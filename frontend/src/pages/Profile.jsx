@@ -38,6 +38,12 @@ const Profile = () => {
                             <h2 className="text-lg font-semibold text-heading mb-3">Details</h2>
                             {profile.email && <div className="flex items-center gap-3 text-body"><FaEnvelope className="text-primary-light" /><span>{profile.email}</span></div>}
                             {profile.phone && <div className="flex items-center gap-3 text-body"><FaPhone className="text-primary-light" /><span>{profile.phone}</span></div>}
+                            {profile.yearsOfExperience !== undefined && (
+                                <div className="flex items-center gap-3 text-body">
+                                    <FaBuilding className="text-primary-light" />
+                                    <span>{profile.yearsOfExperience} Years of Experience</span>
+                                </div>
+                            )}
                             {profile.location && <div className="flex items-center gap-3 text-body"><FaMapMarkerAlt className="text-primary-light" /><span>{profile.location}</span></div>}
                             {profile.department && <div className="flex items-center gap-3 text-body"><FaGraduationCap className="text-primary-light" /><span>{profile.department}{profile.graduationYear ? ` — Class of ${profile.graduationYear}` : ''}</span></div>}
                             {profile.linkedin && <a href={profile.linkedin} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 text-primary-light hover:text-primary transition-colors"><FaLinkedin /><span>LinkedIn Profile</span></a>}

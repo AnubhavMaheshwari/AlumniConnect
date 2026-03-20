@@ -115,7 +115,7 @@ const Directory = () => {
                                         <p><span className="font-medium">Batch :</span> {user.graduationYear || 'N/A'}</p>
                                         <p><span className="font-medium">Course :</span> B.Tech</p>
                                         <p><span className="font-medium">Company :</span> {user.company || 'N/A'}</p>
-                                        <p><span className="font-medium">Year of Exp :</span> {user.experience || 'N/A'}</p>
+                                        <p><span className="font-medium">Year of Exp :</span> {user.yearsOfExperience || 'N/A'}</p>
                                     </div>
 
                                     {/* Buttons */}
