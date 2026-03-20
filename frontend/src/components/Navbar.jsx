@@ -202,11 +202,11 @@ const Navbar = () => {
                             <button
                                 onClick={() => { setShowBell(v => !v); setShowUser(false); }}
                                 style={iconBtnSx(showBell)}
-                                onMouseEnter={e => { e.currentTarget.style.background = C.blueFaint; e.currentTarget.style.borderColor = C.blueBorder; e.currentTarget.style.color = C.white; }}
-                                onMouseLeave={e => { if (!showBell) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = 'transparent'; e.currentTarget.style.color = C.muted; } }}
+                                onMouseEnter={e => { e.currentTarget.style.background = 'var(--blue-faint)'; e.currentTarget.style.borderColor = 'var(--blue-border)'; e.currentTarget.style.color = 'var(--text-primary)'; }}
+                                onMouseLeave={e => { if (!showBell) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = 'transparent'; e.currentTarget.style.color = 'var(--text-secondary)'; } }}
                             >
                                 <FaBell style={{ fontSize: 14 }} />
-                                <span style={{ position: 'absolute', top: 7, right: 8, width: 7, height: 7, borderRadius: '50%', background: C.danger, border: '1.5px solid rgba(10,10,20,0.9)' }} />
+                                <span style={{ position: 'absolute', top: 7, right: 8, width: 7, height: 7, borderRadius: '50%', background: 'var(--danger)', border: '1.5px solid rgba(10,10,20,0.9)' }} />
                             </button>
 
                             {showBell && (

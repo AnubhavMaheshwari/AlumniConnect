@@ -2,10 +2,17 @@ import { Link } from 'react-router-dom';
 import { FaLinkedin, FaGithub, FaEnvelope, FaGraduationCap, FaMapMarkerAlt, FaPhone } from 'react-icons/fa';
 
 const C = {
-    blue: '#203671', blueDark: '#182858', blueLight: '#2D4899',
-    blueFaint: 'rgba(32,54,113,0.12)', blueBorder: 'rgba(32,54,113,0.3)',
-    white: '#FFFFFF', muted: '#8A94A8', black: '#000000',
-    darkCard: '#0E1118', darkBorder: '#1A1E2E',
+    blue:       'var(--blue)',
+    blueDark:   'var(--blue-dark)',
+    blueLight:  'var(--blue-light)',
+    blueFaint:  'var(--blue-faint)',
+    blueBorder: 'var(--blue-border)',
+    white:      'var(--text-primary)',
+    muted:      'var(--text-secondary)',
+    black:      'var(--bg)',
+    darkBg:     'var(--bg)',
+    darkCard:   'var(--bg-secondary)',
+    darkBorder: 'var(--border)',
 };
 
 if (typeof document !== 'undefined' && !document.getElementById('footer-styles')) {
@@ -38,7 +45,7 @@ if (typeof document !== 'undefined' && !document.getElementById('footer-styles')
             transition: color 0.2s;
             padding: 2px 0;
         }
-        .ft-link:hover { color: #ffffff; }
+        .ft-link:hover { color: var(--text-primary); }
 
         /* tablet: 2-col grid */
         @media (max-width: 860px) {
@@ -92,13 +99,15 @@ const ColTitle = ({ children }) => (
     </h4>
 );
 
-const Footer = () => (
-    <footer style={{
-        background: C.darkCard,
-        borderTop: `1px solid ${C.darkBorder}`,
-        fontFamily: "'DM Sans', sans-serif",
-        color: C.white,
-    }}>
+const Footer = () => {
+    return (
+        <footer style={{
+            background: 'var(--bg-secondary)',
+            borderTop: '1px solid var(--border)',
+            fontFamily: "'DM Sans', sans-serif",
+            color: 'var(--text-primary)',
+            transition: 'background 0.3s, border-color 0.3s, color 0.3s'
+        }}>
         <div className="ft-pad" style={{ maxWidth: 1200, margin: '0 auto', padding: '56px 32px 32px' }}>
 
             {/* ── TOP GRID ── */}
@@ -210,6 +219,7 @@ const Footer = () => (
             </div>
         </div>
     </footer>
-);
+    );
+};
 
 export default Footer;
