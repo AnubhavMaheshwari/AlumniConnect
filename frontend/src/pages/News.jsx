@@ -3,14 +3,175 @@ import API from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'react-toastify';
 import { FaNewspaper, FaUser, FaClock, FaPlus, FaTimes, FaFilter, FaTag } from 'react-icons/fa';
+import { HiSparkles } from 'react-icons/hi';
 
+/* ── colour tokens ───────────────────────────────────────────────────────── */
+const C = {
+    blue:       '#203671',
+    blueDark:   '#182858',
+    blueLight:  '#2D4899',
+    blueFaint:  'rgba(32,54,113,0.12)',
+    blueBorder: 'rgba(32,54,113,0.35)',
+    white:      '#FFFFFF',
+    muted:      '#8A94A8',
+    black:      '#000000',
+    darkBg:     '#0C0E14',
+    darkCard:   '#12151F',
+    darkBorder: '#1E2235',
+};
+
+/* ── font injection ──────────────────────────────────────────────────────── */
+if (typeof document !== 'undefined' && !document.getElementById('news-fonts')) {
+    const l = document.createElement('link');
+    l.id = 'news-fonts'; l.rel = 'stylesheet';
+    l.href = 'https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Sora:wght@600;700;800&display=swap';
+    document.head.appendChild(l);
+}
+
+/* ── category accent colours (all blue-family) ───────────────────────────── */
+const catStyle = {
+    achievement:  { bg: 'rgba(32,54,113,0.18)', color: '#7B9FE8', dot: '#7B9FE8' },
+    announcement: { bg: 'rgba(24,40,88,0.25)',  color: '#A0B4F0', dot: '#A0B4F0' },
+    story:        { bg: 'rgba(45,72,153,0.15)', color: '#6B8FE8', dot: '#6B8FE8' },
+    update:       { bg: 'rgba(32,54,113,0.22)', color: '#90AAEC', dot: '#90AAEC' },
+    other:        { bg: 'rgba(30,34,53,0.6)',   color: '#8A94A8', dot: '#8A94A8' },
+};
+
+const getCat = cat => catStyle[cat] || catStyle.other;
+
+/* ── shared input style ──────────────────────────────────────────────────── */
+const inputSx = {
+    width: '100%', background: C.darkBg,
+    border: `1px solid ${C.darkBorder}`,
+    borderRadius: 9, padding: '10px 14px',
+    color: C.white, fontSize: 13.5, outline: 'none',
+    fontFamily: "'DM Sans', sans-serif",
+    transition: 'border-color 0.2s, box-shadow 0.2s',
+    boxSizing: 'border-box',
+};
+
+const focusSx = e => {
+    e.target.style.borderColor = C.blueLight;
+    e.target.style.boxShadow   = `0 0 0 3px ${C.blueFaint}`;
+};
+const blurSx = e => {
+    e.target.style.borderColor = C.darkBorder;
+    e.target.style.boxShadow   = 'none';
+};
+
+/* ── news card ───────────────────────────────────────────────────────────── */
+const NewsCard = ({ item }) => {
+    const cs = getCat(item.category);
+    return (
+        <div style={{
+            background: C.darkCard,
+            border: `1px solid ${C.darkBorder}`,
+            borderRadius: 14, overflow: 'hidden',
+            display: 'flex', flexDirection: 'column',
+            transition: 'border-color 0.25s, box-shadow 0.25s',
+        }}
+            onMouseEnter={e => {
+                e.currentTarget.style.borderColor = C.blueBorder;
+                e.currentTarget.style.boxShadow   = `0 8px 32px rgba(32,54,113,0.2)`;
+            }}
+            onMouseLeave={e => {
+                e.currentTarget.style.borderColor = C.darkBorder;
+                e.currentTarget.style.boxShadow   = 'none';
+            }}
+        >
+            {/* top accent bar */}
+            <div style={{
+                height: 3,
+                background: `linear-gradient(90deg, ${C.blue}, ${C.blueLight})`,
+            }} />
+
+            <div style={{ padding: '20px 22px', flex: 1, display: 'flex', flexDirection: 'column', gap: 12 }}>
+                {/* category badge */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+                    <span style={{
+                        display: 'inline-flex', alignItems: 'center', gap: 5,
+                        background: cs.bg, borderRadius: 20, padding: '4px 10px',
+                        fontSize: 10.5, fontWeight: 700, color: cs.color,
+                        letterSpacing: '0.1em', textTransform: 'uppercase',
+                    }}>
+                        <span style={{ width: 5, height: 5, borderRadius: '50%', background: cs.dot }} />
+                        {item.category}
+                    </span>
+                </div>
+
+                {/* title */}
+                <h3 style={{
+                    fontFamily: "'Sora', sans-serif",
+                    fontSize: 16, fontWeight: 700, color: C.white,
+                    lineHeight: 1.4, margin: 0,
+                    display: '-webkit-box', WebkitLineClamp: 2,
+                    WebkitBoxOrient: 'vertical', overflow: 'hidden',
+                }}>
+                    {item.title}
+                </h3>
+
+                {/* summary */}
+                <p style={{
+                    fontSize: 13, color: C.muted, lineHeight: 1.7,
+                    margin: 0, flex: 1,
+                    display: '-webkit-box', WebkitLineClamp: 3,
+                    WebkitBoxOrient: 'vertical', overflow: 'hidden',
+                }}>
+                    {item.summary || item.content}
+                </p>
+
+                {/* tags */}
+                {item.tags?.length > 0 && (
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                        {item.tags.slice(0, 3).map((tag, j) => (
+                            <span key={j} style={{
+                                display: 'inline-flex', alignItems: 'center', gap: 4,
+                                background: C.blueFaint, border: `1px solid ${C.blueBorder}`,
+                                borderRadius: 6, padding: '3px 8px',
+                                fontSize: 10.5, color: C.muted,
+                            }}>
+                                <FaTag style={{ fontSize: 8, color: C.blueLight }} /> {tag}
+                            </span>
+                        ))}
+                    </div>
+                )}
+
+                {/* footer */}
+                <div style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    paddingTop: 12, borderTop: `1px solid ${C.darkBorder}`,
+                    fontSize: 11.5, color: C.muted,
+                }}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <div style={{
+                            width: 22, height: 22, borderRadius: '50%',
+                            background: `linear-gradient(135deg, ${C.blueLight}, ${C.blue})`,
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        }}>
+                            <FaUser style={{ fontSize: 9, color: C.white }} />
+                        </div>
+                        {item.author?.name || 'Alumni'}
+                    </span>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                        <FaClock style={{ fontSize: 10 }} />
+                        {new Date(item.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                    </span>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+/* ── main ────────────────────────────────────────────────────────────────── */
 const News = () => {
     const { user } = useAuth();
-    const [news, setNews] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const [news, setNews]         = useState([]);
+    const [loading, setLoading]   = useState(true);
     const [showForm, setShowForm] = useState(false);
     const [category, setCategory] = useState('');
     const [formData, setFormData] = useState({ title: '', content: '', summary: '', category: 'other', tags: '' });
+
+    const categories = ['achievement', 'announcement', 'story', 'update', 'other'];
 
     useEffect(() => { fetchNews(); }, [category]);
 
@@ -18,80 +179,262 @@ const News = () => {
         setLoading(true);
         try {
             const params = {}; if (category) params.category = category;
-            const { data } = await API.get('/news', { params }); setNews(data.news);
-        } catch (error) { console.error(error); }
+            const { data } = await API.get('/news', { params });
+            setNews(data.news);
+        } catch (err) { console.error(err); }
         finally { setLoading(false); }
     };
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = async e => {
         e.preventDefault();
         try {
             const submitData = { ...formData, tags: formData.tags.split(',').map(t => t.trim()).filter(Boolean) };
-            await API.post('/news', submitData); toast.success('Story published!'); setShowForm(false);
-            setFormData({ title: '', content: '', summary: '', category: 'other', tags: '' }); fetchNews();
-        } catch (error) { toast.error(error.response?.data?.message || 'Failed to publish'); }
+            await API.post('/news', submitData);
+            toast.success('Story published!');
+            setShowForm(false);
+            setFormData({ title: '', content: '', summary: '', category: 'other', tags: '' });
+            fetchNews();
+        } catch (err) { toast.error(err.response?.data?.message || 'Failed to publish'); }
     };
 
-    const categories = ['achievement', 'announcement', 'story', 'update', 'other'];
-
     return (
-        <div className="py-8 px-4">
-            <div className="max-w-7xl mx-auto">
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8 animate-fade-in">
+        <div style={{
+            minHeight: '100vh', background: C.black,
+            padding: '48px 20px 72px', fontFamily: "'DM Sans', sans-serif",
+            color: C.white
+        }}>
+            <div style={{ maxWidth: 1200, margin: '0 auto' }}>
+
+                {/* ── HEADER ── */}
+                <div style={{
+                    display: 'flex', alignItems: 'flex-start',
+                    justifyContent: 'space-between', gap: 20,
+                    marginBottom: 40, flexWrap: 'wrap'
+                }}>
                     <div>
-                        <h1 className="text-4xl md:text-5xl font-bold mb-2 text-heading"><span className="gradient-text">News</span> & Stories</h1>
-                        <p className="text-body text-lg">Celebrating NIT Jamshedpur alumni achievements and updates.</p>
+                        <div style={{
+                            display: 'inline-flex', alignItems: 'center', gap: 8,
+                            background: C.blueFaint, border: `1px solid ${C.blueBorder}`,
+                            borderRadius: 20, padding: '5px 14px', marginBottom: 16
+                        }}>
+                            <HiSparkles style={{ color: C.blueLight, fontSize: 13 }} />
+                            <span style={{ fontSize: 11, fontWeight: 700, color: C.blueLight, letterSpacing: '0.12em', textTransform: 'uppercase' }}>
+                                Alumni Stories
+                            </span>
+                        </div>
+
+                        <h1 style={{
+                            fontFamily: "'Sora', sans-serif",
+                            fontSize: 38, fontWeight: 800, margin: '0 0 10px',
+                            color: C.white, letterSpacing: '-0.6px', lineHeight: 1.15
+                        }}>
+                            News &{' '}
+                            <span style={{
+                                background: `linear-gradient(135deg, ${C.blueLight}, #6B8FE8)`,
+                                WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent'
+                            }}>Stories</span>
+                        </h1>
+                        <p style={{ fontSize: 14.5, color: C.muted, margin: 0 }}>
+                            Celebrating NIT Jamshedpur alumni achievements and updates.
+                        </p>
                     </div>
-                    {user && <button onClick={() => setShowForm(!showForm)} className="btn-primary">{showForm ? <><FaTimes /> Cancel</> : <><FaPlus /> Share Story</>}</button>}
+
+                    {user && (
+                        <button
+                            onClick={() => setShowForm(!showForm)}
+                            style={{
+                                display: 'inline-flex', alignItems: 'center', gap: 8,
+                                background: showForm
+                                    ? 'transparent'
+                                    : `linear-gradient(135deg, ${C.blueLight}, ${C.blue})`,
+                                border: `1px solid ${showForm ? C.blueBorder : 'transparent'}`,
+                                borderRadius: 10, padding: '11px 22px',
+                                color: C.white, fontSize: 13, fontWeight: 700,
+                                letterSpacing: '0.05em', cursor: 'pointer',
+                                fontFamily: "'DM Sans', sans-serif",
+                                boxShadow: showForm ? 'none' : `0 4px 20px rgba(32,54,113,0.4)`,
+                                transition: 'all 0.2s',
+                            }}
+                        >
+                            {showForm ? <><FaTimes style={{ fontSize: 12 }} /> Cancel</> : <><FaPlus style={{ fontSize: 12 }} /> Share Story</>}
+                        </button>
+                    )}
                 </div>
 
-                <div className="flex items-center gap-2 mb-6 overflow-x-auto pb-2 animate-fade-in" style={{ animationDelay: '0.1s' }}>
-                    <FaFilter className="text-muted shrink-0" />
-                    <button onClick={() => setCategory('')} className={`px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-all ${!category ? 'bg-primary text-white' : 'text-body'}`} style={!category ? {} : { background: 'var(--bg-tertiary)' }}>All</button>
-                    {categories.map(cat => (
-                        <button key={cat} onClick={() => setCategory(cat)} className={`px-4 py-2 rounded-xl text-sm font-medium capitalize whitespace-nowrap transition-all ${category === cat ? 'bg-primary text-white' : 'text-body'}`} style={category === cat ? {} : { background: 'var(--bg-tertiary)' }}>{cat}</button>
-                    ))}
+                {/* ── FILTER BAR ── */}
+                <div style={{
+                    display: 'flex', alignItems: 'center', gap: 8,
+                    marginBottom: 32, flexWrap: 'wrap'
+                }}>
+                    <div style={{
+                        display: 'flex', alignItems: 'center', gap: 6,
+                        padding: '6px 12px', borderRadius: 8,
+                        background: C.darkCard, border: `1px solid ${C.darkBorder}`,
+                        marginRight: 4
+                    }}>
+                        <FaFilter style={{ color: C.muted, fontSize: 11 }} />
+                        <span style={{ fontSize: 11, color: C.muted, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Filter</span>
+                    </div>
+
+                    {['', ...categories].map(cat => {
+                        const active = category === cat;
+                        return (
+                            <button
+                                key={cat || 'all'}
+                                onClick={() => setCategory(cat)}
+                                style={{
+                                    background: active
+                                        ? `linear-gradient(135deg, ${C.blueLight}, ${C.blue})`
+                                        : C.darkCard,
+                                    border: `1px solid ${active ? 'transparent' : C.darkBorder}`,
+                                    borderRadius: 8, padding: '7px 16px',
+                                    color: active ? C.white : C.muted,
+                                    fontSize: 12, fontWeight: active ? 700 : 500,
+                                    textTransform: 'capitalize', cursor: 'pointer',
+                                    letterSpacing: active ? '0.04em' : '0',
+                                    fontFamily: "'DM Sans', sans-serif",
+                                    boxShadow: active ? `0 2px 12px rgba(32,54,113,0.35)` : 'none',
+                                    transition: 'all 0.2s',
+                                    whiteSpace: 'nowrap',
+                                }}
+                            >
+                                {cat || 'All'}
+                            </button>
+                        );
+                    })}
                 </div>
 
+                {/* ── SHARE STORY FORM ── */}
                 {showForm && (
-                    <div className="glass-card p-6 mb-8 animate-fade-in">
-                        <h2 className="text-xl font-semibold text-heading mb-4">Share Your Story</h2>
-                        <form onSubmit={handleSubmit} className="space-y-4">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <input type="text" placeholder="Title" value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} className="input-field" required />
-                                <select value={formData.category} onChange={(e) => setFormData({ ...formData, category: e.target.value })} className="input-field">{categories.map(c => <option key={c} value={c}>{c}</option>)}</select>
+                    <div style={{
+                        background: C.darkCard,
+                        border: `1px solid ${C.blueBorder}`,
+                        borderRadius: 16, padding: '28px 32px',
+                        marginBottom: 36,
+                        boxShadow: `0 8px 40px rgba(32,54,113,0.2)`
+                    }}>
+                        {/* form header */}
+                        <div style={{
+                            display: 'flex', alignItems: 'center', gap: 10, marginBottom: 24,
+                            paddingBottom: 16, borderBottom: `1px solid ${C.darkBorder}`
+                        }}>
+                            <div style={{
+                                width: 36, height: 36, borderRadius: 9,
+                                background: C.blue, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                boxShadow: `0 4px 14px rgba(32,54,113,0.5)`
+                            }}>
+                                <FaNewspaper style={{ color: C.white, fontSize: 14 }} />
                             </div>
-                            <input type="text" placeholder="Brief summary" value={formData.summary} onChange={(e) => setFormData({ ...formData, summary: e.target.value })} className="input-field" />
-                            <textarea placeholder="Full story content..." value={formData.content} onChange={(e) => setFormData({ ...formData, content: e.target.value })} className="input-field" rows={5} required />
-                            <input type="text" placeholder="Tags (comma-separated)" value={formData.tags} onChange={(e) => setFormData({ ...formData, tags: e.target.value })} className="input-field" />
-                            <div className="flex justify-end"><button type="submit" className="btn-primary">Publish Story</button></div>
+                            <div>
+                                <p style={{ fontFamily: "'Sora', sans-serif", fontSize: 15, fontWeight: 700, color: C.white, margin: 0 }}>Share Your Story</p>
+                                <p style={{ fontSize: 11.5, color: C.muted, margin: '2px 0 0' }}>Inspire fellow alumni with your journey</p>
+                            </div>
+                        </div>
+
+                        <form onSubmit={handleSubmit}>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+                                    <input
+                                        type="text" placeholder="Story title *"
+                                        value={formData.title}
+                                        onChange={e => setFormData({ ...formData, title: e.target.value })}
+                                        style={inputSx} onFocus={focusSx} onBlur={blurSx} required
+                                    />
+                                    <select
+                                        value={formData.category}
+                                        onChange={e => setFormData({ ...formData, category: e.target.value })}
+                                        style={{ ...inputSx, appearance: 'none', cursor: 'pointer' }}
+                                        onFocus={focusSx} onBlur={blurSx}
+                                    >
+                                        {categories.map(c => <option key={c} value={c} style={{ background: C.darkBg }}>{c.charAt(0).toUpperCase() + c.slice(1)}</option>)}
+                                    </select>
+                                </div>
+
+                                <input
+                                    type="text" placeholder="Brief summary (optional)"
+                                    value={formData.summary}
+                                    onChange={e => setFormData({ ...formData, summary: e.target.value })}
+                                    style={inputSx} onFocus={focusSx} onBlur={blurSx}
+                                />
+
+                                <textarea
+                                    placeholder="Full story content *"
+                                    value={formData.content}
+                                    onChange={e => setFormData({ ...formData, content: e.target.value })}
+                                    rows={5} required
+                                    style={{ ...inputSx, resize: 'vertical', lineHeight: 1.65 }}
+                                    onFocus={focusSx} onBlur={blurSx}
+                                />
+
+                                <input
+                                    type="text" placeholder="Tags — comma separated (e.g. startup, placement, research)"
+                                    value={formData.tags}
+                                    onChange={e => setFormData({ ...formData, tags: e.target.value })}
+                                    style={inputSx} onFocus={focusSx} onBlur={blurSx}
+                                />
+
+                                <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                                    <button
+                                        type="submit"
+                                        style={{
+                                            background: `linear-gradient(135deg, ${C.blueLight}, ${C.blue})`,
+                                            border: 'none', borderRadius: 9, padding: '11px 28px',
+                                            color: C.white, fontSize: 13, fontWeight: 700,
+                                            letterSpacing: '0.05em', cursor: 'pointer',
+                                            fontFamily: "'DM Sans', sans-serif",
+                                            boxShadow: `0 4px 20px rgba(32,54,113,0.4)`,
+                                            transition: 'opacity 0.2s',
+                                        }}
+                                        onMouseEnter={e => e.currentTarget.style.opacity = '0.85'}
+                                        onMouseLeave={e => e.currentTarget.style.opacity = '1'}
+                                    >
+                                        Publish Story →
+                                    </button>
+                                </div>
+                            </div>
                         </form>
                     </div>
                 )}
 
+                {/* ── CONTENT ── */}
                 {loading ? (
-                    <div className="flex justify-center py-20"><div className="w-12 h-12 border-4 border-primary/30 border-t-primary rounded-full animate-spin"></div></div>
+                    <div style={{ display: 'flex', justifyContent: 'center', padding: '80px 0' }}>
+                        <div style={{
+                            width: 40, height: 40, borderRadius: '50%',
+                            border: `3px solid ${C.blueFaint}`,
+                            borderTopColor: C.blueLight,
+                            animation: 'spin 0.7s linear infinite'
+                        }} />
+                        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+                    </div>
                 ) : news.length === 0 ? (
-                    <div className="text-center py-20 glass-card"><FaNewspaper className="text-6xl text-muted mx-auto mb-4" /><h3 className="text-xl font-semibold text-heading mb-2">No Stories Yet</h3><p className="text-body">Be the first to share an inspiring story!</p></div>
+                    <div style={{
+                        textAlign: 'center', padding: '72px 32px',
+                        background: C.darkCard, border: `1px solid ${C.darkBorder}`,
+                        borderRadius: 16
+                    }}>
+                        <div style={{
+                            width: 64, height: 64, borderRadius: 18,
+                            background: C.blueFaint, border: `1px solid ${C.blueBorder}`,
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            margin: '0 auto 20px'
+                        }}>
+                            <FaNewspaper style={{ fontSize: 26, color: C.blueLight }} />
+                        </div>
+                        <h3 style={{ fontFamily: "'Sora', sans-serif", fontSize: 18, fontWeight: 700, color: C.white, margin: '0 0 8px' }}>No Stories Yet</h3>
+                        <p style={{ fontSize: 13.5, color: C.muted, margin: 0 }}>Be the first to share an inspiring story!</p>
+                    </div>
                 ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {news.map((item, i) => (
-                            <div key={item._id} className="glass-card overflow-hidden group animate-fade-in" style={{ animationDelay: `${i * 0.05}s` }}>
-                                <div className="h-2 bg-gradient-to-r from-primary to-primary-light"></div>
-                                <div className="p-6">
-                                    <span className="px-3 py-1 bg-primary/10 text-primary-light text-xs rounded-lg capitalize font-medium mb-3 inline-block">{item.category}</span>
-                                    <h3 className="text-xl font-bold text-heading mb-3 line-clamp-2 group-hover:text-primary-light transition-colors">{item.title}</h3>
-                                    <p className="text-body text-sm mb-4 line-clamp-3">{item.summary || item.content}</p>
-                                    {item.tags?.length > 0 && <div className="flex flex-wrap gap-1.5 mb-4">{item.tags.slice(0, 3).map((tag, j) => <span key={j} className="px-2 py-1 text-body text-xs rounded-lg flex items-center gap-1" style={{ background: 'var(--bg-tertiary)' }}><FaTag className="text-[10px]" /> {tag}</span>)}</div>}
-                                    <div className="flex items-center justify-between text-sm text-muted pt-4 border-t border-themed">
-                                        <span className="flex items-center gap-1.5"><FaUser /> {item.author?.name || 'Alumni'}</span>
-                                        <span className="flex items-center gap-1.5"><FaClock /> {new Date(item.createdAt).toLocaleDateString()}</span>
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
+                    <div style={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
+                        gap: 20
+                    }}>
+                        {news.map(item => <NewsCard key={item._id} item={item} />)}
                     </div>
                 )}
+
             </div>
         </div>
     );

@@ -1,71 +1,160 @@
 import { Link } from 'react-router-dom';
-import { FaLinkedin, FaGithub, FaEnvelope } from 'react-icons/fa';
+import { FaLinkedin, FaGithub, FaEnvelope, FaGraduationCap, FaMapMarkerAlt, FaPhone } from 'react-icons/fa';
 
-const Footer = () => {
-    return (
-        <footer className="bg-primary  text-white border-t  border-white/10 mt-auto">
-            <div className="max-w-6xl mx-auto px-6 py-14">
+const C = {
+    blue: '#203671', blueDark: '#182858', blueLight: '#2D4899',
+    blueFaint: 'rgba(32,54,113,0.12)', blueBorder: 'rgba(32,54,113,0.3)',
+    white: '#FFFFFF', muted: '#8A94A8', black: '#000000',
+    darkCard: '#0E1118', darkBorder: '#1A1E2E',
+};
 
-                {/* 2. Three Columns Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-10 text-center mb-12">
-                    {/* Quick Links */}
-                    <div className="flex flex-col items-center">
-                        <h3 className="text-white font-bold mb-4 text-lg">Quick Links</h3>
-                        <ul className="space-y-3 text-sm text-blue-100">
-                            <li><Link to="/directory" className="hover:text-white transition-colors">Directory</Link></li>
-                            <li><Link to="/events" className="hover:text-white transition-colors">Events</Link></li>
-                        </ul>
+if (typeof document !== 'undefined' && !document.getElementById('footer-fonts')) {
+    const l = document.createElement('link');
+    l.id = 'footer-fonts'; l.rel = 'stylesheet';
+    l.href = 'https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Sora:wght@700;800&display=swap';
+    document.head.appendChild(l);
+}
+
+const NavLink = ({ to, children }) => (
+    <Link to={to} style={{ color: C.muted, fontSize: 13, textDecoration: 'none', transition: 'color 0.2s', display: 'block', fontFamily: "'DM Sans', sans-serif" }}
+        onMouseEnter={e => e.target.style.color = C.white}
+        onMouseLeave={e => e.target.style.color = C.muted}
+    >
+        {children}
+    </Link>
+);
+
+const Footer = () => (
+    <footer style={{
+        background: C.darkCard,
+        borderTop: `1px solid ${C.darkBorder}`,
+        fontFamily: "'DM Sans', sans-serif",
+        color: C.white,
+    }}>
+        <div style={{ maxWidth: 1200, margin: '0 auto', padding: '56px 32px 32px' }}>
+
+            {/* TOP ROW — brand + columns */}
+            <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', gap: 48, marginBottom: 48, flexWrap: 'wrap' }}>
+
+                {/* Brand block */}
+                <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+                        <div style={{ width: 36, height: 36, borderRadius: 9, background: C.blue, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: `0 3px 14px rgba(32,54,113,0.5)`, flexShrink: 0 }}>
+                            <FaGraduationCap style={{ color: C.white, fontSize: 16 }} />
+                        </div>
+                        <span style={{ fontFamily: "'Sora', sans-serif", fontSize: 15, fontWeight: 800, color: C.white, letterSpacing: '-0.2px' }}>
+                            NIT JSR Alumni
+                        </span>
                     </div>
+                    <p style={{ fontSize: 13, color: C.muted, lineHeight: 1.75, margin: '0 0 22px', maxWidth: 260 }}>
+                        The official alumni network of National Institute of Technology, Jamshedpur. Connecting graduates worldwide since 2024.
+                    </p>
 
-                    {/* Platform */}
-                    <div className="flex flex-col items-center">
-                        <h3 className="text-white font-bold mb-4 text-lg">Platform</h3>
-                        <ul className="space-y-3 text-sm text-blue-100">
-                            <li><Link to="/jobs" className="hover:text-white transition-colors">Jobs</Link></li>
-                            <li><Link to="/news" className="hover:text-white transition-colors">News</Link></li>
-                        </ul>
-                    </div>
-
-                    {/* Support */}
-                    <div className="flex flex-col items-center">
-                        <h3 className="text-white font-bold mb-4 text-lg">Support</h3>
-                        <ul className="space-y-3 text-sm text-blue-100">
-                            <li><Link to="/contact" className="hover:text-white transition-colors">Contact</Link></li>
-                            <li><Link to="/faq" className="hover:text-white transition-colors">FAQ</Link></li>
-                        </ul>
+                    {/* contact info */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 9 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 9, fontSize: 12.5, color: C.muted }}>
+                            <FaMapMarkerAlt style={{ color: C.blueLight, fontSize: 11, flexShrink: 0 }} />
+                            Adityapur, Jamshedpur, Jharkhand
+                        </div>
+                        <a href="mailto:alumni@nitjsr.ac.in" style={{ display: 'flex', alignItems: 'center', gap: 9, fontSize: 12.5, color: C.muted, textDecoration: 'none', transition: 'color 0.2s' }}
+                            onMouseEnter={e => e.currentTarget.style.color = C.white}
+                            onMouseLeave={e => e.currentTarget.style.color = C.muted}
+                        >
+                            <FaEnvelope style={{ color: C.blueLight, fontSize: 11, flexShrink: 0 }} />
+                            alumni@nitjsr.ac.in
+                        </a>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 9, fontSize: 12.5, color: C.muted }}>
+                            <FaPhone style={{ color: C.blueLight, fontSize: 11, flexShrink: 0 }} />
+                            +91 657 237 4000
+                        </div>
                     </div>
                 </div>
 
-                {/* The Social/Contact Block (Maintained in your original position) */}
-                <div className="flex flex-col items-center justify-center gap-2">
-                    <p className="text-blue-100/80 text-center text-sm">
-                        Adityapur, Jamshedpur • <a href="mailto:alumni@nitjsr.ac.in" className="hover:text-white transition">alumni@nitjsr.ac.in</a> • +91 657 237 4000
-                    </p>
-                    <div className="flex gap-6 mt-4 text-2xl">
-                        <a href="#" className="text-blue-100 hover:text-white transition-transform hover:-translate-y-1">
-                            <FaLinkedin />
-                        </a>
-                        <a href="#" className="text-blue-100 hover:text-white transition-transform hover:-translate-y-1">
-                            <FaGithub />
-                        </a>
-                        <a href="#" className="text-blue-100 hover:text-white transition-transform hover:-translate-y-1">
-                            <FaEnvelope />
-                        </a>
+                {/* Quick Links */}
+                <div>
+                    <h4 style={{ fontFamily: "'Sora', sans-serif", fontSize: 12, fontWeight: 700, color: C.white, letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 18px' }}>
+                        Quick Links
+                    </h4>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 11 }}>
+                        <NavLink to="/">Home</NavLink>
+                        <NavLink to="/directory">Directory</NavLink>
+                        <NavLink to="/events">Events</NavLink>
+                        <NavLink to="/news">Stories</NavLink>
                     </div>
                 </div>
 
-                {/* Divider */}
-                <div className="border-t border-white/10 my-8 opacity-50"></div>
+                {/* Platform */}
+                <div>
+                    <h4 style={{ fontFamily: "'Sora', sans-serif", fontSize: 12, fontWeight: 700, color: C.white, letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 18px' }}>
+                        Platform
+                    </h4>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 11 }}>
+                        <NavLink to="/jobs">Job Board</NavLink>
+                        <NavLink to="/news">News</NavLink>
+                        <NavLink to="/dashboard">Dashboard</NavLink>
+                        <NavLink to="/register">Join Now</NavLink>
+                    </div>
+                </div>
 
-                {/* 3. Copyright Row */}
-                <div className="flex flex-col md:flex-row justify-center items-center gap-4 text-xs font-medium tracking-wide">
-                    <p className="text-blue-100/60 text-center uppercase">
-                        © {new Date().getFullYear()} NIT Jamshedpur Alumni Portal.
-                    </p>
+                {/* Support */}
+                <div>
+                    <h4 style={{ fontFamily: "'Sora', sans-serif", fontSize: 12, fontWeight: 700, color: C.white, letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 18px' }}>
+                        Support
+                    </h4>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 11 }}>
+                        <NavLink to="/contact">Contact Us</NavLink>
+                        <NavLink to="/faq">FAQ</NavLink>
+                        <NavLink to="/login">Sign In</NavLink>
+                    </div>
                 </div>
             </div>
-        </footer>
-    );
-};
+
+            {/* divider */}
+            <div style={{ height: 1, background: C.darkBorder, margin: '0 0 28px' }} />
+
+            {/* BOTTOM ROW */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
+                <p style={{ fontSize: 12, color: C.muted, margin: 0 }}>
+                    © {new Date().getFullYear()} NIT Jamshedpur Alumni Portal. All rights reserved.
+                </p>
+
+                {/* social icons */}
+                <div style={{ display: 'flex', gap: 10 }}>
+                    {[
+                        { href: '#', Icon: FaLinkedin, label: 'LinkedIn' },
+                        { href: '#', Icon: FaGithub,   label: 'GitHub' },
+                        { href: 'mailto:alumni@nitjsr.ac.in', Icon: FaEnvelope, label: 'Email' },
+                    ].map(({ href, Icon, label }) => (
+                        <a key={label} href={href} aria-label={label} style={{
+                            width: 36, height: 36, borderRadius: 9,
+                            background: C.blueFaint, border: `1px solid ${C.blueBorder}`,
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            color: C.muted, fontSize: 15, textDecoration: 'none',
+                            transition: 'all 0.2s',
+                        }}
+                            onMouseEnter={e => { e.currentTarget.style.background = `rgba(32,54,113,0.25)`; e.currentTarget.style.borderColor = C.blueLight; e.currentTarget.style.color = C.white; e.currentTarget.style.transform = 'translateY(-2px)'; }}
+                            onMouseLeave={e => { e.currentTarget.style.background = C.blueFaint; e.currentTarget.style.borderColor = C.blueBorder; e.currentTarget.style.color = C.muted; e.currentTarget.style.transform = 'translateY(0)'; }}
+                        >
+                            <Icon />
+                        </a>
+                    ))}
+                </div>
+
+                {/* built with badge */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '5px 12px', borderRadius: 20, background: C.blueFaint, border: `1px solid ${C.blueBorder}` }}>
+                    <div style={{ width: 6, height: 6, borderRadius: '50%', background: C.blueLight, animation: 'pulse 2s infinite' }} />
+                    <span style={{ fontSize: 11, color: C.muted, fontWeight: 500 }}>Portal is live</span>
+                </div>
+            </div>
+        </div>
+
+        <style>{`
+            @keyframes pulse {
+                0%, 100% { opacity: 1; }
+                50% { opacity: 0.4; }
+            }
+        `}</style>
+    </footer>
+);
 
 export default Footer;

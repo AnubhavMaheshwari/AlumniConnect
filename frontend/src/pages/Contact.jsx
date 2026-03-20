@@ -1,55 +1,99 @@
 import { useState } from 'react';
 import { toast } from 'react-toastify';
-import { FaPaperPlane } from 'react-icons/fa';
+import { FaPaperPlane, FaEnvelope, FaPhone, FaUser, FaTag, FaCommentDots } from 'react-icons/fa';
+import { HiSparkles } from 'react-icons/hi';
 
+/* ── colour tokens ───────────────────────────────────────────────────────── */
+const C = {
+    blue:       '#203671',
+    blueDark:   '#182858',
+    blueLight:  '#2D4899',
+    blueFaint:  'rgba(32,54,113,0.12)',
+    blueBorder: 'rgba(32,54,113,0.35)',
+    white:      '#FFFFFF',
+    muted:      '#8A94A8',
+    black:      '#000000',
+    darkBg:     '#0C0E14',
+    darkCard:   '#12151F',
+    darkBorder: '#1E2235',
+    errorRed:   '#FF4D4D',
+    errorFaint: 'rgba(255,77,77,0.1)',
+};
+
+/* ── font injection ──────────────────────────────────────────────────────── */
+if (typeof document !== 'undefined' && !document.getElementById('contact-fonts')) {
+    const l = document.createElement('link');
+    l.id = 'contact-fonts'; l.rel = 'stylesheet';
+    l.href = 'https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Sora:wght@600;700;800&display=swap';
+    document.head.appendChild(l);
+}
+
+/* ── field component ─────────────────────────────────────────────────────── */
+const Field = ({ label, icon: Icon, error, children }) => (
+    <div>
+        <label style={{
+            display: 'block', marginBottom: 7,
+            fontSize: 10.5, fontWeight: 700, letterSpacing: '0.12em',
+            textTransform: 'uppercase', color: C.muted
+        }}>{label}</label>
+        <div style={{ position: 'relative' }}>
+            <Icon style={{
+                position: 'absolute', left: 14, top: 13,
+                color: error ? C.errorRed : C.muted,
+                fontSize: 13, pointerEvents: 'none',
+                transition: 'color 0.2s'
+            }} />
+            {children}
+        </div>
+        {error && (
+            <div style={{
+                display: 'flex', alignItems: 'center', gap: 6,
+                marginTop: 6, padding: '5px 10px', borderRadius: 6,
+                background: C.errorFaint, border: `1px solid rgba(255,77,77,0.2)`
+            }}>
+                <span style={{ fontSize: 11, color: C.errorRed }}>{error}</span>
+            </div>
+        )}
+    </div>
+);
+
+const inputStyle = (error) => ({
+    width: '100%', background: C.darkBg,
+    border: `1px solid ${error ? C.errorRed : C.darkBorder}`,
+    borderRadius: 9, padding: '11px 14px 11px 40px',
+    color: C.white, fontSize: 13.5, outline: 'none',
+    fontFamily: "'DM Sans', sans-serif",
+    transition: 'border-color 0.2s, box-shadow 0.2s',
+    boxSizing: 'border-box',
+    boxShadow: error ? `0 0 0 3px ${C.errorFaint}` : 'none'
+});
+
+/* ── main ────────────────────────────────────────────────────────────────── */
 const Contact = () => {
     const [formData, setFormData] = useState({ name: '', email: '', phone: '', subject: '', message: '' });
     const [loading, setLoading] = useState(false);
     const [errors, setErrors] = useState({});
+    const [submitted, setSubmitted] = useState(false);
 
-    const validateEmail = (email) => {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return emailRegex.test(email);
-    };
+    const validateEmail = email => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    const validatePhone  = phone => /^[0-9]{10}$/.test(phone.replace(/\D/g, ''));
 
-    const validatePhone = (phone) => {
-        const phoneRegex = /^[0-9]{10}$/;
-        return phoneRegex.test(phone.replace(/\D/g, ''));
-    };
-
-    const handleChange = (e) => {
+    const handleChange = e => {
         const { name, value } = e.target;
-        setFormData({ ...formData, [name]: value });
-        // Clear error when user starts typing
-        if (errors[name]) {
-            setErrors({ ...errors, [name]: '' });
-        }
+        setFormData(p => ({ ...p, [name]: value }));
+        if (errors[name]) setErrors(p => ({ ...p, [name]: '' }));
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = e => {
         e.preventDefault();
         const newErrors = {};
-
-        // Validation
-        if (!formData.name.trim()) {
-            newErrors.name = 'Name is required';
-        }
-        if (!formData.email.trim()) {
-            newErrors.email = 'Email is required';
-        } else if (!validateEmail(formData.email)) {
-            newErrors.email = 'Please enter a valid email address';
-        }
-        if (!formData.phone.trim()) {
-            newErrors.phone = 'Mobile number is required';
-        } else if (!validatePhone(formData.phone)) {
-            newErrors.phone = 'Please enter a valid 10-digit mobile number';
-        }
-        if (!formData.subject.trim()) {
-            newErrors.subject = 'Subject is required';
-        }
-        if (!formData.message.trim()) {
-            newErrors.message = 'Message is required';
-        }
+        if (!formData.name.trim())                          newErrors.name    = 'Name is required';
+        if (!formData.email.trim())                         newErrors.email   = 'Email is required';
+        else if (!validateEmail(formData.email))            newErrors.email   = 'Please enter a valid email address';
+        if (!formData.phone.trim())                         newErrors.phone   = 'Mobile number is required';
+        else if (!validatePhone(formData.phone))            newErrors.phone   = 'Please enter a valid 10-digit number';
+        if (!formData.subject.trim())                       newErrors.subject = 'Subject is required';
+        if (!formData.message.trim())                       newErrors.message = 'Message is required';
 
         if (Object.keys(newErrors).length > 0) {
             setErrors(newErrors);
@@ -59,134 +103,224 @@ const Contact = () => {
 
         setLoading(true);
         setTimeout(() => {
-            toast.success("Message sent successfully! We'll get back to you soon.");
+            toast.success("Message sent! We'll get back to you soon.");
             setFormData({ name: '', email: '', phone: '', subject: '', message: '' });
             setErrors({});
             setLoading(false);
+            setSubmitted(true);
+            setTimeout(() => setSubmitted(false), 4000);
         }, 1500);
     };
 
-    return (
-        <div className="min-h-screen flex items-center justify-center px-4 py-10">
-            <div className="w-full max-w-2xl">
+    const focusInput  = e => {
+        e.target.style.borderColor = C.blueLight;
+        e.target.style.boxShadow   = `0 0 0 3px ${C.blueFaint}`;
+    };
+    const blurInput = (e, hasError) => {
+        e.target.style.borderColor = hasError ? C.errorRed : C.darkBorder;
+        e.target.style.boxShadow   = hasError ? `0 0 0 3px ${C.errorFaint}` : 'none';
+    };
 
-                {/* Heading */}
-                <div className="text-center mb-10">
-                    <h1 className="text-4xl md:text-5xl font-bold mb-4 text-heading">
-                        Get In <span className="gradient-text">Touch</span>
+    return (
+        <div style={{
+            minHeight: '100vh', background: C.black,
+            padding: '56px 20px', fontFamily: "'DM Sans', sans-serif",
+            color: C.white, display: 'flex', alignItems: 'center', justifyContent: 'center'
+        }}>
+            <div style={{ width: '100%', maxWidth: 620 }}>
+
+                {/* ── HEADING ── */}
+                <div style={{ textAlign: 'center', marginBottom: 44 }}>
+                    <div style={{
+                        display: 'inline-flex', alignItems: 'center', gap: 8,
+                        background: C.blueFaint, border: `1px solid ${C.blueBorder}`,
+                        borderRadius: 20, padding: '5px 14px', marginBottom: 18
+                    }}>
+                        <HiSparkles style={{ color: C.blueLight, fontSize: 13 }} />
+                        <span style={{ fontSize: 11, fontWeight: 700, color: C.blueLight, letterSpacing: '0.12em', textTransform: 'uppercase' }}>
+                            Alumni Cell · NIT Jamshedpur
+                        </span>
+                    </div>
+
+                    <h1 style={{
+                        fontFamily: "'Sora', sans-serif",
+                        fontSize: 42, fontWeight: 800, margin: '0 0 14px',
+                        color: C.white, letterSpacing: '-0.8px', lineHeight: 1.15
+                    }}>
+                        Get In{' '}
+                        <span style={{
+                            background: `linear-gradient(135deg, ${C.blueLight}, #6B8FE8)`,
+                            WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent'
+                        }}>Touch</span>
                     </h1>
-                    <p className="text-body text-lg">
-                        Have a question or suggestion? Reach out to the NIT Jamshedpur Alumni Cell.
+                    <p style={{ fontSize: 15, color: C.muted, margin: 0, lineHeight: 1.6 }}>
+                        Have a question or suggestion?<br />Reach out to the NIT Jamshedpur Alumni Cell.
                     </p>
                 </div>
 
-                {/* Form Card */}
-                <div className="glass-card p-8">
-                    <h2 className="text-2xl font-bold text-heading mb-6 text-center">
-                        Send a Message
-                    </h2>
+                {/* ── CARD ── */}
+                <div style={{
+                    background: C.darkCard,
+                    border: `1px solid ${C.darkBorder}`,
+                    borderRadius: 20, overflow: 'hidden',
+                    boxShadow: '0 32px 80px rgba(0,0,0,0.7)'
+                }}>
 
-                    <form onSubmit={handleSubmit} className="space-y-5">
-
+                    {/* card header strip */}
+                    <div style={{
+                        background: `linear-gradient(135deg, ${C.blue} 0%, ${C.blueDark} 100%)`,
+                        padding: '22px 32px',
+                        display: 'flex', alignItems: 'center', gap: 12,
+                        position: 'relative', overflow: 'hidden'
+                    }}>
+                        <div style={{
+                            position: 'absolute', right: -20, top: -20,
+                            width: 120, height: 120, borderRadius: '50%',
+                            background: 'rgba(255,255,255,0.05)'
+                        }} />
+                        <div style={{
+                            width: 40, height: 40, borderRadius: 11,
+                            background: 'rgba(255,255,255,0.15)',
+                            border: '1px solid rgba(255,255,255,0.2)',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            flexShrink: 0
+                        }}>
+                            <FaEnvelope style={{ color: C.white, fontSize: 16 }} />
+                        </div>
                         <div>
-                            <label className="block text-sm font-medium text-body mb-2">
-                                Your Name
-                            </label>
-                            <input
-                                type="text"
-                                name="name"
-                                value={formData.name}
-                                onChange={handleChange}
-                                className={`input-field w-full ${errors.name ? 'border-red-500' : ''}`}
-                                placeholder="John Doe"
-                                required
-                            />
-                            {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
+                            <p style={{
+                                fontFamily: "'Sora', sans-serif",
+                                fontSize: 16, fontWeight: 700, color: C.white, margin: 0
+                            }}>Send a Message</p>
+                            <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', margin: '2px 0 0' }}>
+                                We'll respond within 24 hours
+                            </p>
                         </div>
+                    </div>
 
-                        <div>
-                            <label className="block text-sm font-medium text-body mb-2">
-                                Email Address
-                            </label>
-                            <input
-                                type="email"
-                                name="email"
-                                value={formData.email}
-                                onChange={handleChange}
-                                className={`input-field w-full ${errors.email ? 'border-red-500' : ''}`}
-                                placeholder="you@example.com"
-                                required
-                            />
-                            {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
-                        </div>
+                    {/* form body */}
+                    <div style={{ padding: '32px' }}>
+                        <form onSubmit={handleSubmit}>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
 
-                        <div>
-                            <label className="block text-sm font-medium text-body mb-2">
-                                Mobile Number
-                            </label>
-                            <input
-                                type="tel"
-                                name="phone"
-                                value={formData.phone}
-                                onChange={handleChange}
-                                className={`input-field w-full ${errors.phone ? 'border-red-500' : ''}`}
-                                placeholder="+91 98765 43210"
-                                required
-                            />
-                            {errors.phone && <p className="text-red-500 text-sm mt-1">{errors.phone}</p>}
-                        </div>
+                                {/* Name + Email row */}
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                                    <Field label="Your Name" icon={FaUser} error={errors.name}>
+                                        <input
+                                            type="text" name="name" value={formData.name}
+                                            onChange={handleChange} placeholder="John Doe"
+                                            style={inputStyle(errors.name)}
+                                            onFocus={focusInput}
+                                            onBlur={e => blurInput(e, !!errors.name)}
+                                        />
+                                    </Field>
+                                    <Field label="Email Address" icon={FaEnvelope} error={errors.email}>
+                                        <input
+                                            type="email" name="email" value={formData.email}
+                                            onChange={handleChange} placeholder="you@example.com"
+                                            style={inputStyle(errors.email)}
+                                            onFocus={focusInput}
+                                            onBlur={e => blurInput(e, !!errors.email)}
+                                        />
+                                    </Field>
+                                </div>
 
-                        <div>
-                            <label className="block text-sm font-medium text-body mb-2">
-                                Subject
-                            </label>
-                            <input
-                                type="text"
-                                name="subject"
-                                value={formData.subject}
-                                onChange={handleChange}
-                                className={`input-field w-full ${errors.subject ? 'border-red-500' : ''}`}
-                                placeholder="How can we help?"
-                                required
-                            />
-                            {errors.subject && <p className="text-red-500 text-sm mt-1">{errors.subject}</p>}
-                        </div>
+                                {/* Phone + Subject row */}
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                                    <Field label="Mobile Number" icon={FaPhone} error={errors.phone}>
+                                        <input
+                                            type="tel" name="phone" value={formData.phone}
+                                            onChange={handleChange} placeholder="+91 98765 43210"
+                                            style={inputStyle(errors.phone)}
+                                            onFocus={focusInput}
+                                            onBlur={e => blurInput(e, !!errors.phone)}
+                                        />
+                                    </Field>
+                                    <Field label="Subject" icon={FaTag} error={errors.subject}>
+                                        <input
+                                            type="text" name="subject" value={formData.subject}
+                                            onChange={handleChange} placeholder="How can we help?"
+                                            style={inputStyle(errors.subject)}
+                                            onFocus={focusInput}
+                                            onBlur={e => blurInput(e, !!errors.subject)}
+                                        />
+                                    </Field>
+                                </div>
 
-                        <div>
-                            <label className="block text-sm font-medium text-body mb-2">
-                                Message
-                            </label>
-                            <textarea
-                                name="message"
-                                value={formData.message}
-                                onChange={handleChange}
-                                className={`input-field w-full ${errors.message ? 'border-red-500' : ''}`}
-                                placeholder="Tell us what's on your mind..."
-                                rows={6}
-                                required
-                            />
-                            {errors.message && <p className="text-red-500 text-sm mt-1">{errors.message}</p>}
-                        </div>
+                                {/* Message */}
+                                <Field label="Message" icon={FaCommentDots} error={errors.message}>
+                                    <textarea
+                                        name="message" value={formData.message}
+                                        onChange={handleChange}
+                                        placeholder="Tell us what's on your mind..."
+                                        rows={5}
+                                        style={{
+                                            ...inputStyle(errors.message),
+                                            padding: '11px 14px 11px 40px',
+                                            resize: 'vertical', lineHeight: 1.6
+                                        }}
+                                        onFocus={focusInput}
+                                        onBlur={e => blurInput(e, !!errors.message)}
+                                    />
+                                </Field>
 
-                        <div className="flex justify-center pt-2">
-                            <button
-                                type="submit"
-                                disabled={loading}
-                                className="btn-primary flex items-center gap-2 px-8 py-3.5"
-                            >
-                                {loading ? (
-                                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                                ) : (
-                                    <>
-                                        Send Message <FaPaperPlane />
-                                    </>
-                                )}
-                            </button>
-                        </div>
+                                {/* Submit */}
+                                <button
+                                    type="submit"
+                                    disabled={loading}
+                                    style={{
+                                        width: '100%', marginTop: 4,
+                                        background: submitted
+                                            ? 'linear-gradient(135deg, #1a6e3a 0%, #145c30 100%)'
+                                            : `linear-gradient(135deg, ${C.blueLight} 0%, ${C.blue} 100%)`,
+                                        border: 'none', borderRadius: 10, padding: '13px 0',
+                                        color: C.white, fontSize: 14, fontWeight: 700,
+                                        letterSpacing: '0.06em', cursor: loading ? 'not-allowed' : 'pointer',
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 9,
+                                        fontFamily: "'DM Sans', sans-serif",
+                                        boxShadow: `0 4px 24px rgba(32,54,113,0.45)`,
+                                        transition: 'opacity 0.2s, background 0.4s',
+                                        opacity: loading ? 0.8 : 1
+                                    }}
+                                    onMouseEnter={e => { if (!loading) e.currentTarget.style.opacity = '0.85'; }}
+                                    onMouseLeave={e => { e.currentTarget.style.opacity = '1'; }}
+                                >
+                                    {loading ? (
+                                        <div style={{
+                                            width: 18, height: 18, border: '2px solid rgba(255,255,255,0.3)',
+                                            borderTopColor: C.white, borderRadius: '50%',
+                                            animation: 'spin 0.7s linear infinite'
+                                        }} />
+                                    ) : submitted ? (
+                                        <>✓ Message Sent!</>
+                                    ) : (
+                                        <>Send Message <FaPaperPlane style={{ fontSize: 13 }} /></>
+                                    )}
+                                </button>
 
-                    </form>
+                            </div>
+                        </form>
+                    </div>
+
+                    {/* footer strip */}
+                    <div style={{
+                        padding: '14px 32px',
+                        borderTop: `1px solid ${C.darkBorder}`,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6
+                    }}>
+                        <div style={{
+                            width: 6, height: 6, borderRadius: '50%',
+                            background: C.blueLight
+                        }} />
+                        <span style={{ fontSize: 11, color: C.muted }}>
+                            Your message is sent directly to the Alumni Cell team
+                        </span>
+                    </div>
                 </div>
             </div>
+
+            {/* spin keyframe */}
+            <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
         </div>
     );
 };
