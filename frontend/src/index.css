@@ -18,33 +18,46 @@
 }
 /* ===== CSS Variables for Theming ===== */
 :root {
-  --bg: #111111;
-  --bg-secondary: #1A1A1A;
-  --bg-tertiary: #2A2A2A;
+  /* Common */
+  --blue: #203671;
+  --blue-dark: #182858;
+  --blue-light: #2D4899;
+  --blue-faint: rgba(32, 54, 113, 0.12);
+  --blue-border: rgba(32, 54, 113, 0.35);
+  --danger: #FF4D4D;
+  --success: #22C55E;
+
+  /* Dark Theme (Default) */
+  --bg: #0C0E14;
+  --bg-secondary: #12151F;
+  --bg-tertiary: #1E2235;
   --text-primary: #FFFFFF;
-  --text-secondary: #D1D5DB;
+  --text-secondary: #8A94A8;
   --text-muted: #6B7280;
-  --border: rgba(39, 65, 135, 0.15);
-  --border-hover: rgba(39, 65, 135, 0.4);
-  --card-bg: rgba(26, 26, 26, 0.8);
-  --card-shadow: rgba(39, 65, 135, 0.12);
-  --input-bg: rgba(17, 17, 17, 0.9);
-  --overlay: rgba(0, 0, 0, 0.5);
+  --border: #1E2235;
+  --border-hover: rgba(32, 54, 113, 0.4);
+  --card-bg: #12151F;
+  --card-shadow: rgba(0, 0, 0, 0.6);
+  --input-bg: #0C0E14;
+  --overlay: rgba(0, 0, 0, 0.82);
+  --nav-bg: rgba(12, 14, 20, 0.9);
 }
 
 .light {
-  --bg: #FFFFFF;
-  --bg-secondary: #F3F4F6;
-  --bg-tertiary: #E5E7EB;
-  --text-primary: #111111;
-  --text-secondary: #374151;
-  --text-muted: #6B7280;
-  --border: rgba(39, 65, 135, 0.12);
-  --border-hover: rgba(39, 65, 135, 0.35);
-  --card-bg: rgba(255, 255, 255, 0.9);
-  --card-shadow: rgba(39, 65, 135, 0.08);
-  --input-bg: rgba(243, 244, 246, 1);
-  --overlay: rgba(255, 255, 255, 0.5);
+  /* Light Theme Overrides */
+  --bg: #F8FAFC;
+  --bg-secondary: #FFFFFF;
+  --bg-tertiary: #E2E8F0;
+  --text-primary: #1E293B;
+  --text-secondary: #64748B;
+  --text-muted: #94A3B8;
+  --border: #E2E8F0;
+  --border-hover: #CBD5E1;
+  --card-bg: #FFFFFF;
+  --card-shadow: rgba(15, 23, 42, 0.08);
+  --input-bg: #F1F5F9;
+  --overlay: rgba(255, 255, 255, 0.82);
+  --nav-bg: rgba(248, 250, 252, 0.9);
 }
 
 * {

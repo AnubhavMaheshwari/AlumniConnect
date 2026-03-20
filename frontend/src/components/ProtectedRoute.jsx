@@ -3,9 +3,9 @@ import { useAuth } from '../context/AuthContext';
 import { FaGraduationCap } from 'react-icons/fa';
 
 const C = {
-    blue: '#203671', blueLight: '#2D4899',
-    blueFaint: 'rgba(32,54,113,0.12)', blueBorder: 'rgba(32,54,113,0.35)',
-    white: '#FFFFFF', black: '#000000', darkBorder: '#1E2235',
+    blue: 'var(--blue)', blueLight: 'var(--blue-light)',
+    blueFaint: 'var(--blue-faint)', blueBorder: 'var(--blue-border)',
+    white: '#FFFFFF', black: 'var(--bg)', darkBorder: 'var(--border)',
 };
 
 const ProtectedRoute = ({ children }) => {
@@ -39,7 +39,7 @@ const ProtectedRoute = ({ children }) => {
 
                 {/* label */}
                 <p style={{
-                    fontSize: 12, fontWeight: 600, color: '#3D4460',
+                    fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)',
                     letterSpacing: '0.1em', textTransform: 'uppercase',
                     fontFamily: "'DM Sans', sans-serif", margin: 0,
                 }}>

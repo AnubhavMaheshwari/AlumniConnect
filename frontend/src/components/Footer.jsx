@@ -16,9 +16,9 @@ if (typeof document !== 'undefined' && !document.getElementById('footer-fonts'))
 }
 
 const NavLink = ({ to, children }) => (
-    <Link to={to} style={{ color: C.muted, fontSize: 13, textDecoration: 'none', transition: 'color 0.2s', display: 'block', fontFamily: "'DM Sans', sans-serif" }}
-        onMouseEnter={e => e.target.style.color = C.white}
-        onMouseLeave={e => e.target.style.color = C.muted}
+    <Link to={to} style={{ color: 'var(--text-secondary)', fontSize: 13, textDecoration: 'none', transition: 'color 0.2s', display: 'block', fontFamily: "'DM Sans', sans-serif" }}
+        onMouseEnter={e => e.target.style.color = 'var(--blue-light)'}
+        onMouseLeave={e => e.target.style.color = 'var(--text-secondary)'}
     >
         {children}
     </Link>
@@ -26,10 +26,11 @@ const NavLink = ({ to, children }) => (
 
 const Footer = () => (
     <footer style={{
-        background: C.darkCard,
-        borderTop: `1px solid ${C.darkBorder}`,
+        background: 'var(--bg-secondary)',
+        borderTop: '1px solid var(--border)',
         fontFamily: "'DM Sans', sans-serif",
-        color: C.white,
+        color: 'var(--text-primary)',
+        transition: 'background 0.3s, border-color 0.3s, color 0.3s'
     }}>
         <div style={{ maxWidth: 1200, margin: '0 auto', padding: '56px 32px 32px' }}>
 
@@ -39,32 +40,32 @@ const Footer = () => (
                 {/* Brand block */}
                 <div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
-                        <div style={{ width: 36, height: 36, borderRadius: 9, background: C.blue, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: `0 3px 14px rgba(32,54,113,0.5)`, flexShrink: 0 }}>
-                            <FaGraduationCap style={{ color: C.white, fontSize: 16 }} />
+                        <div style={{ width: 36, height: 36, borderRadius: 9, background: 'var(--blue)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: `0 3px 14px rgba(32,54,113,0.5)`, flexShrink: 0 }}>
+                            <FaGraduationCap style={{ color: '#fff', fontSize: 16 }} />
                         </div>
-                        <span style={{ fontFamily: "'Sora', sans-serif", fontSize: 15, fontWeight: 800, color: C.white, letterSpacing: '-0.2px' }}>
+                        <span style={{ fontFamily: "'Sora', sans-serif", fontSize: 15, fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.2px' }}>
                             NIT JSR Alumni
                         </span>
                     </div>
-                    <p style={{ fontSize: 13, color: C.muted, lineHeight: 1.75, margin: '0 0 22px', maxWidth: 260 }}>
+                    <p style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.75, margin: '0 0 22px', maxWidth: 260 }}>
                         The official alumni network of National Institute of Technology, Jamshedpur. Connecting graduates worldwide since 2024.
                     </p>
 
                     {/* contact info */}
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 9 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 9, fontSize: 12.5, color: C.muted }}>
-                            <FaMapMarkerAlt style={{ color: C.blueLight, fontSize: 11, flexShrink: 0 }} />
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 9, fontSize: 12.5, color: 'var(--text-secondary)' }}>
+                            <FaMapMarkerAlt style={{ color: 'var(--blue-light)', fontSize: 11, flexShrink: 0 }} />
                             Adityapur, Jamshedpur, Jharkhand
                         </div>
-                        <a href="mailto:alumni@nitjsr.ac.in" style={{ display: 'flex', alignItems: 'center', gap: 9, fontSize: 12.5, color: C.muted, textDecoration: 'none', transition: 'color 0.2s' }}
-                            onMouseEnter={e => e.currentTarget.style.color = C.white}
-                            onMouseLeave={e => e.currentTarget.style.color = C.muted}
+                        <a href="mailto:alumni@nitjsr.ac.in" style={{ display: 'flex', alignItems: 'center', gap: 9, fontSize: 12.5, color: 'var(--text-secondary)', textDecoration: 'none', transition: 'color 0.2s' }}
+                            onMouseEnter={e => e.currentTarget.style.color = 'var(--text-primary)'}
+                            onMouseLeave={e => e.currentTarget.style.color = 'var(--text-secondary)'}
                         >
-                            <FaEnvelope style={{ color: C.blueLight, fontSize: 11, flexShrink: 0 }} />
+                            <FaEnvelope style={{ color: 'var(--blue-light)', fontSize: 11, flexShrink: 0 }} />
                             alumni@nitjsr.ac.in
                         </a>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 9, fontSize: 12.5, color: C.muted }}>
-                            <FaPhone style={{ color: C.blueLight, fontSize: 11, flexShrink: 0 }} />
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 9, fontSize: 12.5, color: 'var(--text-secondary)' }}>
+                            <FaPhone style={{ color: 'var(--blue-light)', fontSize: 11, flexShrink: 0 }} />
                             +91 657 237 4000
                         </div>
                     </div>
@@ -98,7 +99,7 @@ const Footer = () => (
 
                 {/* Support */}
                 <div>
-                    <h4 style={{ fontFamily: "'Sora', sans-serif", fontSize: 12, fontWeight: 700, color: C.white, letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 18px' }}>
+                    <h4 style={{ fontFamily: "'Sora', sans-serif", fontSize: 12, fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 18px' }}>
                         Support
                     </h4>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 11 }}>
@@ -110,7 +111,7 @@ const Footer = () => (
             </div>
 
             {/* divider */}
-            <div style={{ height: 1, background: C.darkBorder, margin: '0 0 28px' }} />
+            <div style={{ height: 1, background: 'var(--border)', margin: '0 0 28px' }} />
 
             {/* BOTTOM ROW */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
@@ -127,9 +128,9 @@ const Footer = () => (
                     ].map(({ href, Icon, label }) => (
                         <a key={label} href={href} aria-label={label} style={{
                             width: 36, height: 36, borderRadius: 9,
-                            background: C.blueFaint, border: `1px solid ${C.blueBorder}`,
+                            background: 'var(--blue-faint)', border: '1px solid var(--blue-border)',
                             display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            color: C.muted, fontSize: 15, textDecoration: 'none',
+                            color: 'var(--text-secondary)', fontSize: 15, textDecoration: 'none',
                             transition: 'all 0.2s',
                         }}
                             onMouseEnter={e => { e.currentTarget.style.background = `rgba(32,54,113,0.25)`; e.currentTarget.style.borderColor = C.blueLight; e.currentTarget.style.color = C.white; e.currentTarget.style.transform = 'translateY(-2px)'; }}
@@ -141,9 +142,9 @@ const Footer = () => (
                 </div>
 
                 {/* built with badge */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '5px 12px', borderRadius: 20, background: C.blueFaint, border: `1px solid ${C.blueBorder}` }}>
-                    <div style={{ width: 6, height: 6, borderRadius: '50%', background: C.blueLight, animation: 'pulse 2s infinite' }} />
-                    <span style={{ fontSize: 11, color: C.muted, fontWeight: 500 }}>Portal is live</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '5px 12px', borderRadius: 20, background: 'var(--blue-faint)', border: '1px solid var(--blue-border)' }}>
+                    <div style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--blue-light)', animation: 'pulse 2s infinite' }} />
+                    <span style={{ fontSize: 11, color: 'var(--text-secondary)', fontWeight: 500 }}>Portal is live</span>
                 </div>
             </div>
         </div>

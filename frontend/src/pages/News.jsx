@@ -5,84 +5,60 @@ import { toast } from 'react-toastify';
 import { FaNewspaper, FaUser, FaClock, FaPlus, FaTimes, FaFilter, FaTag } from 'react-icons/fa';
 import { HiSparkles } from 'react-icons/hi';
 
-/* ── colour tokens ───────────────────────────────────────────────────────── */
-const C = {
-    blue:       '#203671',
-    blueDark:   '#182858',
-    blueLight:  '#2D4899',
-    blueFaint:  'rgba(32,54,113,0.12)',
-    blueBorder: 'rgba(32,54,113,0.35)',
-    white:      '#FFFFFF',
-    muted:      '#8A94A8',
-    black:      '#000000',
-    darkBg:     '#0C0E14',
-    darkCard:   '#12151F',
-    darkBorder: '#1E2235',
+/* ── colour tokens ─────────────────── */
+const getCatConfig = cat => {
+    const configs = {
+        achievement:  { bg: 'var(--blue-faint)', color: 'var(--blue-light)', dot: 'var(--blue-light)' },
+        announcement: { bg: 'var(--blue-faint)', color: 'var(--blue-light)', dot: 'var(--blue-light)' },
+        story:        { bg: 'var(--blue-faint)', color: 'var(--blue-light)', dot: 'var(--blue-light)' },
+        update:       { bg: 'var(--blue-faint)', color: 'var(--blue-light)', dot: 'var(--blue-light)' },
+        other:        { bg: 'var(--bg-secondary)', color: 'var(--text-secondary)', dot: 'var(--text-secondary)' },
+    };
+    return configs[cat] || configs.other;
 };
 
-/* ── font injection ──────────────────────────────────────────────────────── */
-if (typeof document !== 'undefined' && !document.getElementById('news-fonts')) {
-    const l = document.createElement('link');
-    l.id = 'news-fonts'; l.rel = 'stylesheet';
-    l.href = 'https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Sora:wght@600;700;800&display=swap';
-    document.head.appendChild(l);
-}
-
-/* ── category accent colours (all blue-family) ───────────────────────────── */
-const catStyle = {
-    achievement:  { bg: 'rgba(32,54,113,0.18)', color: '#7B9FE8', dot: '#7B9FE8' },
-    announcement: { bg: 'rgba(24,40,88,0.25)',  color: '#A0B4F0', dot: '#A0B4F0' },
-    story:        { bg: 'rgba(45,72,153,0.15)', color: '#6B8FE8', dot: '#6B8FE8' },
-    update:       { bg: 'rgba(32,54,113,0.22)', color: '#90AAEC', dot: '#90AAEC' },
-    other:        { bg: 'rgba(30,34,53,0.6)',   color: '#8A94A8', dot: '#8A94A8' },
-};
-
-const getCat = cat => catStyle[cat] || catStyle.other;
-
-/* ── shared input style ──────────────────────────────────────────────────── */
 const inputSx = {
-    width: '100%', background: C.darkBg,
-    border: `1px solid ${C.darkBorder}`,
+    width: '100%', background: 'var(--input-bg)',
+    border: '1px solid var(--border)',
     borderRadius: 9, padding: '10px 14px',
-    color: C.white, fontSize: 13.5, outline: 'none',
+    color: 'var(--text-primary)', fontSize: 13.5, outline: 'none',
     fontFamily: "'DM Sans', sans-serif",
     transition: 'border-color 0.2s, box-shadow 0.2s',
     boxSizing: 'border-box',
 };
 
 const focusSx = e => {
-    e.target.style.borderColor = C.blueLight;
-    e.target.style.boxShadow   = `0 0 0 3px ${C.blueFaint}`;
+    e.target.style.borderColor = 'var(--blue-light)';
+    e.target.style.boxShadow   = `0 0 0 3px var(--blue-faint)`;
 };
 const blurSx = e => {
-    e.target.style.borderColor = C.darkBorder;
+    e.target.style.borderColor = 'var(--border)';
     e.target.style.boxShadow   = 'none';
 };
 
-/* ── news card ───────────────────────────────────────────────────────────── */
 const NewsCard = ({ item }) => {
-    const cs = getCat(item.category);
+    const cs = getCatConfig(item.category);
     return (
         <div style={{
-            background: C.darkCard,
-            border: `1px solid ${C.darkBorder}`,
+            background: 'var(--bg-secondary)',
+            border: '1px solid var(--border)',
             borderRadius: 14, overflow: 'hidden',
             display: 'flex', flexDirection: 'column',
             transition: 'border-color 0.25s, box-shadow 0.25s',
         }}
             onMouseEnter={e => {
-                e.currentTarget.style.borderColor = C.blueBorder;
-                e.currentTarget.style.boxShadow   = `0 8px 32px rgba(32,54,113,0.2)`;
+                e.currentTarget.style.borderColor = 'var(--blue-border)';
+                e.currentTarget.style.boxShadow   = `0 8px 32px var(--card-shadow)`;
             }}
             onMouseLeave={e => {
-                e.currentTarget.style.borderColor = C.darkBorder;
+                e.currentTarget.style.borderColor = 'var(--border)';
                 e.currentTarget.style.boxShadow   = 'none';
             }}
         >
             {/* top accent bar */}
             <div style={{
                 height: 3,
-                background: `linear-gradient(90deg, ${C.blue}, ${C.blueLight})`,
+                background: `linear-gradient(90deg, var(--blue), var(--blue-light))`,
             }} />
 
             <div style={{ padding: '20px 22px', flex: 1, display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -102,7 +78,7 @@ const NewsCard = ({ item }) => {
                 {/* title */}
                 <h3 style={{
                     fontFamily: "'Sora', sans-serif",
-                    fontSize: 16, fontWeight: 700, color: C.white,
+                    fontSize: 16, fontWeight: 700, color: 'var(--text-primary)',
                     lineHeight: 1.4, margin: 0,
                     display: '-webkit-box', WebkitLineClamp: 2,
                     WebkitBoxOrient: 'vertical', overflow: 'hidden',
@@ -112,7 +88,7 @@ const NewsCard = ({ item }) => {
 
                 {/* summary */}
                 <p style={{
-                    fontSize: 13, color: C.muted, lineHeight: 1.7,
+                    fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.7,
                     margin: 0, flex: 1,
                     display: '-webkit-box', WebkitLineClamp: 3,
                     WebkitBoxOrient: 'vertical', overflow: 'hidden',
@@ -126,11 +102,11 @@ const NewsCard = ({ item }) => {
                         {item.tags.slice(0, 3).map((tag, j) => (
                             <span key={j} style={{
                                 display: 'inline-flex', alignItems: 'center', gap: 4,
-                                background: C.blueFaint, border: `1px solid ${C.blueBorder}`,
+                                background: 'var(--blue-faint)', border: '1px solid var(--blue-border)',
                                 borderRadius: 6, padding: '3px 8px',
-                                fontSize: 10.5, color: C.muted,
+                                fontSize: 10.5, color: 'var(--text-secondary)',
                             }}>
-                                <FaTag style={{ fontSize: 8, color: C.blueLight }} /> {tag}
+                                <FaTag style={{ fontSize: 8, color: 'var(--blue-light)' }} /> {tag}
                             </span>
                         ))}
                     </div>
@@ -139,16 +115,16 @@ const NewsCard = ({ item }) => {
                 {/* footer */}
                 <div style={{
                     display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                    paddingTop: 12, borderTop: `1px solid ${C.darkBorder}`,
-                    fontSize: 11.5, color: C.muted,
+                    paddingTop: 12, borderTop: '1px solid var(--border)',
+                    fontSize: 11.5, color: 'var(--text-secondary)',
                 }}>
                     <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                         <div style={{
                             width: 22, height: 22, borderRadius: '50%',
-                            background: `linear-gradient(135deg, ${C.blueLight}, ${C.blue})`,
+                            background: `linear-gradient(135deg, var(--blue-light), var(--blue))`,
                             display: 'flex', alignItems: 'center', justifyContent: 'center',
                         }}>
-                            <FaUser style={{ fontSize: 9, color: C.white }} />
+                            <FaUser style={{ fontSize: 9, color: '#fff' }} />
                         </div>
                         {item.author?.name || 'Alumni'}
                     </span>
@@ -162,7 +138,6 @@ const NewsCard = ({ item }) => {
     );
 };
 
-/* ── main ────────────────────────────────────────────────────────────────── */
 const News = () => {
     const { user } = useAuth();
     const [news, setNews]         = useState([]);
@@ -199,13 +174,13 @@ const News = () => {
 
     return (
         <div style={{
-            minHeight: '100vh', background: C.black,
+            minHeight: '100vh', background: 'var(--bg)',
             padding: '48px 20px 72px', fontFamily: "'DM Sans', sans-serif",
-            color: C.white
+            color: 'var(--text-primary)', transition: 'background 0.3s, color 0.3s'
         }}>
             <div style={{ maxWidth: 1200, margin: '0 auto' }}>
 
-                {/* ── HEADER ── */}
+                {/* HEADER */}
                 <div style={{
                     display: 'flex', alignItems: 'flex-start',
                     justifyContent: 'space-between', gap: 20,
@@ -214,11 +189,11 @@ const News = () => {
                     <div>
                         <div style={{
                             display: 'inline-flex', alignItems: 'center', gap: 8,
-                            background: C.blueFaint, border: `1px solid ${C.blueBorder}`,
+                            background: 'var(--blue-faint)', border: '1px solid var(--blue-border)',
                             borderRadius: 20, padding: '5px 14px', marginBottom: 16
                         }}>
-                            <HiSparkles style={{ color: C.blueLight, fontSize: 13 }} />
-                            <span style={{ fontSize: 11, fontWeight: 700, color: C.blueLight, letterSpacing: '0.12em', textTransform: 'uppercase' }}>
+                            <HiSparkles style={{ color: 'var(--blue-light)', fontSize: 13 }} />
+                            <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--blue-light)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>
                                 Alumni Stories
                             </span>
                         </div>
@@ -226,15 +201,15 @@ const News = () => {
                         <h1 style={{
                             fontFamily: "'Sora', sans-serif",
                             fontSize: 38, fontWeight: 800, margin: '0 0 10px',
-                            color: C.white, letterSpacing: '-0.6px', lineHeight: 1.15
+                            color: 'var(--text-primary)', letterSpacing: '-0.6px', lineHeight: 1.15
                         }}>
                             News &{' '}
                             <span style={{
-                                background: `linear-gradient(135deg, ${C.blueLight}, #6B8FE8)`,
+                                background: `linear-gradient(135deg, var(--blue-light), #6B8FE8)`,
                                 WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent'
                             }}>Stories</span>
                         </h1>
-                        <p style={{ fontSize: 14.5, color: C.muted, margin: 0 }}>
+                        <p style={{ fontSize: 14.5, color: 'var(--text-secondary)', margin: 0 }}>
                             Celebrating NIT Jamshedpur alumni achievements and updates.
                         </p>
                     </div>
@@ -246,13 +221,13 @@ const News = () => {
                                 display: 'inline-flex', alignItems: 'center', gap: 8,
                                 background: showForm
                                     ? 'transparent'
-                                    : `linear-gradient(135deg, ${C.blueLight}, ${C.blue})`,
-                                border: `1px solid ${showForm ? C.blueBorder : 'transparent'}`,
+                                    : `linear-gradient(135deg, var(--blue-light), var(--blue))`,
+                                border: `1px solid ${showForm ? 'var(--blue-border)' : 'transparent'}`,
                                 borderRadius: 10, padding: '11px 22px',
-                                color: C.white, fontSize: 13, fontWeight: 700,
+                                color: '#fff', fontSize: 13, fontWeight: 700,
                                 letterSpacing: '0.05em', cursor: 'pointer',
                                 fontFamily: "'DM Sans', sans-serif",
-                                boxShadow: showForm ? 'none' : `0 4px 20px rgba(32,54,113,0.4)`,
+                                boxShadow: showForm ? 'none' : `0 4px 20px rgba(32,54,113,0.35)`,
                                 transition: 'all 0.2s',
                             }}
                         >
@@ -261,7 +236,7 @@ const News = () => {
                     )}
                 </div>
 
-                {/* ── FILTER BAR ── */}
+                {/* FILTER BAR */}
                 <div style={{
                     display: 'flex', alignItems: 'center', gap: 8,
                     marginBottom: 32, flexWrap: 'wrap'
@@ -269,11 +244,11 @@ const News = () => {
                     <div style={{
                         display: 'flex', alignItems: 'center', gap: 6,
                         padding: '6px 12px', borderRadius: 8,
-                        background: C.darkCard, border: `1px solid ${C.darkBorder}`,
+                        background: 'var(--bg-secondary)', border: '1px solid var(--border)',
                         marginRight: 4
                     }}>
-                        <FaFilter style={{ color: C.muted, fontSize: 11 }} />
-                        <span style={{ fontSize: 11, color: C.muted, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Filter</span>
+                        <FaFilter style={{ color: 'var(--text-muted)', fontSize: 11 }} />
+                        <span style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Filter</span>
                     </div>
 
                     {['', ...categories].map(cat => {
@@ -284,11 +259,11 @@ const News = () => {
                                 onClick={() => setCategory(cat)}
                                 style={{
                                     background: active
-                                        ? `linear-gradient(135deg, ${C.blueLight}, ${C.blue})`
-                                        : C.darkCard,
-                                    border: `1px solid ${active ? 'transparent' : C.darkBorder}`,
+                                        ? `linear-gradient(135deg, var(--blue-light), var(--blue))`
+                                        : 'var(--bg-secondary)',
+                                    border: `1px solid ${active ? 'transparent' : 'var(--border)'}`,
                                     borderRadius: 8, padding: '7px 16px',
-                                    color: active ? C.white : C.muted,
+                                    color: active ? '#fff' : 'var(--text-secondary)',
                                     fontSize: 12, fontWeight: active ? 700 : 500,
                                     textTransform: 'capitalize', cursor: 'pointer',
                                     letterSpacing: active ? '0.04em' : '0',
@@ -304,37 +279,37 @@ const News = () => {
                     })}
                 </div>
 
-                {/* ── SHARE STORY FORM ── */}
+                {/* FORM */}
                 {showForm && (
                     <div style={{
-                        background: C.darkCard,
-                        border: `1px solid ${C.blueBorder}`,
+                        background: 'var(--bg-secondary)',
+                        border: '1px solid var(--blue-border)',
                         borderRadius: 16, padding: '28px 32px',
                         marginBottom: 36,
-                        boxShadow: `0 8px 40px rgba(32,54,113,0.2)`
+                        boxShadow: `0 8px 40px var(--card-shadow)`
                     }}>
                         {/* form header */}
                         <div style={{
                             display: 'flex', alignItems: 'center', gap: 10, marginBottom: 24,
-                            paddingBottom: 16, borderBottom: `1px solid ${C.darkBorder}`
+                            paddingBottom: 16, borderBottom: '1px solid var(--border)'
                         }}>
                             <div style={{
                                 width: 36, height: 36, borderRadius: 9,
-                                background: C.blue, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                background: 'var(--blue)', display: 'flex', alignItems: 'center', justifyContent: 'center',
                                 boxShadow: `0 4px 14px rgba(32,54,113,0.5)`
                             }}>
-                                <FaNewspaper style={{ color: C.white, fontSize: 14 }} />
+                                <FaNewspaper style={{ color: '#fff', fontSize: 14 }} />
                             </div>
                             <div>
-                                <p style={{ fontFamily: "'Sora', sans-serif", fontSize: 15, fontWeight: 700, color: C.white, margin: 0 }}>Share Your Story</p>
-                                <p style={{ fontSize: 11.5, color: C.muted, margin: '2px 0 0' }}>Inspire fellow alumni with your journey</p>
+                                <p style={{ fontFamily: "'Sora', sans-serif", fontSize: 15, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>Share Your Story</p>
+                                <p style={{ fontSize: 11.5, color: 'var(--text-secondary)', margin: '2px 0 0' }}>Inspire fellow alumni with your journey</p>
                             </div>
                         </div>
 
                         <form onSubmit={handleSubmit}>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
 
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 14 }}>
                                     <input
                                         type="text" placeholder="Story title *"
                                         value={formData.title}
@@ -347,7 +322,7 @@ const News = () => {
                                         style={{ ...inputSx, appearance: 'none', cursor: 'pointer' }}
                                         onFocus={focusSx} onBlur={blurSx}
                                     >
-                                        {categories.map(c => <option key={c} value={c} style={{ background: C.darkBg }}>{c.charAt(0).toUpperCase() + c.slice(1)}</option>)}
+                                        {categories.map(c => <option key={c} value={c} style={{ background: 'var(--bg-secondary)' }}>{c.charAt(0).toUpperCase() + c.slice(1)}</option>)}
                                     </select>
                                 </div>
 
@@ -378,12 +353,12 @@ const News = () => {
                                     <button
                                         type="submit"
                                         style={{
-                                            background: `linear-gradient(135deg, ${C.blueLight}, ${C.blue})`,
+                                            background: `linear-gradient(135deg, var(--blue-light), var(--blue))`,
                                             border: 'none', borderRadius: 9, padding: '11px 28px',
-                                            color: C.white, fontSize: 13, fontWeight: 700,
+                                            color: '#fff', fontSize: 13, fontWeight: 700,
                                             letterSpacing: '0.05em', cursor: 'pointer',
                                             fontFamily: "'DM Sans', sans-serif",
-                                            boxShadow: `0 4px 20px rgba(32,54,113,0.4)`,
+                                            boxShadow: `0 4px 20px rgba(32,54,113,0.35)`,
                                             transition: 'opacity 0.2s',
                                         }}
                                         onMouseEnter={e => e.currentTarget.style.opacity = '0.85'}
@@ -397,13 +372,13 @@ const News = () => {
                     </div>
                 )}
 
-                {/* ── CONTENT ── */}
+                {/* CONTENT */}
                 {loading ? (
                     <div style={{ display: 'flex', justifyContent: 'center', padding: '80px 0' }}>
                         <div style={{
                             width: 40, height: 40, borderRadius: '50%',
-                            border: `3px solid ${C.blueFaint}`,
-                            borderTopColor: C.blueLight,
+                            border: `3px solid var(--blue-faint)`,
+                            borderTopColor: 'var(--blue-light)',
                             animation: 'spin 0.7s linear infinite'
                         }} />
                         <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
@@ -411,19 +386,19 @@ const News = () => {
                 ) : news.length === 0 ? (
                     <div style={{
                         textAlign: 'center', padding: '72px 32px',
-                        background: C.darkCard, border: `1px solid ${C.darkBorder}`,
+                        background: 'var(--bg-secondary)', border: '1px solid var(--border)',
                         borderRadius: 16
                     }}>
                         <div style={{
                             width: 64, height: 64, borderRadius: 18,
-                            background: C.blueFaint, border: `1px solid ${C.blueBorder}`,
+                            background: 'var(--blue-faint)', border: '1px solid var(--border)',
                             display: 'flex', alignItems: 'center', justifyContent: 'center',
                             margin: '0 auto 20px'
                         }}>
-                            <FaNewspaper style={{ fontSize: 26, color: C.blueLight }} />
+                            <FaNewspaper style={{ fontSize: 26, color: 'var(--blue-light)' }} />
                         </div>
-                        <h3 style={{ fontFamily: "'Sora', sans-serif", fontSize: 18, fontWeight: 700, color: C.white, margin: '0 0 8px' }}>No Stories Yet</h3>
-                        <p style={{ fontSize: 13.5, color: C.muted, margin: 0 }}>Be the first to share an inspiring story!</p>
+                        <h3 style={{ fontFamily: "'Sora', sans-serif", fontSize: 18, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 8px' }}>No Stories Yet</h3>
+                        <p style={{ fontSize: 13.5, color: 'var(--text-secondary)', margin: 0 }}>Be the first to share an inspiring story!</p>
                     </div>
                 ) : (
                     <div style={{

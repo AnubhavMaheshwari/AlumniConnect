@@ -8,45 +8,29 @@ import {
 } from 'react-icons/fa';
 import { HiSparkles } from 'react-icons/hi';
 
-/* ── colour tokens ───────────────────────────────────────────────────────── */
-const C = {
-    blue:       '#203671',
-    blueDark:   '#182858',
-    blueLight:  '#2D4899',
-    blueFaint:  'rgba(32,54,113,0.12)',
-    blueBorder: 'rgba(32,54,113,0.35)',
-    white:      '#FFFFFF',
-    muted:      '#8A94A8',
-    black:      '#000000',
-    darkBg:     '#0C0E14',
-    darkCard:   '#12151F',
-    darkBorder: '#1E2235',
-};
-
 /* ── helpers ─────────────────────────────────────────────────────────────── */
 const Avatar = ({ name }) => (
     <div style={{
         width: 60, height: 60, borderRadius: '50%',
-        background: `linear-gradient(140deg, ${C.blueLight} 0%, ${C.blue} 60%, ${C.blueDark} 100%)`,
+        background: `linear-gradient(140deg, var(--blue-light) 0%, var(--blue) 60%, var(--blue-dark) 100%)`,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        fontSize: 24, fontWeight: 800, color: C.white,
+        fontSize: 24, fontWeight: 800, color: '#fff',
         flexShrink: 0, letterSpacing: '-0.5px',
-        boxShadow: `0 0 0 3px ${C.blueBorder}, 0 4px 20px rgba(32,54,113,0.4)`
+        boxShadow: `0 0 0 3px var(--blue-border), 0 4px 20px rgba(32,54,113,0.4)`
     }}>
         {name?.charAt(0)?.toUpperCase()}
     </div>
 );
 
 const FieldRow = ({ label, children }) => (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         <label style={{
-            width: 134, flexShrink: 0,
             fontSize: 10, fontWeight: 700, letterSpacing: '0.13em',
-            textTransform: 'uppercase', color: C.muted
+            textTransform: 'uppercase', color: 'var(--text-secondary)'
         }}>
             {label}
         </label>
-        <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 10 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             {children}
         </div>
     </div>
@@ -56,25 +40,25 @@ const InputField = ({ icon: Icon, ...props }) => (
     <div style={{ position: 'relative', flex: 1 }}>
         {Icon && <Icon style={{
             position: 'absolute', left: 13, top: '50%', transform: 'translateY(-50%)',
-            color: C.muted, fontSize: 13, pointerEvents: 'none'
+            color: 'var(--text-muted)', fontSize: 13, pointerEvents: 'none'
         }} />}
         <input
             {...props}
             style={{
-                width: '100%', background: C.darkBg,
-                border: `1px solid ${C.darkBorder}`,
+                width: '100%', background: 'var(--input-bg)',
+                border: '1px solid var(--border)',
                 borderRadius: 8, padding: `10px 13px 10px ${Icon ? '38px' : '13px'}`,
-                color: C.white, fontSize: 13.5, outline: 'none',
+                color: 'var(--text-primary)', fontSize: 13.5, outline: 'none',
                 fontFamily: "'DM Sans', sans-serif",
                 transition: 'border-color 0.2s, box-shadow 0.2s',
                 boxSizing: 'border-box'
             }}
             onFocus={e => {
-                e.target.style.borderColor = C.blueLight;
-                e.target.style.boxShadow = `0 0 0 3px ${C.blueFaint}`;
+                e.target.style.borderColor = 'var(--blue-light)';
+                e.target.style.boxShadow = `0 0 0 3px var(--blue-faint)`;
             }}
             onBlur={e => {
-                e.target.style.borderColor = C.darkBorder;
+                e.target.style.borderColor = 'var(--border)';
                 e.target.style.boxShadow = 'none';
             }}
         />
@@ -85,18 +69,18 @@ const SectionTitle = ({ icon: Icon, children }) => (
     <div style={{
         display: 'flex', alignItems: 'center', gap: 10,
         marginBottom: 22, paddingBottom: 13,
-        borderBottom: `1px solid ${C.darkBorder}`
+        borderBottom: '1px solid var(--border)'
     }}>
         <div style={{
             width: 28, height: 28, borderRadius: 7,
-            background: C.blueFaint, border: `1px solid ${C.blueBorder}`,
+            background: 'var(--blue-faint)', border: '1px solid var(--blue-border)',
             display: 'flex', alignItems: 'center', justifyContent: 'center'
         }}>
-            <Icon style={{ color: C.blueLight, fontSize: 12 }} />
+            <Icon style={{ color: 'var(--blue-light)', fontSize: 12 }} />
         </div>
         <span style={{
             fontSize: 11, fontWeight: 700, letterSpacing: '0.14em',
-            textTransform: 'uppercase', color: C.muted
+            textTransform: 'uppercase', color: 'var(--text-secondary)'
         }}>{children}</span>
     </div>
 );
@@ -173,18 +157,25 @@ const Dashboard = () => {
     const updateBtnStyle = {
         flexShrink: 0,
         background: 'transparent',
-        border: `1px solid ${C.blueBorder}`,
+        border: '1px solid var(--blue-border)',
         borderRadius: 7, padding: '9px 16px',
-        color: C.blueLight, fontSize: 11, fontWeight: 700,
+        color: 'var(--blue-light)', fontSize: 11, fontWeight: 700,
         letterSpacing: '0.09em', textTransform: 'uppercase',
         cursor: 'pointer', transition: 'all 0.2s',
         fontFamily: "'DM Sans', sans-serif"
     };
 
+    const activities = [
+        { id: 1, text: 'Updated profile information', time: '2 hours ago' },
+        { id: 2, text: 'Changed contact email', time: '1 day ago' },
+        { id: 3, text: 'Verified phone number', time: '3 days ago' },
+    ];
+
     return (
         <div style={{
-            minHeight: '100vh', background: C.black,
-            padding: '44px 20px', fontFamily: "'DM Sans', sans-serif", color: C.white
+            minHeight: '100vh', background: 'var(--bg)',
+            padding: '44px 20px', fontFamily: "'DM Sans', sans-serif", color: 'var(--text-primary)',
+            transition: 'background 0.3s, color 0.3s'
         }}>
             <div style={{ maxWidth: 700, margin: '0 auto' }}>
 
@@ -192,30 +183,31 @@ const Dashboard = () => {
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 36 }}>
                     <div style={{
                         width: 40, height: 40, borderRadius: 11,
-                        background: C.blue,
+                        background: 'var(--blue)',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                         boxShadow: `0 4px 18px rgba(32,54,113,0.55)`
                     }}>
-                        <HiSparkles style={{ color: C.white, fontSize: 18 }} />
+                        <HiSparkles style={{ color: '#fff', fontSize: 18 }} />
                     </div>
                     <h1 style={{
                         fontFamily: "'Sora', sans-serif",
-                        fontSize: 24, fontWeight: 800, color: C.white,
+                        fontSize: 24, fontWeight: 800, color: 'var(--text-primary)',
                         margin: 0, letterSpacing: '-0.4px'
                     }}>My Profile</h1>
                 </div>
 
                 {/* CARD */}
                 <div style={{
-                    background: C.darkCard,
-                    border: `1px solid ${C.darkBorder}`,
+                    background: 'var(--bg-secondary)',
+                    border: '1px solid var(--border)',
                     borderRadius: 18, overflow: 'hidden',
-                    boxShadow: '0 32px 80px rgba(0,0,0,0.7)'
+                    boxShadow: '0 32px 80px var(--card-shadow)',
+                    transition: 'background 0.3s, border-color 0.3s'
                 }}>
 
                     {/* profile banner */}
                     <div style={{
-                        background: `linear-gradient(135deg, ${C.blue} 0%, ${C.blueDark} 100%)`,
+                        background: `linear-gradient(135deg, var(--blue) 0%, var(--blue-dark) 100%)`,
                         padding: '30px 32px',
                         display: 'flex', alignItems: 'center', gap: 20,
                         position: 'relative', overflow: 'hidden'
@@ -234,7 +226,7 @@ const Dashboard = () => {
                         <div style={{ zIndex: 1 }}>
                             <p style={{
                                 fontFamily: "'Sora', sans-serif",
-                                fontSize: 20, fontWeight: 700, color: C.white, margin: 0
+                                fontSize: 20, fontWeight: 700, color: '#fff', margin: 0
                             }}>{user?.name}</p>
                             <div style={{
                                 display: 'inline-flex', alignItems: 'center',
@@ -243,7 +235,7 @@ const Dashboard = () => {
                                 border: '1px solid rgba(255,255,255,0.22)',
                                 borderRadius: 20, padding: '3px 11px'
                             }}>
-                                <span style={{ fontSize: 11, fontWeight: 600, color: C.white, letterSpacing: '0.07em' }}>
+                                <span style={{ fontSize: 11, fontWeight: 600, color: '#fff', letterSpacing: '0.07em' }}>
                                     {user?.role === 'admin' ? '⚡ Administrator' : '🎓 Alumni Member'}
                                 </span>
                             </div>
@@ -283,9 +275,9 @@ const Dashboard = () => {
                                     disabled={loading}
                                     style={{
                                         marginTop: 22, width: '100%',
-                                        background: `linear-gradient(135deg, ${C.blueLight} 0%, ${C.blue} 100%)`,
+                                        background: `linear-gradient(135deg, var(--blue-light) 0%, var(--blue) 100%)`,
                                         border: 'none', borderRadius: 9, padding: '11px 0',
-                                        color: C.white, fontSize: 13, fontWeight: 700,
+                                        color: '#fff', fontSize: 13, fontWeight: 700,
                                         letterSpacing: '0.06em', cursor: 'pointer',
                                         display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
                                         fontFamily: "'DM Sans', sans-serif",
@@ -301,7 +293,7 @@ const Dashboard = () => {
                             </form>
                         </div>
 
-                        <div style={{ height: 1, background: C.darkBorder, margin: '0 0 32px' }} />
+                        <div style={{ height: 1, background: 'var(--border)', margin: '0 0 32px' }} />
 
                         {/* CONTACT & SECURITY */}
                         <div>
@@ -322,12 +314,12 @@ const Dashboard = () => {
                                         onClick={() => initiateVerification('email')}
                                         style={updateBtnStyle}
                                         onMouseEnter={e => {
-                                            e.currentTarget.style.background = C.blueFaint;
-                                            e.currentTarget.style.borderColor = C.blueLight;
+                                            e.currentTarget.style.background = 'var(--blue-faint)';
+                                            e.currentTarget.style.borderColor = 'var(--blue-light)';
                                         }}
                                         onMouseLeave={e => {
                                             e.currentTarget.style.background = 'transparent';
-                                            e.currentTarget.style.borderColor = C.blueBorder;
+                                            e.currentTarget.style.borderColor = 'var(--blue-border)';
                                         }}
                                     >Update</button>
                                 </FieldRow>
@@ -345,12 +337,12 @@ const Dashboard = () => {
                                         onClick={() => initiateVerification('phone')}
                                         style={updateBtnStyle}
                                         onMouseEnter={e => {
-                                            e.currentTarget.style.background = C.blueFaint;
-                                            e.currentTarget.style.borderColor = C.blueLight;
+                                            e.currentTarget.style.background = 'var(--blue-faint)';
+                                            e.currentTarget.style.borderColor = 'var(--blue-light)';
                                         }}
                                         onMouseLeave={e => {
                                             e.currentTarget.style.background = 'transparent';
-                                            e.currentTarget.style.borderColor = C.blueBorder;
+                                            e.currentTarget.style.borderColor = 'var(--blue-border)';
                                         }}
                                     >Update</button>
                                 </FieldRow>
@@ -359,12 +351,41 @@ const Dashboard = () => {
                             <div style={{
                                 marginTop: 16, display: 'flex', alignItems: 'center', gap: 8,
                                 padding: '10px 14px', borderRadius: 8,
-                                background: C.blueFaint, border: `1px solid ${C.blueBorder}`
+                                background: 'var(--blue-faint)', border: '1px solid var(--blue-border)'
                             }}>
-                                <FaCheckCircle style={{ color: C.blueLight, fontSize: 11, flexShrink: 0 }} />
-                                <span style={{ fontSize: 11.5, color: C.muted }}>
+                                <FaCheckCircle style={{ color: 'var(--blue-light)', fontSize: 11, flexShrink: 0 }} />
+                                <span style={{ fontSize: 11.5, color: 'var(--text-secondary)' }}>
                                     A one-time verification code is required for contact changes.
                                 </span>
+                            </div>
+                        </div>
+
+                        <div style={{ height: 1, background: 'var(--border)', margin: '32px 0' }} />
+
+                        {/* RECENT ACTIVITY */}
+                        <div>
+                            <SectionTitle icon={HiSparkles}>Recent Activity</SectionTitle>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                                {activities.map((act, i) => (
+                                    <div key={act.id} style={{
+                                        display: 'flex', alignItems: 'center', gap: 14,
+                                        padding: '14px 16px', borderRadius: 12,
+                                        background: 'var(--bg)', border: '1px solid var(--border)',
+                                        transition: 'transform 0.2s'
+                                    }}
+                                    onMouseEnter={e => e.currentTarget.style.transform = 'translateX(5px)'}
+                                    onMouseLeave={e => e.currentTarget.style.transform = 'translateX(0)'}
+                                    >
+                                        <div style={{
+                                            width: 8, height: 8, borderRadius: '50%',
+                                            background: i === 0 ? 'var(--blue-light)' : 'var(--border)'
+                                        }} />
+                                        <div style={{ flex: 1 }}>
+                                            <p style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-primary)', margin: '0 0 2px' }}>{act.text}</p>
+                                            <p style={{ fontSize: 11, color: 'var(--text-muted)', margin: 0 }}>{act.time}</p>
+                                        </div>
+                                    </div>
+                                ))}
                             </div>
                         </div>
 
@@ -376,14 +397,14 @@ const Dashboard = () => {
             {otpModal.show && (
                 <div style={{
                     position: 'fixed', inset: 0,
-                    background: 'rgba(0,0,0,0.82)', backdropFilter: 'blur(8px)',
+                    background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    zIndex: 1000
+                    zIndex: 1000, padding: 20
                 }}>
                     <div style={{
-                        background: C.darkCard,
-                        border: `1px solid ${C.darkBorder}`,
-                        borderRadius: 18, padding: 36,
+                        background: 'var(--bg-secondary)',
+                        border: '1px solid var(--border)',
+                        borderRadius: 18, padding: 32,
                         width: '100%', maxWidth: 380,
                         boxShadow: '0 40px 100px rgba(0,0,0,0.8)'
                     }}>
@@ -391,22 +412,22 @@ const Dashboard = () => {
                             <div>
                                 <div style={{
                                     width: 44, height: 44, borderRadius: 12,
-                                    background: C.blue, marginBottom: 14,
+                                    background: 'var(--blue)', marginBottom: 14,
                                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                                     boxShadow: `0 4px 16px rgba(32,54,113,0.5)`
                                 }}>
-                                    <FaCheckCircle style={{ color: C.white, fontSize: 18 }} />
+                                    <FaCheckCircle style={{ color: '#fff', fontSize: 18 }} />
                                 </div>
                                 <p style={{
                                     fontFamily: "'Sora', sans-serif",
-                                    fontSize: 18, fontWeight: 700, color: C.white, margin: '0 0 5px'
+                                    fontSize: 18, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 5px'
                                 }}>Verify Identity</p>
-                                <p style={{ fontSize: 12, color: C.muted, margin: 0 }}>
+                                <p style={{ fontSize: 12, color: 'var(--text-secondary)', margin: 0 }}>
                                     Enter the 6-digit code sent to your {otpModal.type}
                                 </p>
                             </div>
                             <FaTimes
-                                style={{ color: C.muted, cursor: 'pointer', fontSize: 15, marginTop: 4 }}
+                                style={{ color: 'var(--text-muted)', cursor: 'pointer', fontSize: 15, marginTop: 4 }}
                                 onClick={() => setOtpModal({ ...otpModal, show: false })}
                             />
                         </div>
@@ -419,20 +440,20 @@ const Dashboard = () => {
                             style={{
                                 width: '100%', textAlign: 'center', fontSize: 26,
                                 letterSpacing: '0.4em', padding: '15px',
-                                background: C.darkBg,
-                                border: `1px solid ${C.darkBorder}`,
-                                borderRadius: 10, color: C.white,
+                                background: 'var(--input-bg)',
+                                border: '1px solid var(--border)',
+                                borderRadius: 10, color: 'var(--text-primary)',
                                 outline: 'none', marginBottom: 18,
                                 fontFamily: "'Sora', sans-serif",
                                 boxSizing: 'border-box',
                                 transition: 'border-color 0.2s, box-shadow 0.2s'
                             }}
                             onFocus={e => {
-                                e.target.style.borderColor = C.blueLight;
-                                e.target.style.boxShadow = `0 0 0 3px ${C.blueFaint}`;
+                                e.target.style.borderColor = 'var(--blue-light)';
+                                e.target.style.boxShadow = `0 0 0 3px var(--blue-faint)`;
                             }}
                             onBlur={e => {
-                                e.target.style.borderColor = C.darkBorder;
+                                e.target.style.borderColor = 'var(--border)';
                                 e.target.style.boxShadow = 'none';
                             }}
                         />
@@ -442,9 +463,9 @@ const Dashboard = () => {
                             disabled={loading || otpModal.otp.length < 6}
                             style={{
                                 width: '100%',
-                                background: `linear-gradient(135deg, ${C.blueLight} 0%, ${C.blue} 100%)`,
+                                background: `linear-gradient(135deg, var(--blue-light) 0%, var(--blue) 100%)`,
                                 border: 'none', borderRadius: 9, padding: '12px 0',
-                                color: C.white, fontSize: 13, fontWeight: 700,
+                                color: '#fff', fontSize: 13, fontWeight: 700,
                                 letterSpacing: '0.06em', cursor: 'pointer',
                                 fontFamily: "'DM Sans', sans-serif",
                                 opacity: otpModal.otp.length < 6 ? 0.4 : 1,

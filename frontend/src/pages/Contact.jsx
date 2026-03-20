@@ -5,17 +5,17 @@ import { HiSparkles } from 'react-icons/hi';
 
 /* ── colour tokens ───────────────────────────────────────────────────────── */
 const C = {
-    blue:       '#203671',
-    blueDark:   '#182858',
-    blueLight:  '#2D4899',
-    blueFaint:  'rgba(32,54,113,0.12)',
-    blueBorder: 'rgba(32,54,113,0.35)',
-    white:      '#FFFFFF',
-    muted:      '#8A94A8',
-    black:      '#000000',
-    darkBg:     '#0C0E14',
-    darkCard:   '#12151F',
-    darkBorder: '#1E2235',
+    blue:       'var(--blue)',
+    blueDark:   'var(--blue-dark)',
+    blueLight:  'var(--blue-light)',
+    blueFaint:  'var(--blue-faint)',
+    blueBorder: 'var(--blue-border)',
+    white:      'var(--text-primary)',
+    muted:      'var(--text-secondary)',
+    black:      'var(--bg)',
+    darkBg:     'var(--bg)',
+    darkCard:   'var(--bg-secondary)',
+    darkBorder: 'var(--border)',
     errorRed:   '#FF4D4D',
     errorFaint: 'rgba(255,77,77,0.1)',
 };
@@ -58,10 +58,10 @@ const Field = ({ label, icon: Icon, error, children }) => (
 );
 
 const inputStyle = (error) => ({
-    width: '100%', background: C.darkBg,
-    border: `1px solid ${error ? C.errorRed : C.darkBorder}`,
+    width: '100%', background: 'var(--input-bg)',
+    border: `1px solid ${error ? C.errorRed : 'var(--border)'}`,
     borderRadius: 9, padding: '11px 14px 11px 40px',
-    color: C.white, fontSize: 13.5, outline: 'none',
+    color: 'var(--text-primary)', fontSize: 13.5, outline: 'none',
     fontFamily: "'DM Sans', sans-serif",
     transition: 'border-color 0.2s, box-shadow 0.2s',
     boxSizing: 'border-box',
@@ -123,9 +123,10 @@ const Contact = () => {
 
     return (
         <div style={{
-            minHeight: '100vh', background: C.black,
+            minHeight: '100vh', background: 'var(--bg)',
             padding: '56px 20px', fontFamily: "'DM Sans', sans-serif",
-            color: C.white, display: 'flex', alignItems: 'center', justifyContent: 'center'
+            color: 'var(--text-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+            transition: 'background 0.3s, color 0.3s'
         }}>
             <div style={{ width: '100%', maxWidth: 620 }}>
 
@@ -145,7 +146,7 @@ const Contact = () => {
                     <h1 style={{
                         fontFamily: "'Sora', sans-serif",
                         fontSize: 42, fontWeight: 800, margin: '0 0 14px',
-                        color: C.white, letterSpacing: '-0.8px', lineHeight: 1.15
+                        color: 'var(--text-primary)', letterSpacing: '-0.8px', lineHeight: 1.15
                     }}>
                         Get In{' '}
                         <span style={{
@@ -160,10 +161,10 @@ const Contact = () => {
 
                 {/* ── CARD ── */}
                 <div style={{
-                    background: C.darkCard,
-                    border: `1px solid ${C.darkBorder}`,
+                    border: `1px solid var(--border)`,
                     borderRadius: 20, overflow: 'hidden',
-                    boxShadow: '0 32px 80px rgba(0,0,0,0.7)'
+                    boxShadow: '0 32px 80px var(--card-shadow)',
+                    transition: 'background 0.3s, border-color 0.3s'
                 }}>
 
                     {/* card header strip */}
@@ -204,7 +205,7 @@ const Contact = () => {
                             <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
 
                                 {/* Name + Email row */}
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
                                     <Field label="Your Name" icon={FaUser} error={errors.name}>
                                         <input
                                             type="text" name="name" value={formData.name}
@@ -226,7 +227,7 @@ const Contact = () => {
                                 </div>
 
                                 {/* Phone + Subject row */}
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
                                     <Field label="Mobile Number" icon={FaPhone} error={errors.phone}>
                                         <input
                                             type="tel" name="phone" value={formData.phone}
@@ -274,7 +275,7 @@ const Contact = () => {
                                             ? 'linear-gradient(135deg, #1a6e3a 0%, #145c30 100%)'
                                             : `linear-gradient(135deg, ${C.blueLight} 0%, ${C.blue} 100%)`,
                                         border: 'none', borderRadius: 10, padding: '13px 0',
-                                        color: C.white, fontSize: 14, fontWeight: 700,
+                                        color: '#FFFFFF', fontSize: 14, fontWeight: 700,
                                         letterSpacing: '0.06em', cursor: loading ? 'not-allowed' : 'pointer',
                                         display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 9,
                                         fontFamily: "'DM Sans', sans-serif",

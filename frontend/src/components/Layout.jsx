@@ -4,7 +4,7 @@ import Footer from './Footer';
 
 const Layout = () => {
     return (
-        <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: '#000000' }}>
+        <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: 'var(--bg)', color: 'var(--text-primary)', transition: 'background 0.3s, color 0.3s' }}>
             <Navbar />
             <main style={{ flex: 1 }}>
                 <Outlet />

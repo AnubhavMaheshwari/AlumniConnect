@@ -4,17 +4,17 @@ import { HiSparkles } from 'react-icons/hi';
 
 /* ── colour tokens ───────────────────────────────────────────────────────── */
 const C = {
-    blue:       '#203671',
-    blueDark:   '#182858',
-    blueLight:  '#2D4899',
-    blueFaint:  'rgba(32,54,113,0.12)',
-    blueBorder: 'rgba(32,54,113,0.35)',
-    white:      '#FFFFFF',
-    muted:      '#8A94A8',
-    black:      '#000000',
-    darkBg:     '#0C0E14',
-    darkCard:   '#12151F',
-    darkBorder: '#1E2235',
+    blue:       'var(--blue)',
+    blueDark:   'var(--blue-dark)',
+    blueLight:  'var(--blue-light)',
+    blueFaint:  'var(--blue-faint)',
+    blueBorder: 'var(--blue-border)',
+    white:      'var(--text-primary)',
+    muted:      'var(--text-secondary)',
+    black:      'var(--bg)',
+    darkBg:     'var(--bg)',
+    darkCard:   'var(--bg-secondary)',
+    darkBorder: 'var(--border)',
 };
 
 /* ── font injection ──────────────────────────────────────────────────────── */
@@ -84,7 +84,7 @@ const FAQItem = ({ item, index, isOpen, onToggle }) => (
             {/* question */}
             <span style={{
                 flex: 1, fontSize: 14.5, fontWeight: 600,
-                color: isOpen ? C.white : '#C5CCE0',
+                color: isOpen ? 'var(--text-primary)' : 'var(--text-secondary)',
                 lineHeight: 1.45, transition: 'color 0.25s'
             }}>
                 {item.q}
@@ -138,9 +138,9 @@ const FAQ = () => {
 
     return (
         <div style={{
-            minHeight: '100vh', background: C.black,
+            minHeight: '100vh', background: 'var(--bg)',
             padding: '56px 20px 72px', fontFamily: "'DM Sans', sans-serif",
-            color: C.white
+            color: 'var(--text-primary)', transition: 'background 0.3s, color 0.3s'
         }}>
             <div style={{ maxWidth: 760, margin: '0 auto' }}>
 
@@ -163,7 +163,7 @@ const FAQ = () => {
                     <h1 style={{
                         fontFamily: "'Sora', sans-serif",
                         fontSize: 42, fontWeight: 800, margin: '0 0 14px',
-                        color: C.white, letterSpacing: '-0.8px', lineHeight: 1.15
+                        color: 'var(--text-primary)', letterSpacing: '-0.8px', lineHeight: 1.15
                     }}>
                         Frequently Asked{' '}
                         <span style={{
@@ -236,7 +236,7 @@ const FAQ = () => {
                             display: 'inline-flex', alignItems: 'center', gap: 8,
                             background: `linear-gradient(135deg, ${C.blueLight} 0%, ${C.blue} 100%)`,
                             border: 'none', borderRadius: 9, padding: '11px 28px',
-                            color: C.white, fontSize: 13, fontWeight: 700,
+                            color: '#FFFFFF', fontSize: 13, fontWeight: 700,
                             letterSpacing: '0.05em', cursor: 'pointer',
                             textDecoration: 'none',
                             boxShadow: `0 4px 20px rgba(32,54,113,0.45)`,

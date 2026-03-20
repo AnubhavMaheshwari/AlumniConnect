@@ -8,14 +8,6 @@ import {
 } from 'react-icons/fa';
 import { HiSparkles } from 'react-icons/hi';
 
-/* ── tokens ──────────────────────────────────────────────────────────────── */
-const C = {
-    blue: '#203671', blueDark: '#182858', blueLight: '#2D4899',
-    blueFaint: 'rgba(32,54,113,0.12)', blueBorder: 'rgba(32,54,113,0.35)',
-    white: '#FFFFFF', muted: '#8A94A8', black: '#000000',
-    darkBg: '#0C0E14', darkCard: '#12151F', darkBorder: '#1E2235',
-};
-
 /* ── font + keyframes injection ──────────────────────────────────────────── */
 if (typeof document !== 'undefined' && !document.getElementById('home-styles')) {
     const link = document.createElement('link');
@@ -55,94 +47,36 @@ if (typeof document !== 'undefined' && !document.getElementById('home-styles')) 
     document.head.appendChild(style);
 }
 
-/* ── nav ─────────────────────────────────────────────────────────────────── */
-const Navbar = ({ user }) => (
-    <nav style={{
-        position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100,
-        background: 'rgba(10,10,20,0.85)', backdropFilter: 'blur(16px)',
-        borderBottom: `1px solid ${C.darkBorder}`,
-        padding: '0 32px', height: 64,
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-    }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <div style={{ width: 32, height: 32, borderRadius: 8, background: C.blue, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: `0 3px 12px rgba(32,54,113,0.5)` }}>
-                <FaGraduationCap style={{ color: C.white, fontSize: 15 }} />
-            </div>
-            <span style={{ fontFamily: "'Sora', sans-serif", fontSize: 15, fontWeight: 700, color: C.white, letterSpacing: '-0.2px' }}>
-                NIT JSR Alumni
-            </span>
-        </div>
-
-        <div style={{ display: 'flex', alignItems: 'center', gap: 28 }}>
-            {[['/', 'Home'], ['/directory', 'Directory'], ['/jobs', 'Jobs'], ['/events', 'Events'], ['/news', 'Stories'], ['/faq', 'FAQ']].map(([href, label]) => (
-                <Link key={href} to={href} className="nav-link">{label}</Link>
-            ))}
-        </div>
-
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            {user ? (
-                <Link to="/dashboard" style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: `linear-gradient(135deg, ${C.blueLight}, ${C.blue})`, borderRadius: 8, padding: '8px 18px', color: C.white, fontSize: 12.5, fontWeight: 700, textDecoration: 'none', boxShadow: `0 3px 12px rgba(32,54,113,0.4)` }}>
-                    Dashboard
-                </Link>
-            ) : (
-                <>
-                    <Link to="/login" style={{ color: C.muted, fontSize: 13, fontWeight: 500, textDecoration: 'none', padding: '8px 14px' }} className="nav-link">Sign In</Link>
-                    <Link to="/register" className="primary-btn" style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: `linear-gradient(135deg, ${C.blueLight}, ${C.blue})`, borderRadius: 8, padding: '8px 18px', color: C.white, fontSize: 12.5, fontWeight: 700, textDecoration: 'none', boxShadow: `0 3px 12px rgba(32,54,113,0.4)` }}>
-                        Join Now
-                    </Link>
-                </>
-            )}
-        </div>
-    </nav>
-);
-
-/* ── hero ────────────────────────────────────────────────────────────────── */
+/* ── hero ────────────────────────────────────────────────────────── */
 const Hero = ({ user }) => (
     <section style={{
-        minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
-        padding: '100px 20px 80px', position: 'relative', overflow: 'hidden',
-        background: C.black,
+        minHeight: 'calc(100vh - 64px)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+        padding: '60px 20px', position: 'relative', overflow: 'hidden',
+        background: 'var(--bg)',
+        transition: 'background 0.3s'
     }}>
         {/* background grid */}
         <div style={{
             position: 'absolute', inset: 0, zIndex: 0,
             backgroundImage: `
-                linear-gradient(rgba(32,54,113,0.06) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(32,54,113,0.06) 1px, transparent 1px)
+                linear-gradient(var(--blue-faint) 1px, transparent 1px),
+                linear-gradient(90deg, var(--blue-faint) 1px, transparent 1px)
             `,
             backgroundSize: '60px 60px',
         }} />
         {/* radial glow */}
         <div style={{
             position: 'absolute', top: '10%', left: '50%', transform: 'translateX(-50%)',
-            width: 700, height: 400, borderRadius: '50%',
-            background: `radial-gradient(ellipse, rgba(32,54,113,0.18) 0%, transparent 70%)`,
+            width: '100%', maxWidth: 700, height: 400, borderRadius: '50%',
+            background: `radial-gradient(ellipse, var(--blue-faint) 0%, transparent 70%)`,
             pointerEvents: 'none',
         }} />
 
-        {/* floating orbs */}
-        {[
-            { size: 220, top: '8%',  right: '5%',  opacity: 0.07, delay: '0s' },
-            { size: 140, top: '60%', left: '3%',   opacity: 0.05, delay: '1.5s' },
-            { size: 90,  top: '30%', right: '18%', opacity: 0.09, delay: '0.8s' },
-        ].map((orb, i) => (
-            <div key={i} style={{
-                position: 'absolute', width: orb.size, height: orb.size,
-                top: orb.top, left: orb.left, right: orb.right,
-                borderRadius: '50%',
-                background: `radial-gradient(circle, rgba(45,72,153,${orb.opacity * 2}) 0%, transparent 70%)`,
-                border: `1px solid rgba(32,54,113,${orb.opacity})`,
-                animation: `float 6s ease-in-out infinite`,
-                animationDelay: orb.delay,
-                pointerEvents: 'none',
-            }} />
-        ))}
-
         <div style={{ position: 'relative', zIndex: 1, textAlign: 'center', maxWidth: 780 }}>
             {/* badge */}
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: C.blueFaint, border: `1px solid ${C.blueBorder}`, borderRadius: 20, padding: '6px 16px', marginBottom: 28, animation: 'fadeUp 0.6s ease both' }}>
-                <HiSparkles style={{ color: C.blueLight, fontSize: 13 }} />
-                <span style={{ fontSize: 11.5, fontWeight: 700, color: C.blueLight, letterSpacing: '0.12em', textTransform: 'uppercase' }}>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'var(--blue-faint)', border: '1px solid var(--blue-border)', borderRadius: 20, padding: '6px 16px', marginBottom: 28, animation: 'fadeUp 0.6s ease both' }}>
+                <HiSparkles style={{ color: 'var(--blue-light)', fontSize: 13 }} />
+                <span style={{ fontSize: 11.5, fontWeight: 700, color: 'var(--blue-light)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>
                     Official Alumni Portal · Est. 2026
                 </span>
             </div>
@@ -150,15 +84,15 @@ const Hero = ({ user }) => (
             {/* headline */}
             <h1 style={{
                 fontFamily: "'Sora', sans-serif",
-                fontSize: 'clamp(36px, 6vw, 72px)',
-                fontWeight: 800, color: C.white,
+                fontSize: 'clamp(32px, 6vw, 68px)',
+                fontWeight: 800, color: 'var(--text-primary)',
                 lineHeight: 1.1, margin: '0 0 24px',
-                letterSpacing: '-1.5px',
+                letterSpacing: '-1.2px',
                 animation: 'fadeUp 0.7s ease 0.1s both',
             }}>
                 Where NIT Jamshedpur<br />
                 <span style={{
-                    background: `linear-gradient(135deg, #FFFFFF 0%, ${C.blueLight} 40%, #6B8FE8 100%)`,
+                    background: `linear-gradient(135deg, var(--text-primary) 0%, var(--blue-light) 40%, #6B8FE8 100%)`,
                     backgroundSize: '200% auto',
                     WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
                     animation: 'shimmer 4s linear infinite',
@@ -167,7 +101,7 @@ const Hero = ({ user }) => (
 
             {/* subtext */}
             <p style={{
-                fontSize: 17, color: C.muted, lineHeight: 1.75,
+                fontSize: 'clamp(15px, 2vw, 17px)', color: 'var(--text-secondary)', lineHeight: 1.75,
                 maxWidth: 560, margin: '0 auto 40px',
                 animation: 'fadeUp 0.7s ease 0.2s both',
             }}>
@@ -178,11 +112,11 @@ const Hero = ({ user }) => (
             <div style={{ display: 'flex', gap: 14, justifyContent: 'center', flexWrap: 'wrap', animation: 'fadeUp 0.7s ease 0.3s both' }}>
                 <Link to={user ? '/directory' : '/register'} className="primary-btn" style={{
                     display: 'inline-flex', alignItems: 'center', gap: 9,
-                    background: `linear-gradient(135deg, ${C.blueLight} 0%, ${C.blue} 100%)`,
-                    borderRadius: 10, padding: '14px 30px',
-                    color: C.white, fontSize: 14, fontWeight: 700,
+                    background: `linear-gradient(135deg, var(--blue-light) 0%, var(--blue) 100%)`,
+                    borderRadius: 10, padding: '14px 28px',
+                    color: '#fff', fontSize: 14, fontWeight: 700,
                     textDecoration: 'none', letterSpacing: '0.04em',
-                    boxShadow: `0 6px 28px rgba(32,54,113,0.5)`,
+                    boxShadow: `0 6px 28px rgba(32,54,113,0.35)`,
                 }}>
                     {user ? 'Explore Directory' : 'Join the Network'}
                     <FaArrowRight style={{ fontSize: 12 }} />
@@ -190,9 +124,9 @@ const Hero = ({ user }) => (
                 <Link to="/jobs" className="ghost-btn" style={{
                     display: 'inline-flex', alignItems: 'center', gap: 9,
                     background: 'transparent',
-                    border: `1px solid ${C.darkBorder}`,
-                    borderRadius: 10, padding: '14px 30px',
-                    color: C.white, fontSize: 14, fontWeight: 600,
+                    border: '1px solid var(--border)',
+                    borderRadius: 10, padding: '14px 28px',
+                    color: 'var(--text-primary)', fontSize: 14, fontWeight: 600,
                     textDecoration: 'none',
                 }}>
                     Browse Jobs <FaBriefcase style={{ fontSize: 12 }} />
@@ -200,11 +134,11 @@ const Hero = ({ user }) => (
             </div>
 
             {/* trust row */}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 32, marginTop: 56, flexWrap: 'wrap', animation: 'fadeUp 0.7s ease 0.45s both' }}>
-                {[['500+', 'Alumni Members'], ['50+', 'Job Postings'], ['30+', 'Events Hosted'], ['1960', 'Est. Year']].map(([num, label]) => (
-                    <div key={label} style={{ textAlign: 'center' }}>
-                        <div style={{ fontFamily: "'Sora', sans-serif", fontSize: 26, fontWeight: 800, color: C.white, lineHeight: 1 }}>{num}</div>
-                        <div style={{ fontSize: 11, color: C.muted, marginTop: 4, letterSpacing: '0.06em', textTransform: 'uppercase' }}>{label}</div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 'clamp(16px, 4vw, 32px)', marginTop: 56, flexWrap: 'wrap', animation: 'fadeUp 0.7s ease 0.45s both' }}>
+                {[['500+', 'Alumni'], ['50+', 'Jobs'], ['30+', 'Events'], ['1960', 'Est. Year']].map(([num, label]) => (
+                    <div key={label} style={{ textAlign: 'center', minWidth: 80 }}>
+                        <div style={{ fontFamily: "'Sora', sans-serif", fontSize: 24, fontWeight: 800, color: 'var(--text-primary)', lineHeight: 1 }}>{num}</div>
+                        <div style={{ fontSize: 10, color: 'var(--text-secondary)', marginTop: 4, letterSpacing: '0.06em', textTransform: 'uppercase' }}>{label}</div>
                     </div>
                 ))}
             </div>
@@ -223,34 +157,35 @@ const features = [
 ];
 
 const Features = () => (
-    <section style={{ background: C.black, padding: '80px 20px' }}>
+    <section style={{ background: 'var(--bg)', padding: '80px 20px', transition: 'background 0.3s' }}>
         <div style={{ maxWidth: 1200, margin: '0 auto' }}>
             <div style={{ textAlign: 'center', marginBottom: 56 }}>
-                <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: C.blueFaint, border: `1px solid ${C.blueBorder}`, borderRadius: 20, padding: '5px 14px', marginBottom: 18 }}>
-                    <FaGlobe style={{ color: C.blueLight, fontSize: 12 }} />
-                    <span style={{ fontSize: 11, fontWeight: 700, color: C.blueLight, letterSpacing: '0.12em', textTransform: 'uppercase' }}>Everything in One Place</span>
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'var(--blue-faint)', border: '1px solid var(--blue-border)', borderRadius: 20, padding: '5px 14px', marginBottom: 18 }}>
+                    <FaGlobe style={{ color: 'var(--blue-light)', fontSize: 12 }} />
+                    <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--blue-light)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Everything in One Place</span>
                 </div>
-                <h2 style={{ fontFamily: "'Sora', sans-serif", fontSize: 'clamp(28px, 4vw, 42px)', fontWeight: 800, color: C.white, margin: '0 0 14px', letterSpacing: '-0.6px' }}>
+                <h2 style={{ fontFamily: "'Sora', sans-serif", fontSize: 'clamp(26px, 4vw, 40px)', fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 14px', letterSpacing: '-0.6px' }}>
                     Built for the Alumni Community
                 </h2>
-                <p style={{ fontSize: 15, color: C.muted, maxWidth: 500, margin: '0 auto' }}>
+                <p style={{ fontSize: 15, color: 'var(--text-secondary)', maxWidth: 500, margin: '0 auto' }}>
                     Every feature designed to strengthen the bond between NIT Jamshedpur graduates worldwide.
                 </p>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 20 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 20 }}>
                 {features.map(f => (
                     <div key={f.title} className="feature-card" style={{
-                        background: C.darkCard, border: `1px solid ${C.darkBorder}`,
+                        background: 'var(--bg-secondary)', border: '1px solid var(--border)',
                         borderRadius: 14, padding: '26px 26px 22px',
                         cursor: 'pointer',
+                        transition: 'all 0.3s'
                     }}>
-                        <div style={{ width: 44, height: 44, borderRadius: 11, background: `linear-gradient(135deg, ${C.blue}, ${C.blueDark})`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 18, boxShadow: `0 4px 16px rgba(32,54,113,0.45)` }}>
-                            <f.icon style={{ color: C.white, fontSize: 17 }} />
+                        <div style={{ width: 44, height: 44, borderRadius: 11, background: `linear-gradient(135deg, var(--blue), var(--blue-dark))`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 18, boxShadow: `0 4px 16px rgba(32,54,113,0.3)` }}>
+                            <f.icon style={{ color: '#fff', fontSize: 17 }} />
                         </div>
-                        <h3 style={{ fontFamily: "'Sora', sans-serif", fontSize: 16, fontWeight: 700, color: C.white, margin: '0 0 10px' }}>{f.title}</h3>
-                        <p style={{ fontSize: 13, color: C.muted, lineHeight: 1.7, margin: '0 0 18px' }}>{f.desc}</p>
-                        <Link to={f.href} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 700, color: C.blueLight, textDecoration: 'none', letterSpacing: '0.04em' }}>
+                        <h3 style={{ fontFamily: "'Sora', sans-serif", fontSize: 16, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 10px' }}>{f.title}</h3>
+                        <p style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.7, margin: '0 0 18px' }}>{f.desc}</p>
+                        <Link to={f.href} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 700, color: 'var(--blue-light)', textDecoration: 'none', letterSpacing: '0.04em' }}>
                             {f.label} <FaArrowRight style={{ fontSize: 10 }} />
                         </Link>
                     </div>
@@ -262,12 +197,12 @@ const Features = () => (
 
 /* ── stats banner ────────────────────────────────────────────────────────── */
 const Stats = () => (
-    <section style={{ background: C.darkCard, borderTop: `1px solid ${C.darkBorder}`, borderBottom: `1px solid ${C.darkBorder}`, padding: '64px 20px' }}>
-        <div style={{ maxWidth: 1000, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 2 }}>
+    <section style={{ background: 'var(--bg-secondary)', borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)', padding: '64px 20px', transition: 'background 0.3s' }}>
+        <div style={{ maxWidth: 1000, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 10 }}>
             {[
                 { num: '1960', label: 'Founded', sub: 'Formerly RIT Jamshedpur' },
                 { num: '60+',  label: 'Years Legacy', sub: 'Of engineering excellence' },
-                { num: '500+', label: 'Registered Alumni', sub: 'And growing daily' },
+                { num: '500+', label: 'Alumni', sub: 'And growing daily' },
                 { num: '20+',  label: 'Departments', sub: 'Across all disciplines' },
                 { num: '100%', label: 'Free to Join', sub: 'No membership fees' },
             ].map(s => (
@@ -276,12 +211,13 @@ const Stats = () => (
                     borderRadius: 12, background: 'transparent',
                     border: '1px solid transparent',
                     cursor: 'default',
+                    transition: 'all 0.3s'
                 }}>
-                    <div style={{ fontFamily: "'Sora', sans-serif", fontSize: 36, fontWeight: 800, color: C.white, lineHeight: 1, marginBottom: 6 }}>
+                    <div style={{ fontFamily: "'Sora', sans-serif", fontSize: 32, fontWeight: 800, color: 'var(--text-primary)', lineHeight: 1, marginBottom: 6 }}>
                         {s.num}
                     </div>
-                    <div style={{ fontSize: 13, fontWeight: 700, color: C.blueLight, marginBottom: 4, letterSpacing: '0.04em' }}>{s.label}</div>
-                    <div style={{ fontSize: 11.5, color: C.muted }}>{s.sub}</div>
+                    <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--blue-light)', marginBottom: 4, letterSpacing: '0.04em' }}>{s.label}</div>
+                    <div style={{ fontSize: 11, color: 'var(--text-secondary)' }}>{s.sub}</div>
                 </div>
             ))}
         </div>
@@ -290,23 +226,19 @@ const Stats = () => (
 
 /* ── CTA strip ───────────────────────────────────────────────────────────── */
 const CTAStrip = ({ user }) => (
-    <section style={{ background: C.black, padding: '80px 20px' }}>
+    <section style={{ background: 'var(--bg)', padding: '80px 20px' }}>
         <div style={{ maxWidth: 720, margin: '0 auto', textAlign: 'center' }}>
             <div style={{
-                background: `linear-gradient(135deg, ${C.blue} 0%, ${C.blueDark} 100%)`,
+                background: `linear-gradient(135deg, var(--blue) 0%, var(--blue-dark) 100%)`,
                 borderRadius: 20, padding: '56px 48px',
                 position: 'relative', overflow: 'hidden',
-                boxShadow: `0 24px 64px rgba(32,54,113,0.4)`,
+                boxShadow: `0 24px 64px rgba(32,54,113,0.3)`,
             }}>
-                {/* decorative circles */}
-                <div style={{ position: 'absolute', right: -30, top: -30, width: 180, height: 180, borderRadius: '50%', background: 'rgba(255,255,255,0.05)' }} />
-                <div style={{ position: 'absolute', left: -20, bottom: -40, width: 140, height: 140, borderRadius: '50%', background: 'rgba(255,255,255,0.04)' }} />
-
                 <div style={{ position: 'relative', zIndex: 1 }}>
                     <div style={{ width: 56, height: 56, borderRadius: 14, background: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
-                        <FaGraduationCap style={{ color: C.white, fontSize: 24 }} />
+                        <FaGraduationCap style={{ color: '#fff', fontSize: 24 }} />
                     </div>
-                    <h2 style={{ fontFamily: "'Sora', sans-serif", fontSize: 30, fontWeight: 800, color: C.white, margin: '0 0 14px', letterSpacing: '-0.4px' }}>
+                    <h2 style={{ fontFamily: "'Sora', sans-serif", fontSize: 'clamp(24px, 5vw, 30px)', fontWeight: 800, color: '#fff', margin: '0 0 14px', letterSpacing: '-0.4px' }}>
                         {user ? 'Welcome back!' : 'Ready to reconnect?'}
                     </h2>
                     <p style={{ fontSize: 15, color: 'rgba(255,255,255,0.75)', margin: '0 0 32px', lineHeight: 1.65 }}>
@@ -318,33 +250,16 @@ const CTAStrip = ({ user }) => (
                     <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
                         <Link to={user ? '/directory' : '/register'} style={{
                             display: 'inline-flex', alignItems: 'center', gap: 8,
-                            background: C.white, borderRadius: 10, padding: '13px 28px',
-                            color: C.blue, fontSize: 13.5, fontWeight: 800,
+                            background: '#fff', borderRadius: 10, padding: '13px 28px',
+                            color: 'var(--blue)', fontSize: 13.5, fontWeight: 800,
                             textDecoration: 'none', letterSpacing: '0.03em',
                             boxShadow: '0 4px 20px rgba(0,0,0,0.25)',
                             transition: 'opacity 0.2s',
                         }}
-                            onMouseEnter={e => e.currentTarget.style.opacity = '0.9'}
-                            onMouseLeave={e => e.currentTarget.style.opacity = '1'}
                         >
                             {user ? 'Browse Directory' : 'Create Free Account'}
                             <FaArrowRight style={{ fontSize: 11 }} />
                         </Link>
-                        {!user && (
-                            <Link to="/login" style={{
-                                display: 'inline-flex', alignItems: 'center', gap: 8,
-                                background: 'transparent', border: '1px solid rgba(255,255,255,0.3)',
-                                borderRadius: 10, padding: '13px 28px',
-                                color: C.white, fontSize: 13.5, fontWeight: 600,
-                                textDecoration: 'none',
-                                transition: 'border-color 0.2s',
-                            }}
-                                onMouseEnter={e => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.6)'}
-                                onMouseLeave={e => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.3)'}
-                            >
-                                Sign In
-                            </Link>
-                        )}
                     </div>
                 </div>
             </div>
@@ -352,25 +267,16 @@ const CTAStrip = ({ user }) => (
     </section>
 );
 
-/* ── footer ──────────────────────────────────────────────────────────────── */
-const Footer = () => (
-    <footer style={{ background: C.darkCard, borderTop: `1px solid ${C.darkBorder}`, padding: '' }}>
-        
-    </footer>
-);
-
 /* ── main ────────────────────────────────────────────────────────────────── */
 const Home = () => {
     const { user } = useAuth();
 
     return (
-        <div style={{ fontFamily: "'DM Sans', sans-serif", background: C.black, color: C.white }}>
-            <Navbar user={user} />
+        <div style={{ fontFamily: "'DM Sans', sans-serif", background: 'var(--bg)', color: 'var(--text-primary)', transition: 'background 0.3s, color 0.3s' }}>
             <Hero user={user} />
             <Features />
             <Stats />
             <CTAStrip user={user} />
-            <Footer />
         </div>
     );
 };
