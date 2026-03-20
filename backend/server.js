@@ -25,8 +25,14 @@ app.use(cookieParser());
 // Static folder for uploads
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
+// Root API route
+app.get('/api', (req, res) => {
+    res.json({ message: 'Welcome to Alumni Connect API' });
+});
+
 // Routes
 app.use('/api/auth', require('./routes/auth.routes'));
+
 app.use('/api/users', require('./routes/user.routes'));
 app.use('/api/events', require('./routes/event.routes'));
 app.use('/api/jobs', require('./routes/job.routes'));
