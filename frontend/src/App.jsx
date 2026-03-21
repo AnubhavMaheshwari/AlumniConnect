@@ -6,6 +6,7 @@ import 'react-toastify/dist/ReactToastify.css';
 
 import Layout from './components/Layout';
 import ProtectedRoute from './components/ProtectedRoute';
+import ScrollToTop from './components/ScrollToTop';
 
 import Home from './pages/Home';
 import Login from './pages/Login';
@@ -25,6 +26,7 @@ function App() {
     <ThemeProvider>
       <AuthProvider>
         <Router>
+          <ScrollToTop />
           <Routes>
             <Route path="/" element={<Layout />}>
               {/* Public routes */}

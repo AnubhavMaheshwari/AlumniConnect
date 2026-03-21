@@ -7,6 +7,8 @@ import {
     FaPhone, FaBriefcase, FaIdCard
 } from 'react-icons/fa';
 import { HiSparkles } from 'react-icons/hi';
+import { auth } from '../config/firebase';
+import { RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
 
 /* ── helpers ─────────────────────────────────────────────────────────────── */
 const Avatar = ({ name }) => (
@@ -92,6 +94,7 @@ const Dashboard = () => {
     const [editData, setEditData] = useState({
         company: user?.company || '',
         yearsOfExperience: user?.yearsOfExperience || 0,
+        location: user?.location || '',
         email: user?.email || '',
         phone: user?.phone || ''
     });
@@ -109,7 +112,8 @@ const Dashboard = () => {
         try {
             const { data } = await API.put(`/users/${user._id}`, {
                 company: editData.company,
-                yearsOfExperience: editData.yearsOfExperience
+                yearsOfExperience: editData.yearsOfExperience,
+                location: editData.location
             });
             setUser(data.user);
             toast.success('Profile updated successfully');
@@ -120,27 +124,54 @@ const Dashboard = () => {
         }
     };
 
-    const initiateVerification = type => {
+    const initiateVerification = async type => {
         const val = editData[type];
         if (!val) return toast.error(`Enter a valid ${type}`);
         if (val === user[type]) return toast.info(`${type} is unchanged`);
-        toast.info('Verification code sent');
-        setOtpModal({ show: true, type, value: val, otp: '' });
+        
+        setLoading(true);
+        try {
+            if (type === 'email') {
+                await API.post('/auth/send-email-otp', { email: val });
+                toast.success('Verification code sent to email');
+                setOtpModal({ show: true, type, value: val, otp: '' });
+            } else {
+                // Phone Verification
+                if (!window.recaptchaVerifier) {
+                    window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container-dash', {
+                        'size': 'invisible'
+                    });
+                }
+                const appVerifier = window.recaptchaVerifier;
+                const confirmation = await signInWithPhoneNumber(auth, val, appVerifier);
+                setOtpModal({ show: true, type, value: val, otp: '', confirmationResult: confirmation });
+                toast.success('Verification code sent to phone');
+            }
+        } catch (err) {
+            toast.error(err.message || 'Failed to send verification code');
+        } finally {
+            setLoading(false);
+        }
     };
 
     const verifyOtp = async () => {
-        if (otpModal.otp !== '123456') return toast.error('Invalid verification code');
         setLoading(true);
         try {
-            const field = otpModal.type === 'email'
-                ? { email: otpModal.value }
-                : { phone: otpModal.value };
-            const { data } = await API.put(`/users/${user._id}`, field);
-            setUser(data.user);
-            toast.success(`${otpModal.type} updated`);
+            if (otpModal.type === 'email') {
+                await API.post('/auth/verify-email-otp', { email: otpModal.value, otp: otpModal.otp });
+                const { data } = await API.put(`/users/${user._id}`, { email: otpModal.value });
+                setUser(data.user);
+                toast.success('Email updated');
+            } else {
+                const result = await otpModal.confirmationResult.confirm(otpModal.otp);
+                const idToken = await result.user.getIdToken();
+                const { data } = await API.post('/auth/verify-phone-otp', { idToken, phone: otpModal.value });
+                setUser(data.user);
+                toast.success('Phone updated');
+            }
             setOtpModal({ show: false, type: '', value: '', otp: '' });
-        } catch {
-            toast.error('Verification failed');
+        } catch (err) {
+            toast.error(err.message || 'Verification failed');
         } finally {
             setLoading(false);
         }
@@ -269,6 +300,15 @@ const Dashboard = () => {
                                             placeholder="Years"
                                         />
                                     </FieldRow>
+                                    <FieldRow label="Location">
+                                        <InputField
+                                            icon={FaBuilding}
+                                            name="location"
+                                            value={editData.location}
+                                            onChange={handleChange}
+                                            placeholder="City, Country"
+                                        />
+                                    </FieldRow>
                                 </div>
                                 <button
                                     type="submit"
@@ -358,6 +398,7 @@ const Dashboard = () => {
                                     A one-time verification code is required for contact changes.
                                 </span>
                             </div>
+                            <div id="recaptcha-container-dash"></div>
                         </div>
 
                         <div style={{ height: 1, background: 'var(--border)', margin: '32px 0' }} />

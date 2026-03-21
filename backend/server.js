@@ -8,6 +8,34 @@ const connectDB = require('./config/db');
 // Load env vars
 dotenv.config();
 
+// Firebase Admin Initialization
+const admin = require('firebase-admin');
+const fs = require('fs');
+
+try {
+    const serviceAccountPath = path.join(__dirname, 'firebaseServiceAccount.json');
+    let serviceAccount;
+
+    if (fs.existsSync(serviceAccountPath)) {
+        serviceAccount = require(serviceAccountPath);
+        console.log('Firebase Admin: Initializing from firebaseServiceAccount.json');
+    } else if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+        serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+        console.log('Firebase Admin: Initializing from Environment Variable');
+    }
+
+    if (serviceAccount) {
+        admin.initializeApp({
+            credential: admin.credential.cert(serviceAccount)
+        });
+        console.log('Firebase Admin initialized ✅');
+    } else {
+        console.warn('⚠️ FIREBASE_SERVICE_ACCOUNT not found. Phone verification will not work.');
+    }
+} catch (error) {
+    console.error('❌ Firebase Admin initialization failed:', error.message);
+}
+
 // Connect to database
 connectDB();
 
