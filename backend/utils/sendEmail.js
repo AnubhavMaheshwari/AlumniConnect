@@ -2,7 +2,8 @@ const nodemailer = require('nodemailer');
 
 const getSmtpConfig = () => {
     const host = process.env.SMTP_HOST || process.env.EMAIL_HOST || 'smtp.gmail.com';
-    const port = Number(process.env.SMTP_PORT || process.env.EMAIL_PORT || 587);
+    const envPort = process.env.SMTP_PORT || process.env.EMAIL_PORT;
+    const port = Number(envPort || (host === 'smtp.gmail.com' ? 465 : 587));
     const user = process.env.SMTP_USER || process.env.EMAIL_USER;
     const rawPass = process.env.SMTP_PASS || process.env.EMAIL_PASS || '';
     const pass = rawPass.replace(/\s+/g, '');
@@ -25,9 +26,9 @@ const getTransporter = (config) => {
             user: config.user,
             pass: config.pass
         },
-        connectionTimeout: 15000,
-        greetingTimeout: 15000,
-        socketTimeout: 20000
+        connectionTimeout: 60000,
+        greetingTimeout: 30000,
+        socketTimeout: 60000
     });
 };
 
