@@ -1,54 +1,96 @@
-const nodemailer = require('nodemailer');
+const https = require('https');
 
-const getSmtpConfig = () => {
-    const host = process.env.SMTP_HOST || process.env.EMAIL_HOST || 'smtp.gmail.com';
-    const envPort = process.env.SMTP_PORT || process.env.EMAIL_PORT;
-    const port = Number(envPort || (host === 'smtp.gmail.com' ? 465 : 587));
-    const user = process.env.SMTP_USER || process.env.EMAIL_USER;
-    const rawPass = process.env.SMTP_PASS || process.env.EMAIL_PASS || '';
-    const pass = rawPass.replace(/\s+/g, '');
-    const from = process.env.SMTP_FROM || process.env.EMAIL_FROM || `"Alumni Connect" <${user}>`;
-    const secure = port === 465;
+const parseEmailFrom = (value) => {
+    if (!value) {
+        return {};
+    }
 
-    return { host, port, user, pass, from, secure };
+    const match = value.match(/^(.*)<(.+)>$/);
+    if (!match) {
+        return { email: value.trim() };
+    }
+
+    return {
+        name: match[1].replace(/"/g, '').trim(),
+        email: match[2].trim()
+    };
+};
+
+const getBrevoConfig = () => {
+    const apiKey = (
+        process.env.BREVO_API_KEY ||
+        process.env.BREVO_API ||
+        process.env.BREVO_KEY ||
+        process.env.BREVO_APIKEY ||
+        ''
+    ).trim();
+    const parsedFrom = parseEmailFrom(process.env.EMAIL_FROM || process.env.SMTP_FROM);
+
+    const senderEmail = process.env.BREVO_SENDER_EMAIL || parsedFrom.email;
+    const senderName = process.env.BREVO_SENDER_NAME || parsedFrom.name || 'Alumni Connect';
+
+    return { apiKey, senderEmail, senderName };
 };
 
 const sendEmail = async (options) => {
-    const config = getSmtpConfig();
-    if (!config.user || !config.pass) {
-        throw new Error('SMTP credentials missing. Set SMTP_USER/SMTP_PASS (or EMAIL_USER/EMAIL_PASS).');
+    const { apiKey, senderEmail, senderName } = getBrevoConfig();
+
+    if (!apiKey) {
+        throw new Error('Brevo API key is missing. Set BREVO_API_KEY (or BREVO_API/BREVO_KEY).');
+    }
+    if (!senderEmail) {
+        throw new Error('BREVO_SENDER_EMAIL is missing. Set it in environment variables.');
     }
 
-    const transporter = nodemailer.createTransport({
-        host: config.host,
-        port: config.port,
-        secure: config.secure,
-        auth: {
-            user: config.user,
-            pass: config.pass
-        },
-        connectionTimeout: 60000,
-        greetingTimeout: 30000,
-        socketTimeout: 60000
+    const payload = JSON.stringify({
+        sender: { name: senderName, email: senderEmail },
+        to: [{ email: options.email }],
+        subject: options.subject,
+        htmlContent: options.html
     });
 
-    try {
-        return await transporter.sendMail({
-            from: config.from,
-            to: options.email,
-            subject: options.subject,
-            html: options.html
+    const result = await new Promise((resolve, reject) => {
+        const req = https.request(
+            'https://api.brevo.com/v3/smtp/email',
+            {
+                method: 'POST',
+                headers: {
+                    accept: 'application/json',
+                    'content-type': 'application/json',
+                    'api-key': apiKey,
+                    'content-length': Buffer.byteLength(payload)
+                },
+                timeout: 20000
+            },
+            (res) => {
+                let body = '';
+                res.on('data', (chunk) => {
+                    body += chunk;
+                });
+                res.on('end', () => {
+                    const status = res.statusCode || 500;
+                    if (status >= 200 && status < 300) {
+                        try {
+                            resolve(body ? JSON.parse(body) : { ok: true });
+                        } catch {
+                            resolve({ ok: true, raw: body });
+                        }
+                    } else {
+                        reject(new Error(`Brevo send failed (${status}): ${body}`));
+                    }
+                });
+            }
+        );
+
+        req.on('timeout', () => {
+            req.destroy(new Error('Brevo request timed out.'));
         });
-    } catch (error) {
-        console.error('[SMTP] Email send failed', {
-            host: config.host,
-            port: config.port,
-            secure: config.secure,
-            code: error.code,
-            response: error.response
-        });
-        throw error;
-    }
+        req.on('error', reject);
+        req.write(payload);
+        req.end();
+    });
+
+    return result;
 };
 
 module.exports = sendEmail;
