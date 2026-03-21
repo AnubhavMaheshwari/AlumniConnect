@@ -95,3 +95,53 @@ exports.deleteUser = async (req, res) => {
         res.status(500).json({ success: false, message: error.message });
     }
 };
+
+const cloudinary = require('../config/cloudinary');
+
+// @desc    Upload profile photo
+// @route   PUT /api/users/:id/profile-photo
+exports.uploadProfilePhoto = async (req, res) => {
+    try {
+        if (req.params.id !== req.user.id && req.user.role !== 'admin') {
+            return res.status(403).json({ success: false, message: 'Not authorized to update this profile' });
+        }
+
+        let result;
+
+        if (req.file) {
+            // Option 1: File via Multer (Memory Buffer)
+            result = await new Promise((resolve, reject) => {
+                const uploadStream = cloudinary.uploader.upload_stream(
+                    { folder: 'alumni_connect/profiles', width: 400, height: 400, crop: 'fill' },
+                    (error, result) => {
+                        if (error) return reject(error);
+                        resolve(result);
+                    }
+                );
+                uploadStream.end(req.file.buffer);
+            });
+        } else if (req.body.image) {
+            // Option 2: Base64 string from Camera snapshot
+            result = await cloudinary.uploader.upload(req.body.image, {
+                folder: 'alumni_connect/profiles',
+                width: 400,
+                height: 400,
+                crop: 'fill'
+            });
+        } else {
+            return res.status(400).json({ success: false, message: 'No image provided' });
+        }
+
+        // Update user record
+        const user = await User.findByIdAndUpdate(
+            req.params.id,
+            { profileImage: result.secure_url },
+            { new: true, runValidators: true }
+        ).select('-password');
+
+        res.json({ success: true, profileImage: user.profileImage, user });
+    } catch (error) {
+        console.error('Profile Upload Error:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+};

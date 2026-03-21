@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import API from '../services/api';
+import { useAuth } from '../context/AuthContext';
+import PhotoUploadModal from '../components/PhotoUploadModal';
 import {
     FaEnvelope, FaPhone, FaLinkedin, FaMapMarkerAlt,
-    FaBuilding, FaGraduationCap, FaArrowLeft, FaBriefcase,
+    FaBuilding, FaGraduationCap, FaArrowLeft, FaBriefcase, FaCamera,
 } from 'react-icons/fa';
 import { HiSparkles } from 'react-icons/hi';
 import useIsMobile from '../hooks/useIsMobile';
@@ -32,8 +34,10 @@ const DetailRow = ({ icon: Icon, children, href }) => {
 
 const Profile = () => {
     const { id } = useParams();
+    const { user, setUser } = useAuth();
     const [profile, setProfile] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
     const isMobile = useIsMobile();
 
     useEffect(() => { fetchProfile(); }, [id]);
@@ -63,10 +67,27 @@ const Profile = () => {
     );
 
     const initials = profile.name?.slice(0, 2).toUpperCase() || '??';
+    const isOwnProfile = user && profile && user._id === profile._id;
+
+    const handleUploadSuccess = (newImageUrl) => {
+        setProfile((prev) => ({ ...prev, profileImage: newImageUrl }));
+        if (isOwnProfile) {
+            const updatedUser = { ...user, profileImage: newImageUrl };
+            setUser(updatedUser);
+            localStorage.setItem('user', JSON.stringify(updatedUser));
+        }
+    };
 
     return (
         <div style={{ minHeight: '100vh', background: 'var(--bg)', padding: isMobile ? '32px 16px 56px' : '48px 20px 72px', fontFamily: "'DM Sans', sans-serif", color: 'var(--text-primary)', transition: 'background 0.3s, color 0.3s' }}>
             <div style={{ maxWidth: 860, margin: '0 auto' }}>
+                <PhotoUploadModal 
+                    isOpen={isUploadModalOpen} 
+                    onClose={() => setIsUploadModalOpen(false)} 
+                    userId={profile._id}
+                    onUploadSuccess={handleUploadSuccess}
+                />
+
 
                 {/* back link */}
                 <Link to="/directory" style={{
@@ -96,9 +117,31 @@ const Profile = () => {
                         <div style={{ position: 'absolute', right: 80, bottom: -60, width: 130, height: 130, borderRadius: '50%', background: 'rgba(255,255,255,0.03)' }} />
 
                         {/* avatar */}
-                        <div style={{ width: isMobile ? 64 : 80, height: isMobile ? 64 : 80, borderRadius: '50%', flexShrink: 0, background: 'rgba(255,255,255,0.15)', border: '3px solid rgba(255,255,255,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Sora', sans-serif", fontSize: isMobile ? 22 : 28, fontWeight: 800, color: '#fff', boxShadow: '0 4px 20px rgba(0,0,0,0.3)', zIndex: 1 }}>
-                            {initials}
+                        <div 
+                            onClick={() => isOwnProfile && setIsUploadModalOpen(true)}
+                            className="profile-avatar-container"
+                            style={{ 
+                                width: isMobile ? 64 : 80, height: isMobile ? 64 : 80, borderRadius: '50%', flexShrink: 0, 
+                                background: 'rgba(255,255,255,0.15)', border: '3px solid rgba(255,255,255,0.3)', 
+                                display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Sora', sans-serif", 
+                                fontSize: isMobile ? 22 : 28, fontWeight: 800, color: '#fff', boxShadow: '0 4px 20px rgba(0,0,0,0.3)', 
+                                zIndex: 1, position: 'relative', overflow: 'hidden', cursor: isOwnProfile ? 'pointer' : 'default',
+                                backgroundImage: profile.profileImage ? `url(${profile.profileImage})` : 'none',
+                                backgroundSize: 'cover', backgroundPosition: 'center'
+                            }}
+                        >
+                            {!profile.profileImage && initials}
+                            {isOwnProfile && (
+                                <div className="profile-camera-overlay" style={{
+                                    position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0, transition: 'opacity 0.2s'
+                                }}>
+                                    <FaCamera style={{ fontSize: 20, color: '#fff' }} />
+                                </div>
+                            )}
                         </div>
+                        <style>{`
+                            .profile-avatar-container:hover .profile-camera-overlay { opacity: 1 !important; }
+                        `}</style>
 
                         <div style={{ zIndex: 1 }}>
                             <p style={{ fontFamily: "'Sora', sans-serif", fontSize: isMobile ? 20 : 24, fontWeight: 800, color: '#fff', margin: '0 0 6px', letterSpacing: '-0.3px' }}>{profile.name}</p>
