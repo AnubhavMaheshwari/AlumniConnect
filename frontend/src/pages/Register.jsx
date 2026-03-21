@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'react-toastify';
 import { FaGraduationCap, FaUser, FaEnvelope, FaLock, FaBuilding, FaCalendarAlt, FaArrowRight, FaPhone, FaBriefcase, FaEye, FaEyeSlash, FaCheckCircle, FaMapMarkerAlt } from 'react-icons/fa';
@@ -9,10 +10,10 @@ import { RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
 import API from '../services/api';
 
 const C = {
-    blue: '#203671', blueDark: '#182858', blueLight: '#2D4899',
-    blueFaint: 'rgba(32,54,113,0.12)', blueBorder: 'rgba(32,54,113,0.35)',
-    white: '#FFFFFF', muted: '#8A94A8', black: '#000000',
-    darkBg: '#0C0E14', darkCard: '#12151F', darkBorder: '#1E2235',
+    blue: 'var(--blue)', blueDark: 'var(--blue-dark)', blueLight: 'var(--blue-light)',
+    blueFaint: 'var(--blue-faint)', blueBorder: 'var(--blue-border)',
+    white: 'var(--text-primary)', muted: 'var(--text-secondary)', black: 'var(--bg)',
+    darkBg: 'var(--bg)', darkCard: 'var(--card-bg)', darkBorder: 'var(--border)',
 };
 
 if (typeof document !== 'undefined' && !document.getElementById('reg-fonts')) {
@@ -96,6 +97,8 @@ const departments = [
 ];
 
 const Register = () => {
+    const { isDark } = useTheme();
+    const { register } = useAuth();
     const [formData, setFormData] = useState({
         name: '', email: '', password: '', confirmPassword: '',
         graduationYear: '', department: '', phone: '', company: '',
@@ -112,7 +115,6 @@ const Register = () => {
     const [confirmationResult, setConfirmationResult] = useState(null);
     const [isPhoneVerified, setIsPhoneVerified] = useState(false);
 
-    const { register } = useAuth();
     const navigate = useNavigate();
     const isMobile = useIsMobile();
 
@@ -212,9 +214,14 @@ const Register = () => {
             fontFamily: "'DM Sans', sans-serif", position: 'relative', overflow: 'hidden',
         }}>
             {/* background decorations */}
-            <div style={{ position: 'absolute', inset: 0, backgroundImage: `linear-gradient(rgba(32,54,113,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(32,54,113,0.05) 1px, transparent 1px)`, backgroundSize: '60px 60px', pointerEvents: 'none' }} />
-            <div style={{ position: 'absolute', top: '10%', right: '15%', width: 300, height: 300, borderRadius: '50%', background: `radial-gradient(circle, rgba(32,54,113,0.14) 0%, transparent 70%)`, pointerEvents: 'none' }} />
-            <div style={{ position: 'absolute', bottom: '8%', left: '12%', width: 240, height: 240, borderRadius: '50%', background: `radial-gradient(circle, rgba(45,72,153,0.1) 0%, transparent 70%)`, pointerEvents: 'none' }} />
+            <div style={{ 
+                position: 'absolute', inset: 0, 
+                backgroundImage: `linear-gradient(${isDark ? 'rgba(32,54,113,0.05)' : 'rgba(32,54,113,0.03)'} 1px, transparent 1px), 
+                                 linear-gradient(90deg, ${isDark ? 'rgba(32,54,113,0.05)' : 'rgba(32,54,113,0.03)'} 1px, transparent 1px)`, 
+                backgroundSize: '60px 60px', pointerEvents: 'none' 
+            }} />
+            <div style={{ position: 'absolute', top: '10%', right: '15%', width: 300, height: 300, borderRadius: '50%', background: `radial-gradient(circle, ${isDark ? 'rgba(32,54,113,0.14)' : 'rgba(32,54,113,0.08)'} 0%, transparent 70%)`, pointerEvents: 'none' }} />
+            <div style={{ position: 'absolute', bottom: '8%', left: '12%', width: 240, height: 240, borderRadius: '50%', background: `radial-gradient(circle, ${isDark ? 'rgba(45,72,153,0.1)' : 'rgba(45,72,153,0.05)'} 0%, transparent 70%)`, pointerEvents: 'none' }} />
 
             <div style={{ width: '100%', maxWidth: 560, position: 'relative', zIndex: 1, animation: 'fadeUp 0.6s ease both' }}>
 
@@ -230,7 +237,7 @@ const Register = () => {
                 </div>
 
                 {/* card */}
-                <div style={{ background: C.darkCard, border: `1px solid ${C.darkBorder}`, borderRadius: 18, padding: pad, boxShadow: '0 24px 64px rgba(0,0,0,0.6)' }}>
+                <div style={{ background: C.darkCard, border: `1px solid ${C.darkBorder}`, borderRadius: 18, padding: pad, boxShadow: 'var(--card-shadow)' }}>
                     <div style={{ height: 3, background: `linear-gradient(90deg, ${C.blue}, ${C.blueLight})`, borderRadius: '4px 4px 0 0', margin: isMobile ? '-24px -24px 26px' : '-32px -32px 30px' }} />
 
                     <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
