@@ -15,7 +15,13 @@ const parseEmailFrom = (value) => {
 };
 
 const getBrevoConfig = () => {
-    const apiKey = process.env.BREVO_API_KEY;
+    const apiKey = (
+        process.env.BREVO_API_KEY ||
+        process.env.BREVO_API ||
+        process.env.BREVO_KEY ||
+        process.env.BREVO_APIKEY ||
+        ''
+    ).trim();
     const parsedFrom = parseEmailFrom(process.env.EMAIL_FROM || process.env.SMTP_FROM);
 
     const senderEmail = process.env.BREVO_SENDER_EMAIL || parsedFrom.email;
@@ -28,7 +34,7 @@ const sendEmail = async (options) => {
     const { apiKey, senderEmail, senderName } = getBrevoConfig();
 
     if (!apiKey) {
-        throw new Error('BREVO_API_KEY is missing. Set it in environment variables.');
+        throw new Error('Brevo API key is missing. Set BREVO_API_KEY (or BREVO_API/BREVO_KEY).');
     }
     if (!senderEmail) {
         throw new Error('BREVO_SENDER_EMAIL is missing. Set it in environment variables.');
