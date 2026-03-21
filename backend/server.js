@@ -25,6 +25,11 @@ try {
     }
 
     if (serviceAccount) {
+        // Fix for private_key formatting issues (literal \n vs actual newlines)
+        if (serviceAccount.private_key) {
+            serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, '\n');
+        }
+
         admin.initializeApp({
             credential: admin.credential.cert(serviceAccount)
         });
@@ -44,10 +49,18 @@ const app = express();
 // Middleware
 app.use(cors({
     origin: (origin, callback) => {
-        const allowedOrigins = [process.env.CLIENT_URL || 'http://localhost:5173', 'http://localhost:5174'];
-        if (!origin || allowedOrigins.indexOf(origin) !== -1 || origin.startsWith('http://localhost:')) {
+        const allowedOrigins = ['http://localhost:5173', 'http://localhost:5174'];
+        
+        // Add CLIENT_URL from env if it exists
+        if (process.env.CLIENT_URL) {
+            const extraOrigins = process.env.CLIENT_URL.split(',').map(o => o.trim());
+            allowedOrigins.push(...extraOrigins);
+        }
+
+        if (!origin || allowedOrigins.includes(origin) || origin.startsWith('http://localhost:')) {
             callback(null, true);
         } else {
+            console.warn(`Denied origin by CORS: ${origin}`);
             callback(new Error('Not allowed by CORS'));
         }
     },
