@@ -8,13 +8,24 @@ const admin = require('firebase-admin');
 // @route   POST /api/auth/send-email-otp
 exports.sendEmailOTP = async (req, res) => {
     try {
-        const { email } = req.body;
+        const { email } = req.body || {};
+        const normalizedEmail = (email || '').trim().toLowerCase();
+
+        if (!normalizedEmail) {
+            return res.status(400).json({ success: false, message: 'Email is required' });
+        }
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(normalizedEmail)) {
+            return res.status(400).json({ success: false, message: 'Please provide a valid email address' });
+        }
+
         const otp = generateOTP();
         const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
         // Store or update OTP in Verification collection
         await Verification.findOneAndUpdate(
-            { identifier: email },
+            { identifier: normalizedEmail },
             { otp, expiresAt },
             { upsert: true, new: true }
         );
@@ -35,7 +46,7 @@ exports.sendEmailOTP = async (req, res) => {
         `;
 
         await sendEmail({
-            email,
+            email: normalizedEmail,
             subject: 'Email Verification - Alumni Connect',
             html
         });
