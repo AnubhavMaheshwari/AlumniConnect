@@ -1,29 +1,69 @@
 const nodemailer = require('nodemailer');
 
-const sendEmail = async (options) => {
-    // Automatically fix common mistakes with App Passwords (removing spaces)
-    const emailPass = process.env.EMAIL_PASS ? process.env.EMAIL_PASS.replace(/\s+/g, '') : '';
+let transporter;
 
-    const port = parseInt(process.env.EMAIL_PORT) || 465;
+const getSmtpConfig = () => {
+    const host = process.env.SMTP_HOST || process.env.EMAIL_HOST || 'smtp.gmail.com';
+    const port = Number(process.env.SMTP_PORT || process.env.EMAIL_PORT || 587);
+    const user = process.env.SMTP_USER || process.env.EMAIL_USER;
+    const rawPass = process.env.SMTP_PASS || process.env.EMAIL_PASS || '';
+    const pass = rawPass.replace(/\s+/g, '');
+    const from = process.env.SMTP_FROM || process.env.EMAIL_FROM || `"Alumni Connect" <${user}>`;
+    const secure = port === 465;
 
-    const transporter = nodemailer.createTransport({
-        host: process.env.EMAIL_HOST || 'smtp.gmail.com',
-        port: port,
-        secure: port === 465, // Must be true for 465, false for 587/25
+    return { host, port, user, pass, from, secure };
+};
+
+const getTransporter = () => {
+    if (transporter) {
+        return transporter;
+    }
+
+    const config = getSmtpConfig();
+    if (!config.user || !config.pass) {
+        throw new Error('SMTP credentials missing. Set SMTP_USER/SMTP_PASS (or EMAIL_USER/EMAIL_PASS).');
+    }
+
+    transporter = nodemailer.createTransport({
+        host: config.host,
+        port: config.port,
+        secure: config.secure,
         auth: {
-            user: process.env.EMAIL_USER,
-            pass: emailPass
-        }
+            user: config.user,
+            pass: config.pass
+        },
+        connectionTimeout: 15000,
+        greetingTimeout: 15000,
+        socketTimeout: 20000
     });
 
+    return transporter;
+};
+
+const sendEmail = async (options) => {
+    const config = getSmtpConfig();
+    const smtpTransporter = getTransporter();
+
     const mailOptions = {
-        from: `"Alumni Connect" <${process.env.EMAIL_USER}>`,
+        from: config.from,
         to: options.email,
         subject: options.subject,
         html: options.html
     };
 
-    await transporter.sendMail(mailOptions);
+    try {
+        const info = await smtpTransporter.sendMail(mailOptions);
+        return info;
+    } catch (error) {
+        console.error('[SMTP] Email send failed', {
+            host: config.host,
+            port: config.port,
+            secure: config.secure,
+            code: error.code,
+            response: error.response
+        });
+        throw error;
+    }
 };
 
 module.exports = sendEmail;
