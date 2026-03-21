@@ -1,54 +1,64 @@
-const nodemailer = require('nodemailer');
+const parseEmailFrom = (value) => {
+    if (!value) {
+        return {};
+    }
 
-const getSmtpConfig = () => {
-    const host = process.env.SMTP_HOST || process.env.EMAIL_HOST || 'smtp.gmail.com';
-    const envPort = process.env.SMTP_PORT || process.env.EMAIL_PORT;
-    const port = Number(envPort || (host === 'smtp.gmail.com' ? 465 : 587));
-    const user = process.env.SMTP_USER || process.env.EMAIL_USER;
-    const rawPass = process.env.SMTP_PASS || process.env.EMAIL_PASS || '';
-    const pass = rawPass.replace(/\s+/g, '');
-    const from = process.env.SMTP_FROM || process.env.EMAIL_FROM || `"Alumni Connect" <${user}>`;
-    const secure = port === 465;
+    const match = value.match(/^(.*)<(.+)>$/);
+    if (!match) {
+        return { email: value.trim() };
+    }
 
-    return { host, port, user, pass, from, secure };
+    return {
+        name: match[1].replace(/"/g, '').trim(),
+        email: match[2].trim()
+    };
+};
+
+const getBrevoConfig = () => {
+    const apiKey = process.env.BREVO_API_KEY;
+    const parsedFrom = parseEmailFrom(process.env.EMAIL_FROM || process.env.SMTP_FROM);
+
+    const senderEmail = process.env.BREVO_SENDER_EMAIL || parsedFrom.email;
+    const senderName = process.env.BREVO_SENDER_NAME || parsedFrom.name || 'Alumni Connect';
+
+    return { apiKey, senderEmail, senderName };
 };
 
 const sendEmail = async (options) => {
-    const config = getSmtpConfig();
-    if (!config.user || !config.pass) {
-        throw new Error('SMTP credentials missing. Set SMTP_USER/SMTP_PASS (or EMAIL_USER/EMAIL_PASS).');
+    const { apiKey, senderEmail, senderName } = getBrevoConfig();
+
+    if (!apiKey) {
+        throw new Error('BREVO_API_KEY is missing. Set it in environment variables.');
+    }
+    if (!senderEmail) {
+        throw new Error('BREVO_SENDER_EMAIL is missing. Set it in environment variables.');
     }
 
-    const transporter = nodemailer.createTransport({
-        host: config.host,
-        port: config.port,
-        secure: config.secure,
-        auth: {
-            user: config.user,
-            pass: config.pass
+    const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+        method: 'POST',
+        headers: {
+            accept: 'application/json',
+            'content-type': 'application/json',
+            'api-key': apiKey
         },
-        connectionTimeout: 60000,
-        greetingTimeout: 30000,
-        socketTimeout: 60000
+        body: JSON.stringify({
+            sender: { name: senderName, email: senderEmail },
+            to: [{ email: options.email }],
+            subject: options.subject,
+            htmlContent: options.html
+        })
     });
 
-    try {
-        return await transporter.sendMail({
-            from: config.from,
-            to: options.email,
-            subject: options.subject,
-            html: options.html
+    if (!response.ok) {
+        const errorText = await response.text();
+        console.error('[Brevo] Email send failed', {
+            status: response.status,
+            body: errorText
         });
-    } catch (error) {
-        console.error('[SMTP] Email send failed', {
-            host: config.host,
-            port: config.port,
-            secure: config.secure,
-            code: error.code,
-            response: error.response
-        });
-        throw error;
+        throw new Error(`Brevo send failed (${response.status}).`);
     }
+
+    return response.json();
 };
 
 module.exports = sendEmail;
