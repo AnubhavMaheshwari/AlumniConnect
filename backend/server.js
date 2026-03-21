@@ -53,11 +53,18 @@ app.use(cors({
         
         // Add CLIENT_URL from env if it exists
         if (process.env.CLIENT_URL) {
-            const extraOrigins = process.env.CLIENT_URL.split(',').map(o => o.trim());
+            // Remove trailing slashes from defined URLs just in case
+            const extraOrigins = process.env.CLIENT_URL.split(',').map(o => o.trim().replace(/\/$/, ''));
             allowedOrigins.push(...extraOrigins);
         }
 
-        if (!origin || allowedOrigins.includes(origin) || origin.startsWith('http://localhost:')) {
+        // Allow localhost, specified origins, and any Vercel preview/production deployments automatically
+        if (
+            !origin || 
+            allowedOrigins.includes(origin) || 
+            origin.startsWith('http://localhost:') ||
+            origin.endsWith('.vercel.app')
+        ) {
             callback(null, true);
         } else {
             console.warn(`Denied origin by CORS: ${origin}`);
