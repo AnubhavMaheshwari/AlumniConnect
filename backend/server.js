@@ -49,27 +49,43 @@ const app = express();
 // Middleware
 app.use(cors({
     origin: (origin, callback) => {
-        const allowedOrigins = ['http://localhost:5173', 'http://localhost:5174'];
-        
-        // Add CLIENT_URL from env if it exists
-        if (process.env.CLIENT_URL) {
-            // Remove trailing slashes from defined URLs just in case
-            const extraOrigins = process.env.CLIENT_URL.split(',').map(o => o.trim().replace(/\/$/, ''));
-            allowedOrigins.push(...extraOrigins);
+        // Non-browser requests (like health checks/postman) may not send origin.
+        if (!origin) {
+            return callback(null, true);
         }
 
-        // Allow localhost, specified origins, and any Vercel preview/production deployments automatically
-        if (
-            !origin || 
-            allowedOrigins.includes(origin) || 
-            origin.startsWith('http://localhost:') ||
-            origin.endsWith('.vercel.app')
-        ) {
-            callback(null, true);
-        } else {
-            console.warn(`Denied origin by CORS: ${origin}`);
-            callback(new Error('Not allowed by CORS'));
+        const normalize = (value) => value.trim().replace(/\/$/, '');
+        const allowedOrigins = new Set(['http://localhost:5173', 'http://localhost:5174']);
+
+        if (process.env.CLIENT_URL) {
+            const extraOrigins = process.env.CLIENT_URL
+                .split(',')
+                .map(normalize)
+                .filter(Boolean);
+            extraOrigins.forEach((o) => allowedOrigins.add(o));
         }
+
+        const normalizedOrigin = normalize(origin);
+        let hostname = '';
+        try {
+            hostname = new URL(normalizedOrigin).hostname;
+        } catch (e) {
+            console.warn(`Invalid origin format blocked by CORS: ${origin}`);
+            return callback(new Error('Not allowed by CORS'));
+        }
+
+        const isAllowed =
+            allowedOrigins.has(normalizedOrigin) ||
+            hostname === 'localhost' ||
+            hostname === '127.0.0.1' ||
+            hostname.endsWith('.vercel.app');
+
+        if (isAllowed) {
+            return callback(null, true);
+        }
+
+        console.warn(`Denied origin by CORS: ${origin}`);
+        return callback(new Error('Not allowed by CORS'));
     },
     credentials: true
 }));
