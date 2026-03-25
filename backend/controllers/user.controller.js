@@ -62,7 +62,7 @@ exports.getUser = async (req, res) => {
 // @route   PUT /api/users/:id
 exports.updateUser = async (req, res) => {
     try {
-        const { name, bio, graduationYear, department, linkedin, phone, skills, currentPosition, company, location } = req.body;
+        const { name, bio, graduationYear, department, linkedin, phone, skills, currentPosition, company, location, country, zipCode } = req.body;
 
         // Only allow user to update their own profile
         if (req.params.id !== req.user.id && req.user.role !== 'admin') {
@@ -71,7 +71,7 @@ exports.updateUser = async (req, res) => {
 
         const user = await User.findByIdAndUpdate(
             req.params.id,
-            { name, bio, graduationYear, department, linkedin, phone, skills, currentPosition, company, location },
+            { name, bio, graduationYear, department, linkedin, phone, skills, currentPosition, company, location, country, zipCode },
             { new: true, runValidators: true }
         ).select('-password');
 

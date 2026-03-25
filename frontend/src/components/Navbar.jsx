@@ -7,6 +7,8 @@ import {
     FaGraduationCap, FaBell, FaSignOutAlt,
     FaTachometerAlt, FaUserShield,
 } from 'react-icons/fa';
+import API from '../services/api';
+import { formatDistanceToNow } from 'date-fns';
 
 /* ── global styles (injected once) ──────────────────────────────────────── */
 if (typeof document !== 'undefined' && !document.getElementById('nav-styles')) {
@@ -90,14 +92,35 @@ const Navbar = () => {
     const [isOpen,  setIsOpen]  = useState(false);
     const [showBell, setShowBell] = useState(false);
     const [showUser, setShowUser] = useState(false);
+    const [showAllNotifications, setShowAllNotifications] = useState(false);
     const bellRef = useRef(null);
     const userRef = useRef(null);
+    const [activities, setActivities] = useState([]);
 
-    const activities = [
-        { id: 1, text: 'You updated your profile information.', time: 'Just now'    },
-        { id: 2, text: 'Logged in from a new device.',          time: '2 hours ago' },
-        { id: 3, text: 'Welcome to the Alumni Portal!',         time: '1 day ago'   },
-    ];
+    useEffect(() => {
+        if (user) {
+            fetchActivities();
+        }
+    }, [user, location.pathname]);
+
+    const fetchActivities = async () => {
+        try {
+            const { data } = await API.get('/activity');
+            if (data.success) {
+                setActivities(data.activities);
+            }
+        } catch (error) {
+            console.error('Error fetching activities:', error);
+        }
+    };
+
+    const formatTime = (date) => {
+        try {
+            return formatDistanceToNow(new Date(date), { addSuffix: true });
+        } catch (err) {
+            return 'Just now';
+        }
+    };
 
     /* close dropdowns on outside click */
     useEffect(() => {
@@ -114,10 +137,14 @@ const Navbar = () => {
 
     const handleLogout = () => { logout(); navigate('/'); setIsOpen(false); };
 
+    useEffect(() => {
+        if (!showBell) setShowAllNotifications(false);
+    }, [showBell]);
+
     const publicLinks = [
         { name: 'Home',    path: '/' },
         { name: 'FAQ',     path: '/faq' },
-        { name: 'Contact', path: '/contact' },
+        { name: 'Contact Us', path: '/contact' },
     ];
     const authLinks = [
         { name: 'Home',      path: '/' },
@@ -127,7 +154,7 @@ const Navbar = () => {
         { name: 'Jobs',      path: '/jobs' },
         { name: 'News',      path: '/news' },
         { name: 'FAQ',       path: '/faq' },
-        { name: 'Contact',   path: '/contact' },
+        { name: 'Contact Us',   path: '/contact' },
         ...(user?.role === 'admin' ? [{ name: 'Admin', path: '/admin' }] : []),
     ];
     const navLinks = user ? authLinks : publicLinks;
@@ -216,12 +243,31 @@ const Navbar = () => {
                                         <span style={{ fontFamily: "'Sora', sans-serif", fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>Activity</span>
                                         <span style={{ background: 'var(--blue-faint)', border: '1px solid var(--blue-border)', borderRadius: 20, padding: '2px 8px', fontSize: 10, fontWeight: 700, color: 'var(--blue-light)' }}>{activities.length}</span>
                                     </div>
-                                    {activities.map(a => (
-                                        <div key={a.id} className="ni" style={{ padding: '11px 16px', borderBottom: '1px solid var(--border)' }}>
-                                            <p style={{ fontSize: 12.5, color: 'var(--text-secondary)', margin: '0 0 3px', lineHeight: 1.5 }}>{a.text}</p>
-                                            <p style={{ fontSize: 10.5, color: 'var(--text-muted)', margin: 0, fontWeight: 600 }}>{a.time}</p>
-                                        </div>
-                                    ))}
+                                    <div style={{ maxHeight: 'calc(100vh - 200px)', overflowY: 'auto' }}>
+                                        {activities.length === 0 ? (
+                                            <div style={{ padding: '20px', textAlign: 'center', color: 'var(--text-muted)', fontSize: 13 }}>
+                                                No recent activity
+                                            </div>
+                                        ) : (
+                                            (showAllNotifications ? activities : activities.slice(0, 3)).map(a => (
+                                                <div key={a._id} className="ni" style={{ padding: '11px 16px', borderBottom: '1px solid var(--border)' }}>
+                                                    <p style={{ fontSize: 12.5, color: 'var(--text-secondary)', margin: '0 0 3px', lineHeight: 1.5 }}>{a.text}</p>
+                                                    <p style={{ fontSize: 10.5, color: 'var(--text-muted)', margin: 0, fontWeight: 600 }}>{formatTime(a.createdAt)}</p>
+                                                </div>
+                                            ))
+                                        )}
+                                    </div>
+                                    {activities.length > 3 && (
+                                        <Link 
+                                            to="/notifications"
+                                            onClick={() => setShowBell(false)}
+                                            style={{ display: 'block', textAlign: 'center', width: '100%', padding: '12px 0', background: 'transparent', border: 'none', color: 'var(--blue-light)', fontSize: 12, fontWeight: 700, cursor: 'pointer', transition: 'background 0.2s', fontFamily: "'DM Sans', sans-serif", textDecoration: 'none' }}
+                                            onMouseEnter={e => e.currentTarget.style.background = 'var(--blue-faint)'}
+                                            onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                                        >
+                                            View All Notifications
+                                        </Link>
+                                    )}
                                 </div>
                             )}
                         </div>
@@ -250,7 +296,7 @@ const Navbar = () => {
                                 <div style={{ 
                                     width: 28, height: 28, borderRadius: '50%', background: `linear-gradient(135deg, var(--blue-light), var(--blue-dark))`, 
                                     display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Sora', sans-serif", fontSize: 11, 
-                                    fontWeight: 800, color: '#fff', flexShrink: 0,
+                                    fontWeight: 800, color: '#FFFFFF', flexShrink: 0,
                                     backgroundImage: user.profileImage ? `url('${user.profileImage}')` : 'none',
                                     backgroundSize: 'cover', backgroundPosition: 'center'
                                 }}>
@@ -333,12 +379,31 @@ const Navbar = () => {
                                         <span style={{ fontFamily: "'Sora', sans-serif", fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>Activity</span>
                                         <span style={{ background: 'var(--blue-faint)', border: '1px solid var(--blue-border)', borderRadius: 20, padding: '2px 8px', fontSize: 10, fontWeight: 700, color: 'var(--blue-light)' }}>{activities.length}</span>
                                     </div>
-                                    {activities.map(a => (
-                                        <div key={a.id} className="ni" style={{ padding: '11px 16px', borderBottom: '1px solid var(--border)' }}>
-                                            <p style={{ fontSize: 12.5, color: 'var(--text-secondary)', margin: '0 0 3px', lineHeight: 1.5 }}>{a.text}</p>
-                                            <p style={{ fontSize: 10.5, color: 'var(--text-muted)', margin: 0, fontWeight: 600 }}>{a.time}</p>
-                                        </div>
-                                    ))}
+                                    <div style={{ maxHeight: 'calc(100vh - 250px)', overflowY: 'auto' }}>
+                                        {activities.length === 0 ? (
+                                            <div style={{ padding: '20px', textAlign: 'center', color: 'var(--text-muted)', fontSize: 13 }}>
+                                                No recent activity
+                                            </div>
+                                        ) : (
+                                            (showAllNotifications ? activities : activities.slice(0, 3)).map(a => (
+                                                <div key={a._id} className="ni" style={{ padding: '11px 16px', borderBottom: '1px solid var(--border)' }}>
+                                                    <p style={{ fontSize: 12.5, color: 'var(--text-secondary)', margin: '0 0 3px', lineHeight: 1.5 }}>{a.text}</p>
+                                                    <p style={{ fontSize: 10.5, color: 'var(--text-muted)', margin: 0, fontWeight: 600 }}>{formatTime(a.createdAt)}</p>
+                                                </div>
+                                            ))
+                                        )}
+                                    </div>
+                                    {activities.length > 3 && (
+                                        <Link 
+                                            to="/notifications"
+                                            onClick={() => { setShowBell(false); setIsOpen(false); }}
+                                            style={{ display: 'block', textAlign: 'center', width: '100%', padding: '12px 0', background: 'transparent', border: 'none', color: 'var(--blue-light)', fontSize: 12, fontWeight: 700, cursor: 'pointer', transition: 'background 0.2s', fontFamily: "'DM Sans', sans-serif", textDecoration: 'none' }}
+                                            onMouseEnter={e => e.currentTarget.style.background = 'var(--blue-faint)'}
+                                            onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                                        >
+                                            View All Notifications
+                                        </Link>
+                                    )}
                                 </div>
                             )}
                         </div>
@@ -361,8 +426,7 @@ const Navbar = () => {
                     {user && (
                         <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 14px', background: 'var(--blue-faint)', border: '1px solid var(--blue-border)', borderRadius: 10, marginBottom: 12 }}>
                             <div style={{ 
-                                width: 36, height: 36, borderRadius: '50%', background: `linear-gradient(135deg, var(--blue-light), var(--blue-dark))`, 
-                                display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 800, color: '#fff', flexShrink: 0,
+                                display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 800, color: '#FFFFFF', flexShrink: 0,
                                 backgroundImage: user.profileImage ? `url('${user.profileImage}')` : 'none',
                                 backgroundSize: 'cover', backgroundPosition: 'center'
                             }}>

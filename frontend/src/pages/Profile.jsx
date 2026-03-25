@@ -125,9 +125,12 @@ const Profile = () => {
                             className="profile-avatar-container"
                             style={{ 
                                 width: isMobile ? 64 : 80, height: isMobile ? 64 : 80, borderRadius: '50%', flexShrink: 0, 
-                                background: 'rgba(255,255,255,0.15)', border: '3px solid rgba(255,255,255,0.3)', 
+                                background: profile.profileImage ? 'transparent' : '#FFFFFF', 
+                                border: '3px solid rgba(255,255,255,0.3)', 
                                 display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Sora', sans-serif", 
-                                fontSize: isMobile ? 22 : 28, fontWeight: 800, color: '#fff', boxShadow: '0 4px 20px rgba(0,0,0,0.3)', 
+                                fontSize: isMobile ? 22 : 28, fontWeight: 800, 
+                                color: 'var(--blue)', // Dark letter on white bg
+                                boxShadow: '0 4px 20px rgba(0,0,0,0.3)', 
                                 zIndex: 1, position: 'relative', overflow: 'hidden', cursor: profile.profileImage ? 'zoom-in' : 'default',
                                 backgroundImage: profile.profileImage ? `url(${profile.profileImage})` : 'none',
                                 backgroundSize: 'cover', backgroundPosition: 'center'
@@ -208,12 +211,27 @@ const Profile = () => {
                                     <div style={{ display: 'flex', flexDirection: 'column' }}>
                                         {profile.email    && <DetailRow icon={FaEnvelope}     href={`mailto:${profile.email}`}>{profile.email}</DetailRow>}
                                         {profile.phone    && <DetailRow icon={FaPhone}        >{profile.phone}</DetailRow>}
-                                        {profile.location && <DetailRow icon={FaMapMarkerAlt} >{profile.location}</DetailRow>}
+                                        {profile.location && <DetailRow icon={FaMapMarkerAlt}>{profile.location}</DetailRow>}
+                                        {(profile.country || profile.zipCode) && (
+                                            <DetailRow icon={FaMapMarkerAlt}>
+                                                {[profile.country, profile.zipCode].filter(Boolean).join(', ')}
+                                            </DetailRow>
+                                        )}
                                         {profile.department && (
                                             <DetailRow icon={FaGraduationCap}>
                                                 {profile.department}{profile.graduationYear ? ` — Class of ${profile.graduationYear}` : ''}
                                             </DetailRow>
                                         )}
+                                        {/* <button onClick={() => navigate('/dashboard')} style={{
+                                            background: `linear-gradient(135deg, var(--blue-light), var(--blue))`,
+                                            color: '#FFFFFF', border: 'none', borderRadius: 9, 
+                                            padding: '12px 20px', fontSize: 13, fontWeight: 700, cursor: 'pointer',
+                                            transition: 'all 0.2s', fontFamily: "'DM Sans', sans-serif",
+                                            boxShadow: '0 4px 12px rgba(32,54,113,0.15)', display: 'flex', alignItems: 'center', gap: 8,
+                                            marginTop: 15
+                                        }}>
+                                            <FaBuilding style={{ fontSize: 12 }} /> View Dashboard
+                                        </button> */}
                                         {profile.yearsOfExperience !== undefined && profile.yearsOfExperience > 0 && (
                                             <DetailRow icon={FaBriefcase}>{profile.yearsOfExperience} years of experience</DetailRow>
                                         )}

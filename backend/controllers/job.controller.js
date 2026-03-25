@@ -1,4 +1,5 @@
 const Job = require('../models/Job');
+const { logActivity } = require('./activity.controller');
 
 // @desc    Get all jobs
 // @route   GET /api/jobs
@@ -57,6 +58,16 @@ exports.createJob = async (req, res) => {
     try {
         req.body.postedBy = req.user.id;
         const job = await Job.create(req.body);
+
+        // Log Global Activity for Job Post
+        await logActivity(
+            req.user.id, 
+            `New Job Posted: ${job.title} at ${job.company}`, 
+            'job_create', 
+            true, 
+            job.applicationDeadline
+        );
+
         res.status(201).json({ success: true, job });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });

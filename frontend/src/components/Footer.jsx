@@ -117,7 +117,7 @@ const Footer = () => {
                 <div className="ft-brand">
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
                         <div style={{ width: 36, height: 36, borderRadius: 9, background: C.blue, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: `0 3px 14px rgba(32,54,113,0.5)`, flexShrink: 0 }}>
-                            <FaGraduationCap style={{ color: C.white, fontSize: 16 }} />
+                            <FaGraduationCap style={{ color: '#FFFFFF', fontSize: 16 }} />
                         </div>
                         <span style={{ fontFamily: "'Sora', sans-serif", fontSize: 15, fontWeight: 800, color: C.white, letterSpacing: '-0.2px' }}>
                             NIT JSR Alumni

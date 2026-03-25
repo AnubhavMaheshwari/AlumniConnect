@@ -2,6 +2,7 @@ const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const sendEmail = require('../utils/sendEmail');
+const { logActivity } = require('./activity.controller');
 
 // Generate JWT Token
 const generateToken = (id) => {
@@ -14,7 +15,7 @@ const generateToken = (id) => {
 // @route   POST /api/auth/register
 exports.register = async (req, res) => {
     try {
-        const { name, email, password, graduationYear, department, phone, company, yearsOfExperience } = req.body;
+        const { name, email, password, graduationYear, department, phone, company, yearsOfExperience, country, zipCode } = req.body;
 
         // Check if user exists
         const userExists = await User.findOne({ email });
@@ -31,10 +32,15 @@ exports.register = async (req, res) => {
             department,
             phone,
             company,
-            yearsOfExperience
+            yearsOfExperience,
+            country,
+            zipCode
         });
 
         const token = generateToken(user._id);
+
+        // Log registration activity
+        await logActivity(user._id, 'Welcome to the Alumni Portal! Your account has been created.', 'register');
 
         res.status(201).json({
             success: true,
@@ -48,7 +54,9 @@ exports.register = async (req, res) => {
                 department: user.department,
                 phone: user.phone,
                 company: user.company,
-                yearsOfExperience: user.yearsOfExperience
+                yearsOfExperience: user.yearsOfExperience,
+                country: user.country,
+                zipCode: user.zipCode
             }
         });
     } catch (error) {
@@ -77,6 +85,9 @@ exports.login = async (req, res) => {
         }
 
         const token = generateToken(user._id);
+
+        // Log login activity
+        await logActivity(user._id, 'Logged in to your account.', 'login');
 
         res.json({
             success: true,

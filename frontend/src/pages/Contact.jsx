@@ -186,14 +186,14 @@ const Contact = () => {
                             display: 'flex', alignItems: 'center', justifyContent: 'center',
                             flexShrink: 0
                         }}>
-                            <FaEnvelope style={{ color: C.white, fontSize: 16 }} />
+                            <FaEnvelope style={{ color: '#FFFFFF', fontSize: 16 }} />
                         </div>
                         <div>
                             <p style={{
                                 fontFamily: "'Sora', sans-serif",
-                                fontSize: 16, fontWeight: 700, color: C.white, margin: 0
+                                fontSize: 16, fontWeight: 700, color: '#FFFFFF', margin: 0
                             }}>Send a Message</p>
-                            <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', margin: '2px 0 0' }}>
+                            <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.7)', margin: '2px 0 0' }}>
                                 We'll respond within 24 hours
                             </p>
                         </div>

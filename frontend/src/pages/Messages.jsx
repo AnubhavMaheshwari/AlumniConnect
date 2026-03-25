@@ -10,6 +10,7 @@ import {
 } from 'react-icons/fa';
 import { HiSparkles } from 'react-icons/hi';
 import useIsMobile from '../hooks/useIsMobile';
+import { formatDistanceToNow } from 'date-fns';
 
 /* ── tokens ──────────────────────────────────────────────────────────────── */
 const C = {
@@ -39,7 +40,21 @@ if (typeof document !== 'undefined' && !document.getElementById('msg-styles')) {
         .msg-send-btn:hover { opacity: 0.85 !important; }
         .msg-scroll::-webkit-scrollbar { width: 4px; }
         .msg-scroll::-webkit-scrollbar-track { background: transparent; }
-        .msg-scroll::-webkit-scrollbar-thumb { background: #1E2235; border-radius: 4px; }
+        .msg-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+        .msg-scroll::-webkit-scrollbar-thumb:hover { background: var(--blue-border); }
+        
+        .chat-item:hover { background: var(--blue-faint) !important; }
+        .chat-item.active { background: var(--blue-faint) !important; border-left: 4px solid var(--blue-light) !important; }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade { animation: fadeIn 0.3s ease-out forwards; }
+
+        .msg-bubble { 
+            max-width: 80%; padding: 10px 14px; border-radius: 12px; font-size: 14px; line-height: 1.5; 
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05); position: relative;
+        }
+        .msg-sent { background: var(--blue-light); color: #FFFFFF; border-bottom-right-radius: 2px; }
+        .msg-received { background: var(--bg-secondary); color: var(--text-primary); border: 1px solid var(--border); border-bottom-left-radius: 2px; }
         .dot-typing span {
             display: inline-block; width: 5px; height: 5px; border-radius: 50%;
             background: #8A94A8; margin: 0 2px;
@@ -65,8 +80,10 @@ const Avatar = ({ name = '', img, size = 40, gradient = false, onClick }) => (
                 : C.blueFaint,
             border: `1px solid ${C.blueBorder}`,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            overflow: 'hidden', fontSize: size * 0.38, fontWeight: 800,
-            color: gradient ? C.trueWhite : C.blueLight, fontFamily: "'Sora', sans-serif",
+            overflow: 'hidden', 
+            fontSize: size * 0.4, fontWeight: 700, 
+            color: 'var(--text-primary)', // Dark letter
+            fontFamily: "'Sora', sans-serif",
             backgroundImage: img ? `url(${img})` : undefined,
             backgroundSize: 'cover', backgroundPosition: 'center',
             cursor: onClick ? 'zoom-in' : 'default'
@@ -168,8 +185,21 @@ const Messages = () => {
         socket.on('message recieved', newMessageRecieved => {
             if (!selectedChatCompare || selectedChatCompare._id !== newMessageRecieved.chat._id) {
                 toast.info(`💬 ${newMessageRecieved.sender.name}: ${newMessageRecieved.content.slice(0, 40)}`);
-                fetchChats();
-            } else { setMessages(prev => [...prev, newMessageRecieved]); }
+                setChats(prev => {
+                    const existing = prev.find(c => c._id === newMessageRecieved.chat._id);
+                    if (existing) {
+                        return prev.map(c => c._id === newMessageRecieved.chat._id 
+                            ? { ...c, latestMessage: newMessageRecieved, unreadCount: (c.unreadCount || 0) + 1 } 
+                            : c
+                        ).sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+                    }
+                    fetchChats(); // fetch if new chat
+                    return prev;
+                });
+            } else { 
+                setMessages(prev => [...prev, newMessageRecieved]); 
+                markChatAsRead(newMessageRecieved.chat._id);
+            }
         });
 
         socket.on('message updated', updatedMsg => {
@@ -200,7 +230,7 @@ const Messages = () => {
         fetchChats(); 
     }, []);
     useEffect(() => { if (location.state?.userId) accessChat(location.state.userId); }, [location.state]);
-    useEffect(() => { fetchMessages(); selectedChatCompare = selectedChat; }, [selectedChat]);
+    useEffect(() => { fetchMessages(); selectedChatCompare = selectedChat; if (selectedChat) markChatAsRead(selectedChat._id); }, [selectedChat]);
     useEffect(() => { if (messagesContainerRef.current) messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight; }, [messages]);
 
     const fetchBatches = async () => {
@@ -242,6 +272,15 @@ const Messages = () => {
             socket.emit('join chat', selectedChat._id);
         } catch { toast.error('Failed to load messages'); }
         finally { setLoadingMessages(false); }
+    };
+
+    const markChatAsRead = async (chatId) => {
+        try {
+            await API.put(`/message/read/${chatId}`);
+            setChats(prev => prev.map(c => c._id === chatId ? { ...c, unreadCount: 0 } : c));
+        } catch (err) {
+            console.error("Failed to mark messages as read", err);
+        }
     };
 
     const sendMessage = async () => {
@@ -296,6 +335,7 @@ const Messages = () => {
         setEditingMsgId(msg._id);
         setNewMessage(msg.content);
         inputRef.current?.focus();
+        setContextMenu({ show: false, x: 0, y: 0, msg: null });
     };
 
     const cancelEdit = () => {
@@ -306,11 +346,15 @@ const Messages = () => {
     const saveEdit = async () => {
         if (!newMessage.trim()) return cancelEdit();
         try {
+            console.log("Saving edit for:", editingMsgId, "content:", newMessage);
             const { data } = await API.put(`/message/${editingMsgId}`, { content: newMessage });
             socket.emit('message updated', data);
             setMessages(prev => prev.map(m => m._id === data._id ? data : m));
             cancelEdit();
-        } catch { toast.error("Failed to update message"); }
+        } catch (err) { 
+            console.error("Edit failed:", err);
+            toast.error(err.response?.data?.message || "Failed to update message"); 
+        }
     };
 
     const deleteMessage = async (msgId) => {
@@ -341,8 +385,23 @@ const Messages = () => {
     const handleSearch = async q => {
         setSearch(q);
         if (!q) return setSearchResults([]);
-        try { const { data } = await API.get(`/users?search=${q}`); setSearchResults(data.users || data); }
-        catch { toast.error('Search failed'); }
+        
+        try { 
+            const { data } = await API.get(`/users?search=${q}`); 
+            const apiResults = data.users || data;
+            
+            // Filter out people who already have an active chat from the "Directory" results
+            const directoryOnly = apiResults.filter(u => {
+                const alreadyHasChat = chats.find(c => !c.isGroupChat && c.users.find(cu => cu._id === u._id));
+                return !alreadyHasChat && u._id !== user._id;
+            });
+            
+            setSearchResults(directoryOnly); 
+        }
+        catch { 
+            setSearchResults([]);
+            toast.error('Directory search failed'); 
+        }
     };
 
     const handleGroupSearch = async q => {
@@ -488,90 +547,149 @@ const Messages = () => {
                                 style={{ ...panelInput, paddingLeft: 30, fontSize: 12 }}
                             />
                         </div>
-
-                        {/* search results dropdown */}
-                        {search && searchResults.length > 0 && (
-                            <div style={{ marginTop: 6, background: C.darkBg, border: `1px solid ${C.darkBorder}`, borderRadius: 9, overflow: 'hidden', animation: 'slideIn 0.15s ease both' }}>
-                                {searchResults.slice(0, 5).map(u => (
-                                    <div key={u._id} onClick={() => { accessChat(u._id); setSearch(''); setSearchResults([]); }}
-                                        className="search-item"
-                                        style={{ display: 'flex', alignItems: 'center', gap: 9, padding: '9px 12px', cursor: 'pointer', transition: 'background 0.15s' }}>
-                                        <Avatar name={u.name} img={u.profileImage} size={28} gradient onClick={(e) => { e.stopPropagation(); if (u.profileImage) setPreviewImage(u.profileImage); }} />
-                                        <div>
-                                            <p style={{ fontSize: 12.5, fontWeight: 600, color: C.white, margin: 0 }}>{u.name}</p>
-                                            <p style={{ fontSize: 10.5, color: C.muted, margin: 0 }}>{u.email}</p>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
                     </div>
 
                     {/* chat list / batch list */}
-                    <div className="msg-scroll" style={{ flex: 1, overflowY: 'auto', padding: '10px 10px' }}>
+                    <div className="msg-scroll" style={{ flex: 1, overflowY: 'auto' }}>
                         {showBatchList ? (
-                            loadingBatches ? (
-                                <div style={{ display: 'flex', justifyContent: 'center', padding: '40px 0' }}>
-                                    <div style={{ width: 24, height: 24, borderRadius: '50%', border: `3px solid ${C.blueFaint}`, borderTopColor: C.blueLight, animation: 'spin 0.7s linear infinite' }} />
-                                </div>
-                            ) : batchGroups.length === 0 ? (
-                                <div style={{ textAlign: 'center', padding: '40px 16px', color: C.muted, fontSize: 12.5 }}>No batch groups found.</div>
-                            ) : (
-                                batchGroups.map(b => (
-                                    <div key={b._id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, padding: '12px 10px', borderBottom: `1px solid ${C.darkBorder}` }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
-                                            <div style={{ width: 34, height: 34, borderRadius: '50%', flexShrink: 0, background: `linear-gradient(135deg, ${C.blue}, ${C.blueDark})`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                                <FaUsers style={{ color: C.trueWhite, fontSize: 13 }} />
-                                            </div>
-                                            <div style={{ minWidth: 0 }}>
-                                                <p style={{ fontSize: 13, fontWeight: 700, color: C.white, margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{b.chatName}</p>
-                                                <p style={{ fontSize: 10.5, color: C.muted, margin: 0 }}>{b.users.length} members</p>
-                                            </div>
-                                        </div>
-                                        {b.users.some(u => u._id === user._id) ? (
-                                            <button onClick={() => { setSelectedChat(b); setShowBatchList(false); }} style={{ background: C.blueFaint, border: `1px solid ${C.blueBorder}`, borderRadius: 6, padding: '4px 8px', color: C.blueLight, fontSize: 10, fontWeight: 700, cursor: 'pointer' }}>Open</button>
-                                        ) : (
-                                            <button onClick={() => joinBatch(b._id)} style={{ background: C.blue, border: 'none', borderRadius: 6, padding: '4px 10px', color: C.trueWhite, fontSize: 10, fontWeight: 700, cursor: 'pointer' }}>Join</button>
-                                        )}
+                            <div style={{ padding: '10px' }}>
+                                {loadingBatches ? (
+                                    <div style={{ display: 'flex', justifyContent: 'center', padding: '40px 0' }}>
+                                        <div style={{ width: 24, height: 24, borderRadius: '50%', border: `3px solid ${C.blueFaint}`, borderTopColor: C.blueLight, animation: 'spin 0.7s linear infinite' }} />
                                     </div>
-                                ))
-                            )
-                        ) : (
-                            loadingChats ? (
-                                <div style={{ display: 'flex', justifyContent: 'center', padding: '40px 0' }}>
-                                    <div style={{ width: 24, height: 24, borderRadius: '50%', border: `3px solid ${C.blueFaint}`, borderTopColor: C.blueLight, animation: 'spin 0.7s linear infinite' }} />
-                                </div>
-                            ) : filteredChats.length === 0 ? (
-                                <div style={{ textAlign: 'center', padding: '40px 16px', color: C.muted, fontSize: 12.5 }}>
-                                    No chats yet.<br />Search for a user to start.
-                                </div>
-                            ) : 
-                                filteredChats.map(c => {
-                                    const active = selectedChat?._id === c._id;
-                                    return (
-                                    <div key={c._id} onClick={() => setSelectedChat(c)}
-                                        className="chat-item"
-                                        style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 10px', cursor: 'pointer', marginBottom: 3, background: active ? C.blueFaint : 'transparent', borderColor: active ? C.blueBorder : 'transparent' }}>
-                                        {c.isGroupChat
-                                            ? <div style={{ width: 40, height: 40, borderRadius: '50%', flexShrink: 0, background: `linear-gradient(135deg, ${C.blue}, ${C.blueDark})`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                                <FaUsers style={{ color: C.trueWhite, fontSize: 16 }} />
+                                ) : batchGroups.length === 0 ? (
+                                    <div style={{ textAlign: 'center', padding: '40px 16px', color: C.muted, fontSize: 12.5 }}>No batch groups found.</div>
+                                ) : (
+                                    batchGroups.map(b => (
+                                        <div key={b._id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, padding: '12px 10px', borderBottom: `1px solid ${C.darkBorder}` }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
+                                                <div style={{ width: 34, height: 34, borderRadius: '50%', flexShrink: 0, background: `linear-gradient(135deg, ${C.blue}, ${C.blueDark})`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                    <FaUsers style={{ color: C.trueWhite, fontSize: 13 }} />
+                                                </div>
+                                                <div style={{ minWidth: 0 }}>
+                                                    <p style={{ fontSize: 13, fontWeight: 700, color: C.white, margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{b.chatName}</p>
+                                                    <p style={{ fontSize: 10.5, color: C.muted, margin: 0 }}>{b.users.length} members</p>
+                                                </div>
                                             </div>
-                                            : <Avatar name={getChatName(c)} img={getChatImage(c)} size={40} gradient onClick={(e) => { e.stopPropagation(); if (getChatImage(c)) setPreviewImage(getChatImage(c)); }} />
-                                        }
-                                        <div style={{ minWidth: 0 }}>
-                                            <p style={{ fontSize: 13.5, fontWeight: active ? 700 : 600, color: active ? C.white : '#C5CCE0', margin: '0 0 2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                                                {getChatName(c)}
-                                            </p>
-                                            {c.latestMessage && (
-                                                <p style={{ fontSize: 11.5, color: C.muted, margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                                                    <span style={{ fontWeight: 600 }}>{c.latestMessage.sender.name === user.name ? 'You' : c.latestMessage.sender.name}:</span>{' '}
-                                                    {c.latestMessage.content.slice(0, 40)}{c.latestMessage.content.length > 40 ? '…' : ''}
-                                                </p>
+                                            {b.users.some(u => u._id === user._id) ? (
+                                                <button onClick={() => { setSelectedChat(b); setShowBatchList(false); }} style={{ background: C.blueFaint, border: `1px solid ${C.blueBorder}`, borderRadius: 6, padding: '4px 8px', color: C.blueLight, fontSize: 10, fontWeight: 700, cursor: 'pointer' }}>Open</button>
+                                            ) : (
+                                                <button onClick={() => joinBatch(b._id)} style={{ background: C.blue, border: 'none', borderRadius: 6, padding: '4px 10px', color: C.trueWhite, fontSize: 10, fontWeight: 700, cursor: 'pointer' }}>Join</button>
                                             )}
                                         </div>
+                                    ))
+                                )}
+                            </div>
+                        ) : (
+                            <>
+                                {/* Existing Chats (Filtered if searching) */}
+                                <div style={{ padding: '0 0 12px' }}>
+                                    {loadingChats ? (
+                                        <div style={{ display: 'flex', justifyContent: 'center', padding: '40px 0' }}>
+                                            <div style={{ width: 24, height: 24, borderRadius: '50%', border: `3px solid ${C.blueFaint}`, borderTopColor: C.blueLight, animation: 'spin 0.7s linear infinite' }} />
+                                        </div>
+                                    ) : (
+                                        (() => {
+                                            const matches = chats.filter(c => {
+                                                if (!search) return true;
+                                                const name = getChatName(c).toLowerCase();
+                                                return name.includes(search.toLowerCase());
+                                            });
+
+                                            if (matches.length === 0 && !search) {
+                                                return (
+                                                    <div style={{ textAlign: 'center', padding: '40px 16px', color: C.muted, fontSize: 12.5 }}>
+                                                        No chats yet.<br />Search for a user to start.
+                                                    </div>
+                                                );
+                                            }
+
+                                            return matches.map(c => {
+                                                const active = selectedChat?._id === c._id;
+                                                const chatName = getChatName(c);
+                                                const chatImage = getChatImage(c);
+                                                
+                                                return (
+                                                    <div 
+                                                        key={c._id} 
+                                                        onClick={() => setSelectedChat(c)}
+                                                        className={`chat-item ${active ? 'active' : ''}`}
+                                                        style={{ 
+                                                            padding: '12px 14px', cursor: 'pointer', display: 'flex', gap: 12, 
+                                                            transition: 'all 0.2s', borderLeft: '4px solid transparent',
+                                                            background: active ? 'var(--blue-faint)' : 'transparent',
+                                                            borderBottom: '1px solid var(--border)'
+                                                        }}
+                                                    >
+                                                        {c.isGroupChat 
+                                                            ? <div style={{ width: 38, height: 38, borderRadius: '50%', flexShrink: 0, background: `linear-gradient(135deg, ${C.blue}, ${C.blueDark})`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                                <FaUsers style={{ color: C.trueWhite, fontSize: 15 }} />
+                                                            </div>
+                                                            : <Avatar name={chatName} img={chatImage} size={38} />
+                                                        }
+                                                        <div style={{ flex: 1, minWidth: 0 }}>
+                                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 2 }}>
+                                                                <p style={{ fontSize: 13, fontWeight: active ? 700 : 600, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', margin: 0 }}>
+                                                                    {chatName}
+                                                                </p>
+                                                                {c.latestMessage && (
+                                                                    <span style={{ fontSize: 9, color: 'var(--text-muted)' }}>
+                                                                        {formatDistanceToNow(new Date(c.latestMessage.createdAt), { addSuffix: false }).replace('about ', '').replace('less than a minute', 'now')}
+                                                                    </span>
+                                                                )}
+                                                            </div>
+                                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                                                <p style={{ fontSize: 11, color: 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', margin: 0, flex: 1 }}>
+                                                                    {c.latestMessage ? (
+                                                                        <>
+                                                                            <span style={{ fontWeight: 600 }}>{c.latestMessage.sender.name === user.name ? 'You' : c.latestMessage.sender.name}:</span>{' '}
+                                                                            {c.latestMessage.content}
+                                                                        </>
+                                                                    ) : 'No messages yet'}
+                                                                </p>
+                                                                {c.unreadCount > 0 && (
+                                                                    <div style={{ 
+                                                                        minWidth: 18, height: 18, borderRadius: 10, 
+                                                                        background: 'var(--blue-light)', color: '#fff', 
+                                                                        fontSize: 10, fontWeight: 800, display: 'flex', 
+                                                                        alignItems: 'center', justifyContent: 'center',
+                                                                        padding: '0 5px', marginLeft: 8, boxShadow: '0 2px 6px rgba(32,54,113,0.3)'
+                                                                    }}>
+                                                                        {c.unreadCount}
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            });
+                                        })()
+                                    )}
+                                </div>
+
+                                {/* Directory Results (Only if searching) */}
+                                {search && searchResults.length > 0 && (
+                                    <div style={{ padding: '12px 0', borderTop: '1px solid var(--border)', background: 'var(--bg-secondary)' }}>
+                                        <p style={{ fontSize: 10, fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em', padding: '0 14px', marginBottom: 12 }}>
+                                            From Directory
+                                        </p>
+                                        {searchResults.map(u => (
+                                            <div 
+                                                key={u._id} 
+                                                onClick={() => accessChat(u._id)}
+                                                className="chat-item"
+                                                style={{ padding: '10px 14px', cursor: 'pointer', display: 'flex', gap: 12, transition: 'all 0.2s', alignItems: 'center' }}
+                                            >
+                                                <Avatar name={u.name} img={u.profileImage} size={34} />
+                                                <div style={{ flex: 1, minWidth: 0 }}>
+                                                    <p style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>{u.name}</p>
+                                                    <p style={{ fontSize: 10, color: 'var(--text-muted)', margin: 0, textTransform: 'capitalize' }}>{u.role}</p>
+                                                </div>
+                                            </div>
+                                        ))}
                                     </div>
-                                );
-                            })
+                                )}
+                            </>
                         )}
                     </div>
                 </div>
@@ -909,10 +1027,10 @@ const Messages = () => {
                     {contextMenu.msg.sender._id === user._id && !contextMenu.msg.isDeleted ? (
                         <>
                             <div style={{ padding: '10px 16px', cursor: 'pointer', fontSize: '13px', display: 'flex', gap: '8px', alignItems: 'center', transition: 'background 0.2s', color: C.white }} onClick={() => startEditMenu(contextMenu.msg)} className="search-item">
-                                <span style={{ fontSize: '12px' }}>✏️</span> Edit Message
+                                <span style={{ fontSize: '12px' }}></span> Edit 
                             </div>
                             <div style={{ padding: '10px 16px', cursor: 'pointer', fontSize: '13px', display: 'flex', gap: '8px', alignItems: 'center', transition: 'background 0.2s', color: C.danger }} onClick={() => deleteMessage(contextMenu.msg._id)} className="search-item">
-                                <span style={{ fontSize: '12px' }}>🗑️</span> Delete Message
+                                <span style={{ fontSize: '12px' }}></span>Delete
                             </div>
                         </>
                     ) : !contextMenu.msg.isDeleted ? (

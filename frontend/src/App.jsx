@@ -21,6 +21,7 @@ import Jobs from './pages/Jobs';
 import News from './pages/News';
 import Admin from './pages/Admin';
 import Messages from './pages/Messages';
+import Notifications from './pages/Notifications';
 
 function App() {
   return (
@@ -45,6 +46,7 @@ function App() {
               <Route path="jobs" element={<ProtectedRoute><Jobs /></ProtectedRoute>} />
               <Route path="news" element={<ProtectedRoute><News /></ProtectedRoute>} />
               <Route path="messages" element={<ProtectedRoute><Messages /></ProtectedRoute>} />
+              <Route path="notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
 
               {/* Admin routes - require admin role */}
               <Route path="admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />

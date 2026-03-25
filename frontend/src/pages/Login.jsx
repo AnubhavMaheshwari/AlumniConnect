@@ -42,6 +42,7 @@ const blurSx  = e => { e.target.style.borderColor = 'var(--border)'; e.target.st
 
 const Login = () => {
     const [formData, setFormData] = useState({ email: '', password: '' });
+    const [rememberMe, setRememberMe] = useState(false);
     const [loading, setLoading]   = useState(false);
     const [showPw, setShowPw]     = useState(false);
     const { login } = useAuth();
@@ -50,13 +51,26 @@ const Login = () => {
 
     const handleChange = e => setFormData({ ...formData, [e.target.name]: e.target.value });
 
+    useEffect(() => {
+        const savedEmail = localStorage.getItem('rememberedEmail');
+        if (savedEmail) {
+            setFormData(prev => ({ ...prev, email: savedEmail }));
+            setRememberMe(true);
+        }
+    }, []);
+
     const handleSubmit = async e => {
         e.preventDefault();
         setLoading(true);
         try {
             await login(formData.email, formData.password);
+            if (rememberMe) {
+                localStorage.setItem('rememberedEmail', formData.email);
+            } else {
+                localStorage.removeItem('rememberedEmail');
+            }
             toast.success('Welcome back!');
-            navigate('/dashboard');
+            navigate('/directory');
         } catch (err) {
             toast.error(err.response?.data?.message || 'Login failed');
         } finally { setLoading(false); }
@@ -105,7 +119,12 @@ const Login = () => {
                         {/* remember + forgot */}
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                             <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12.5, color: 'var(--text-muted)', cursor: 'pointer' }}>
-                                <input type="checkbox" style={{ accentColor: 'var(--blue-light)', width: 14, height: 14 }} />
+                                <input 
+                                    type="checkbox" 
+                                    checked={rememberMe}
+                                    onChange={e => setRememberMe(e.target.checked)}
+                                    style={{ accentColor: 'var(--blue-light)', width: 14, height: 14 }} 
+                                />
                                 Remember me
                             </label>
                             <Link to="/forgot-password" style={{ fontSize: 12.5, color: 'var(--blue-light)', textDecoration: 'none', fontWeight: 600, transition: 'opacity 0.2s' }}

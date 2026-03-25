@@ -35,9 +35,11 @@ const AlumniCard = ({ user }) => {
                 <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 14 }}>
                     <div style={{
                         width: 54, height: 54, borderRadius: '50%', flexShrink: 0,
-                        background: `linear-gradient(135deg, var(--blue-light), var(--blue-dark))`,
+                        background: user.profileImage ? 'transparent' : 'var(--blue-faint)',
+                        border: `1px solid ${user.profileImage ? 'transparent' : 'var(--blue-border)'}`,
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        fontFamily: "'Sora', sans-serif", fontSize: 18, fontWeight: 800, color: '#fff',
+                        fontFamily: "'Sora', sans-serif", fontSize: 18, fontWeight: 800, 
+                        color: 'var(--text-primary)', // Dark letter
                         boxShadow: `0 0 0 3px var(--blue-border)`,
                         backgroundImage: user.profileImage ? `url('${user.profileImage}')` : 'none',
                         backgroundSize: 'cover', backgroundPosition: 'center'

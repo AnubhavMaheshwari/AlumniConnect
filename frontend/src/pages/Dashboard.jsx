@@ -9,6 +9,7 @@ import {
 import { HiSparkles } from 'react-icons/hi';
 import { auth } from '../config/firebase';
 import { RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
+import { countries } from '../utils/countries';
 import PhotoUploadModal from '../components/PhotoUploadModal';
 
 /* ── helpers ─────────────────────────────────────────────────────────────── */
@@ -124,8 +125,11 @@ const Dashboard = () => {
         company: user?.company || '',
         yearsOfExperience: user?.yearsOfExperience || 0,
         location: user?.location || '',
+        country: user?.country || '',
+        zipCode: user?.zipCode || '',
         email: user?.email || '',
-        phone: user?.phone || ''
+        phone: user?.phone?.replace(/^\+\d+\s?/, '') || '',
+        countryCode: countries.find(c => c.name === user?.country)?.code || '+91'
     });
     const [loading, setLoading] = useState(false);
     const [otpModal, setOtpModal] = useState({ show: false, type: '', value: '', otp: '' });
@@ -141,7 +145,12 @@ const Dashboard = () => {
 
     const handleChange = e => {
         const { name, value } = e.target;
-        setEditData(prev => ({ ...prev, [name]: value }));
+        if (name === 'phone') {
+            const val = value.replace(/\D/g, '').slice(0, 10);
+            setEditData(prev => ({ ...prev, [name]: val }));
+        } else {
+            setEditData(prev => ({ ...prev, [name]: value }));
+        }
     };
 
     const handleSaveGeneral = async e => {
@@ -151,7 +160,9 @@ const Dashboard = () => {
             const { data } = await API.put(`/users/${user._id}`, {
                 company: editData.company,
                 yearsOfExperience: editData.yearsOfExperience,
-                location: editData.location
+                location: editData.location,
+                country: editData.country,
+                zipCode: editData.zipCode
             });
             setUser(data.user);
             toast.success('Profile updated successfully');
@@ -165,14 +176,21 @@ const Dashboard = () => {
     const initiateVerification = async type => {
         const val = editData[type];
         if (!val) return toast.error(`Enter a valid ${type}`);
-        if (val === user[type]) return toast.info(`${type} is unchanged`);
+        
+        let fullVal = val;
+        if (type === 'phone') {
+            if (val.length < 10) return toast.error('Enter a valid 10-digit number');
+            fullVal = `${editData.countryCode || '+91'}${val}`;
+        }
+
+        if (fullVal === user[type]) return toast.info(`${type} is unchanged`);
         
         setLoading(true);
         try {
             if (type === 'email') {
-                await API.post('/auth/send-email-otp', { email: val });
+                await API.post('/auth/send-email-otp', { email: fullVal });
                 toast.success('Verification code sent to email');
-                setOtpModal({ show: true, type, value: val, otp: '' });
+                setOtpModal({ show: true, type, value: fullVal, otp: '' });
             } else {
                 // Phone Verification
                 if (!window.recaptchaVerifier) {
@@ -181,8 +199,8 @@ const Dashboard = () => {
                     });
                 }
                 const appVerifier = window.recaptchaVerifier;
-                const confirmation = await signInWithPhoneNumber(auth, val, appVerifier);
-                setOtpModal({ show: true, type, value: val, otp: '', confirmationResult: confirmation });
+                const confirmation = await signInWithPhoneNumber(auth, fullVal, appVerifier);
+                setOtpModal({ show: true, type, value: fullVal, otp: '', confirmationResult: confirmation });
                 toast.success('Verification code sent to phone');
             }
         } catch (err) {
@@ -349,7 +367,40 @@ const Dashboard = () => {
                                             name="location"
                                             value={editData.location}
                                             onChange={handleChange}
-                                            placeholder="City, Country"
+                                            placeholder="City, State"
+                                        />
+                                    </FieldRow>
+                                    <FieldRow label="Country">
+                                        <div style={{ position: 'relative', flex: 1 }}>
+                                            <FaBuilding style={{
+                                                position: 'absolute', left: 13, top: '50%', transform: 'translateY(-50%)',
+                                                color: 'var(--text-muted)', fontSize: 13, pointerEvents: 'none', zIndex: 1
+                                            }} />
+                                            <select
+                                                name="country"
+                                                value={editData.country}
+                                                onChange={handleChange}
+                                                style={{
+                                                    width: '100%', background: 'var(--input-bg)',
+                                                    border: '1px solid var(--border)',
+                                                    borderRadius: 8, padding: '10px 13px 10px 38px',
+                                                    color: 'var(--text-primary)', fontSize: 13.5, outline: 'none',
+                                                    fontFamily: "'DM Sans', sans-serif", appearance: 'none',
+                                                    cursor: 'pointer'
+                                                }}
+                                            >
+                                                <option value="">Select Country</option>
+                                                {countries.map(c => <option key={c.name} value={c.name} style={{ background: 'var(--bg-secondary)' }}>{c.name}</option>)}
+                                            </select>
+                                        </div>
+                                    </FieldRow>
+                                    <FieldRow label="Zip / Postal Code">
+                                        <InputField
+                                            icon={FaBuilding}
+                                            name="zipCode"
+                                            value={editData.zipCode}
+                                            onChange={handleChange}
+                                            placeholder="e.g. 10001"
                                         />
                                     </FieldRow>
                                 </div>
@@ -408,13 +459,24 @@ const Dashboard = () => {
                                 </FieldRow>
 
                                 <FieldRow label="Phone Number">
-                                    <InputField
-                                        icon={FaPhone}
-                                        name="phone"
-                                        value={editData.phone}
-                                        onChange={handleChange}
-                                        placeholder="+1 (000) 000-0000"
-                                    />
+                                    <div style={{ display: 'flex', gap: 0, flex: 1 }}>
+                                        <div style={{ 
+                                            background: 'var(--input-bg)', border: '1px solid var(--border)', 
+                                            borderRight: 'none', borderRadius: '8px 0 0 8px', padding: '10px 8px', 
+                                            color: 'var(--text-muted)', fontSize: 13, minWidth: 45, textAlign: 'center'
+                                        }}>
+                                            {editData.countryCode || (countries.find(c => c.name === editData.country)?.code || '+91')}
+                                        </div>
+                                        <InputField
+                                            icon={FaPhone}
+                                            name="phone"
+                                            value={editData.phone}
+                                            onChange={handleChange}
+                                            placeholder="9876543210"
+                                            style={{ borderRadius: '0 8px 8px 0' }}
+                                            maxLength="10"
+                                        />
+                                    </div>
                                     <button
                                         type="button"
                                         onClick={() => initiateVerification('phone')}
@@ -549,7 +611,7 @@ const Dashboard = () => {
                                 width: '100%',
                                 background: `linear-gradient(135deg, var(--blue-light) 0%, var(--blue) 100%)`,
                                 border: 'none', borderRadius: 9, padding: '12px 0',
-                                color: '#fff', fontSize: 13, fontWeight: 700,
+                                color: '#FFFFFF', fontSize: 13, fontWeight: 700,
                                 letterSpacing: '0.06em', cursor: 'pointer',
                                 fontFamily: "'DM Sans', sans-serif",
                                 opacity: otpModal.otp.length < 6 ? 0.4 : 1,

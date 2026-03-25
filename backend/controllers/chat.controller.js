@@ -1,5 +1,6 @@
 const Conversation = require('../models/Conversation');
 const User = require('../models/User');
+const Message = require('../models/Message');
 
 // @description     Create or fetch One to One Chat
 // @route           POST /api/chat/
@@ -82,7 +83,10 @@ const fetchChats = async (req, res) => {
         }
         // --- End Auto-Batch Group Logic ---
 
-        let results = await Conversation.find({ users: req.user._id })
+        let results = await Conversation.find({ 
+            users: req.user._id,
+            latestMessage: { $exists: true, $ne: null }
+        })
             .populate("users", "-password")
             .populate("groupAdmin", "-password")
             .populate("latestMessage")
@@ -92,7 +96,35 @@ const fetchChats = async (req, res) => {
             path: "latestMessage.sender",
             select: "name profileImage email",
         });
-        res.status(200).send(results);
+
+        // --- Calculate Unread Counts ---
+        const unreadCounts = await Message.aggregate([
+            { 
+                $match: { 
+                    chat: { $in: results.map(c => c._id) }, 
+                    sender: { $ne: req.user._id }, 
+                    readBy: { $ne: req.user._id } 
+                } 
+            },
+            { 
+                $group: { 
+                    _id: "$chat", 
+                    count: { $sum: 1 } 
+                } 
+            }
+        ]);
+
+        const unreadMap = unreadCounts.reduce((acc, item) => {
+            acc[item._id.toString()] = item.count;
+            return acc;
+        }, {});
+
+        const finalResults = results.map(c => ({
+            ...c.toObject(),
+            unreadCount: unreadMap[c._id.toString()] || 0
+        }));
+
+        res.status(200).send(finalResults);
     } catch (error) {
         res.status(400).json({ message: error.message });
     }

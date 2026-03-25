@@ -8,12 +8,13 @@ import useIsMobile from '../hooks/useIsMobile';
 import { auth } from '../config/firebase';
 import { RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
 import API from '../services/api';
+import { countries } from '../utils/countries';
 
 const C = {
     blue: 'var(--blue)', blueDark: 'var(--blue-dark)', blueLight: 'var(--blue-light)',
     blueFaint: 'var(--blue-faint)', blueBorder: 'var(--blue-border)',
-    white: 'var(--text-primary)', muted: 'var(--text-secondary)', black: 'var(--bg)',
-    darkBg: 'var(--bg)', darkCard: 'var(--card-bg)', darkBorder: 'var(--border)',
+    text: 'var(--text-primary)', muted: 'var(--text-secondary)', white: '#FFFFFF',
+    black: 'var(--bg)', darkBg: 'var(--bg)', darkCard: 'var(--card-bg)', darkBorder: 'var(--border)',
 };
 
 if (typeof document !== 'undefined' && !document.getElementById('reg-fonts')) {
@@ -33,7 +34,7 @@ const inputSx = (hasRight = false) => ({
     width: '100%', background: C.darkBg, border: `1px solid ${C.darkBorder}`,
     borderRadius: 9, padding: `10px 14px 10px 40px`,
     paddingRight: hasRight ? 72 : 14,
-    color: C.white, fontSize: 13.5, outline: 'none',
+    color: C.text, fontSize: 13.5, outline: 'none',
     fontFamily: "'DM Sans', sans-serif",
     transition: 'border-color 0.2s, box-shadow 0.2s', boxSizing: 'border-box',
 });
@@ -102,7 +103,8 @@ const Register = () => {
     const [formData, setFormData] = useState({
         name: '', email: '', password: '', confirmPassword: '',
         graduationYear: '', department: '', phone: '', company: '',
-        yearsOfExperience: '', location: '',
+        yearsOfExperience: '', location: '', country: 'India', zipCode: '',
+        countryCode: '+91'
     });
     const [locationLoading, setLocationLoading] = useState(false);
     const [loading, setLoading]   = useState(false);
@@ -118,7 +120,19 @@ const Register = () => {
     const navigate = useNavigate();
     const isMobile = useIsMobile();
 
-    const handleChange = e => setFormData({ ...formData, [e.target.name]: e.target.value });
+    const handleChange = e => {
+        const { name, value } = e.target;
+        if (name === 'country') {
+            const country = countries.find(c => c.name === value);
+            setFormData(prev => ({ ...prev, country: value, countryCode: country ? country.code : '', phone: '' }));
+        } else if (name === 'phone') {
+            // Only allow digits and max 10
+            const val = value.replace(/\D/g, '').slice(0, 10);
+            setFormData(prev => ({ ...prev, [name]: val }));
+        } else {
+            setFormData(prev => ({ ...prev, [name]: value }));
+        }
+    };
 
     const handleGetLocation = () => {
         if (!navigator.geolocation) return toast.error("Geolocation not supported");
@@ -146,11 +160,13 @@ const Register = () => {
         if (!isPhoneVerified) { toast.error('Please verify your phone number first'); return; }
         setLoading(true);
         try {
+            const fullPhone = `${formData.countryCode}${formData.phone}`;
             await register({
                 name: formData.name, email: formData.email, password: formData.password,
                 graduationYear: formData.graduationYear ? parseInt(formData.graduationYear) : undefined,
-                department: formData.department, phone: formData.phone,
+                department: formData.department, phone: fullPhone,
                 company: formData.company, location: formData.location,
+                country: formData.country, zipCode: formData.zipCode,
                 yearsOfExperience: formData.yearsOfExperience ? parseInt(formData.yearsOfExperience) : 0,
             });
             toast.success('Account created successfully!');
@@ -185,19 +201,22 @@ const Register = () => {
 
     const sendPhoneOTP = async () => {
         if (!formData.phone) return toast.error('Enter phone number first');
+        if (formData.phone.length < 10) return toast.error('Enter a valid 10-digit number');
+        const fullPhone = `${formData.countryCode}${formData.phone}`;
         try {
             setupRecaptcha();
-            const confirmation = await signInWithPhoneNumber(auth, formData.phone, window.recaptchaVerifier);
+            const confirmation = await signInWithPhoneNumber(auth, fullPhone, window.recaptchaVerifier);
             setConfirmationResult(confirmation);
             toast.success('SMS OTP sent');
         } catch (err) { toast.error(err.message || 'Failed to send SMS OTP'); }
     };
 
     const verifyPhoneOTP = async () => {
+        const fullPhone = `${formData.countryCode}${formData.phone}`;
         try {
             const result  = await confirmationResult.confirm(phoneOtp);
             const idToken = await result.user.getIdToken();
-            await API.post('/auth/verify-phone-otp', { idToken, phone: formData.phone });
+            await API.post('/auth/verify-phone-otp', { idToken, phone: fullPhone });
             setIsPhoneVerified(true);
             toast.success('Phone verified!');
         } catch (err) { toast.error(err.message || 'Invalid SMS OTP'); }
@@ -228,9 +247,9 @@ const Register = () => {
                 {/* header */}
                 <div style={{ textAlign: 'center', marginBottom: isMobile ? 24 : 32 }}>
                     <div style={{ width: isMobile ? 56 : 68, height: isMobile ? 56 : 68, borderRadius: 18, background: `linear-gradient(135deg, ${C.blueLight}, ${C.blueDark})`, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 18px', boxShadow: `0 8px 32px rgba(32,54,113,0.5)`, animation: 'float 5s ease-in-out infinite' }}>
-                        <FaGraduationCap style={{ color: C.white, fontSize: isMobile ? 24 : 30 }} />
+                        <FaGraduationCap style={{ color: '#FFFFFF', fontSize: isMobile ? 24 : 30 }} />
                     </div>
-                    <h1 style={{ fontFamily: "'Sora', sans-serif", fontSize: isMobile ? 24 : 28, fontWeight: 800, color: C.white, margin: '0 0 8px', letterSpacing: '-0.4px' }}>
+                    <h1 style={{ fontFamily: "'Sora', sans-serif", fontSize: isMobile ? 24 : 28, fontWeight: 800, color: C.text, margin: '0 0 8px', letterSpacing: '-0.4px' }}>
                         Join NIT JSR Alumni
                     </h1>
                     <p style={{ fontSize: isMobile ? 13 : 14, color: C.muted, margin: 0 }}>Create your alumni profile — it's free</p>
@@ -320,24 +339,6 @@ const Register = () => {
                                         </select>
                                     </Field>
                                 </div>
-
-                                {/* Location — spans full width */}
-                                <Field label="Location" icon={FaMapMarkerAlt} right={
-                                    <button type="button" onClick={handleGetLocation} disabled={locationLoading} style={{
-                                        background: 'none', border: 'none',
-                                        color: C.blueLight, fontSize: 10, fontWeight: 800,
-                                        cursor: locationLoading ? 'not-allowed' : 'pointer',
-                                        letterSpacing: '0.06em', padding: '2px 4px',
-                                        fontFamily: "'DM Sans', sans-serif", whiteSpace: 'nowrap',
-                                        opacity: locationLoading ? 0.6 : 1,
-                                    }}>
-                                        {locationLoading ? 'GETTING…' : 'USE GPS'}
-                                    </button>
-                                }>
-                                    <input type="text" name="location" value={formData.location} onChange={handleChange}
-                                        placeholder="City, Country"
-                                        style={inputSx(true)} onFocus={focusSx} onBlur={blurSx} />
-                                </Field>
                             </div>
                         </div>
 
@@ -346,21 +347,34 @@ const Register = () => {
                             <SectionLabel num="3">Professional Info</SectionLabel>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
 
-                                {/* Phone + Company */}
+                                {/* Country + Phone */}
                                 <div style={{ display: 'grid', gridTemplateColumns: col2, gap: 14 }}>
+                                    <Field label="Country" icon={FaMapMarkerAlt}>
+                                        <select name="country" value={formData.country} onChange={handleChange}
+                                            style={{ ...inputSx(), appearance: 'none', cursor: 'pointer' }}
+                                            onFocus={focusSx} onBlur={blurSx}>
+                                            <option value="" style={{ background: C.darkBg }}>Select Country</option>
+                                            {countries.map(c => <option key={c.name} value={c.name} style={{ background: C.darkBg }}>{c.name} ({c.code})</option>)}
+                                        </select>
+                                    </Field>
                                     <Field label="Phone" icon={FaPhone} right={
                                         isPhoneVerified
                                             ? <FaCheckCircle style={{ color: '#10B981', fontSize: 14 }} />
                                             : <VerifyBtn onClick={sendPhoneOTP} sent={!!confirmationResult} />
                                     }>
-                                        <input type="tel" name="phone" value={formData.phone} onChange={handleChange}
-                                            placeholder="+91 9876543210" disabled={isPhoneVerified}
-                                            style={inputSx(true)} onFocus={focusSx} onBlur={blurSx} />
-                                    </Field>
-                                    <Field label="Company" icon={FaBriefcase}>
-                                        <input type="text" name="company" value={formData.company} onChange={handleChange}
-                                            placeholder="Google / Amazon"
-                                            style={inputSx()} onFocus={focusSx} onBlur={blurSx} />
+                                        <div style={{ display: 'flex', gap: 0 }}>
+                                            <div style={{ 
+                                                background: 'var(--bg-secondary)', border: `1px solid ${C.darkBorder}`, 
+                                                borderRight: 'none', borderRadius: '9px 0 0 9px', padding: '10px 8px', 
+                                                color: C.muted, fontSize: 13.5, minWidth: 45, textAlign: 'center'
+                                            }}>
+                                                {formData.countryCode}
+                                            </div>
+                                            <input type="tel" name="phone" value={formData.phone} onChange={handleChange}
+                                                placeholder="9876543210" disabled={isPhoneVerified}
+                                                style={{ ...inputSx(true), borderRadius: '0 9px 9px 0', paddingLeft: 10 }} 
+                                                onFocus={focusSx} onBlur={blurSx} maxLength="10" />
+                                        </div>
                                     </Field>
                                 </div>
 
@@ -374,12 +388,18 @@ const Register = () => {
                                     />
                                 )}
 
-                                {/* Years of experience — full width */}
-                                <Field label="Years of Experience" icon={FaBriefcase}>
-                                    <input type="number" name="yearsOfExperience" value={formData.yearsOfExperience}
-                                        onChange={handleChange} placeholder="e.g. 5" min="0" max="50"
-                                        style={inputSx()} onFocus={focusSx} onBlur={blurSx} />
-                                </Field>
+                                <div style={{ display: 'grid', gridTemplateColumns: col2, gap: 14 }}>
+                                    <Field label="Years of Experience" icon={FaBriefcase}>
+                                        <input type="number" name="yearsOfExperience" value={formData.yearsOfExperience}
+                                            onChange={handleChange} placeholder="e.g. 5" min="0" max="50"
+                                            style={inputSx()} onFocus={focusSx} onBlur={blurSx} />
+                                    </Field>
+                                    <Field label="Zip / Postal Code" icon={FaMapMarkerAlt}>
+                                        <input type="text" name="zipCode" value={formData.zipCode}
+                                            onChange={handleChange} placeholder="e.g. 10001" required
+                                            style={inputSx()} onFocus={focusSx} onBlur={blurSx} />
+                                    </Field>
+                                </div>
 
                                 <div id="recaptcha-container" />
                             </div>
@@ -388,19 +408,20 @@ const Register = () => {
                         {/* submit */}
                         <button type="submit" disabled={loading} style={{
                             width: '100%', background: `linear-gradient(135deg, ${C.blueLight}, ${C.blue})`,
-                            border: 'none', borderRadius: 10, padding: '13px 0',
-                            color: C.white, fontSize: 14, fontWeight: 700, letterSpacing: '0.04em',
-                            cursor: loading ? 'not-allowed' : 'pointer',
+                            border: 'none', borderRadius: 10, padding: '14px 0',
+                            color: '#FFFFFF', fontSize: 14, fontWeight: 700,
+                            letterSpacing: '0.04em', cursor: loading ? 'not-allowed' : 'pointer',
                             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 9,
                             fontFamily: "'DM Sans', sans-serif",
-                            boxShadow: `0 4px 24px rgba(32,54,113,0.45)`,
+                            boxShadow: `0 4px 24px rgba(32,54,113,0.4)`,
                             transition: 'opacity 0.2s', opacity: loading ? 0.75 : 1,
+                            marginTop: 10
                         }}
-                            onMouseEnter={e => { if (!loading) e.currentTarget.style.opacity = '0.85'; }}
-                            onMouseLeave={e => { e.currentTarget.style.opacity = loading ? '0.75' : '1'; }}
+                            onMouseEnter={e => { if(!loading) e.currentTarget.style.opacity = '0.85'; }}
+                            onMouseLeave={e => e.currentTarget.style.opacity = loading? '0.75' : '1'}
                         >
                             {loading
-                                ? <div style={{ width: 18, height: 18, border: '2px solid rgba(255,255,255,0.3)', borderTopColor: C.white, borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />
+                                ? <div style={{ width: 18, height: 18, border: '2px solid rgba(255,255,255,0.3)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />
                                 : <>Create Account <FaArrowRight style={{ fontSize: 12 }} /></>
                             }
                         </button>

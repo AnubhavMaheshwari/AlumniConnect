@@ -78,10 +78,17 @@ const editMessage = async (req, res) => {
     try {
         const { content } = req.body;
         const messageId = req.params.id;
+        console.log("Editing message ID:", messageId, "New content:", content);
 
         const message = await Message.findById(messageId);
-        if (!message) return res.status(404).json({ message: "Message not found" });
-        if (message.sender.toString() !== req.user._id.toString()) return res.status(403).json({ message: "Not authorized to edit this message" });
+        if (!message) {
+            console.log("Message not found with ID:", messageId);
+            return res.status(404).json({ message: "Message not found" });
+        }
+        if (message.sender.toString() !== req.user._id.toString()) {
+            console.log("Not authorized to edit. Sender:", message.sender, "User:", req.user._id);
+            return res.status(403).json({ message: "Not authorized to edit this message" });
+        }
 
         message.content = content;
         message.isEdited = true;
@@ -162,4 +169,19 @@ const sendAttachment = async (req, res) => {
     }
 };
 
-module.exports = { allMessages, sendMessage, reportMessage, editMessage, deleteMessage, sendAttachment };
+// @description     Mark Messages as Read
+// @route           PUT /api/message/read/:chatId
+// @access          Protected
+const markAsRead = async (req, res) => {
+    try {
+        await Message.updateMany(
+            { chat: req.params.chatId, sender: { $ne: req.user._id }, readBy: { $ne: req.user._id } },
+            { $addToSet: { readBy: req.user._id } }
+        );
+        res.json({ success: true });
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
+};
+
+module.exports = { allMessages, sendMessage, reportMessage, editMessage, deleteMessage, sendAttachment, markAsRead };
