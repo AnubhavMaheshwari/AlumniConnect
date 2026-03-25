@@ -10,6 +10,7 @@ import ScrollToTop from './components/ScrollToTop';
 
 import Home from './pages/Home';
 import Login from './pages/Login';
+import ForgotPassword from './pages/ForgotPassword';
 import Register from './pages/Register';
 import FAQ from './pages/FAQ';
 import Contact from './pages/Contact';
@@ -34,6 +35,7 @@ function App() {
               {/* Public routes */}
               <Route index element={<Home />} />
               <Route path="login" element={<Login />} />
+              <Route path="forgot-password" element={<ForgotPassword />} />
               <Route path="register" element={<Register />} />
               <Route path="faq" element={<FAQ />} />
               <Route path="contact" element={<Contact />} />

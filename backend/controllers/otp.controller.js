@@ -139,3 +139,56 @@ exports.checkPhoneAvailable = async (req, res) => {
         res.status(500).json({ success: false, message: error.message });
     }
 };
+
+// @desc    Send Forgot Password OTP
+// @route   POST /api/auth/send-forgot-password-otp
+exports.sendForgotPasswordOTP = async (req, res) => {
+    try {
+        const { email } = req.body || {};
+        const normalizedEmail = (email || '').trim().toLowerCase();
+
+        if (!normalizedEmail) {
+            return res.status(400).json({ success: false, message: 'Email is required' });
+        }
+
+        const user = await User.findOne({ email: normalizedEmail });
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'No user found with this email address' });
+        }
+
+        const otp = generateOTP();
+        const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
+        // Store or update OTP in Verification collection
+        await Verification.findOneAndUpdate(
+            { identifier: normalizedEmail },
+            { otp, expiresAt },
+            { upsert: true, new: true }
+        );
+
+        const html = `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 10px;">
+                <h2 style="color: #4F46E5; text-align: center;">Reset Your Password</h2>
+                <p>Hello ${user.name},</p>
+                <p>You requested to reset your password. Use the verification code below to proceed:</p>
+                <div style="background: #f3f4f6; padding: 20px; text-align: center; font-size: 32px; font-weight: bold; letter-spacing: 5px; color: #111827; border-radius: 8px; margin: 20px 0;">
+                    ${otp}
+                </div>
+                <p>This code will expire in 10 minutes.</p>
+                <p>If you did not request a password reset, please ignore this email or contact support.</p>
+                <hr style="border: 0; border-top: 1px solid #e0e0e0; margin: 20px 0;">
+                <p style="font-size: 12px; color: #6b7280; text-align: center;">Alumni Connect - NIT Jamshedpur</p>
+            </div>
+        `;
+
+        await sendEmail({
+            email: normalizedEmail,
+            subject: 'Password Reset OTP - Alumni Connect',
+            html
+        });
+
+        res.json({ success: true, message: 'OTP sent to email for password reset' });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};

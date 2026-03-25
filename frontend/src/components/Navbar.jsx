@@ -153,6 +153,7 @@ const Navbar = () => {
         { name: 'Events',    path: '/events' },
         { name: 'Jobs',      path: '/jobs' },
         { name: 'News',      path: '/news' },
+        { name: 'Notifications', path: '/notifications' },
         { name: 'FAQ',       path: '/faq' },
         { name: 'Contact Us',   path: '/contact' },
         ...(user?.role === 'admin' ? [{ name: 'Admin', path: '/admin' }] : []),

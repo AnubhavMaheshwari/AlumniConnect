@@ -204,3 +204,38 @@ exports.resetPassword = async (req, res) => {
         res.status(500).json({ success: false, message: error.message });
     }
 };
+
+// @desc    Reset password with OTP
+// @route   POST /api/auth/reset-password-otp
+exports.resetPasswordWithOTP = async (req, res) => {
+    try {
+        const { email, otp, password } = req.body;
+        const normalizedEmail = (email || '').trim().toLowerCase();
+
+        if (!normalizedEmail || !otp || !password) {
+            return res.status(400).json({ success: false, message: 'Please provide email, OTP and new password' });
+        }
+
+        const Verification = require('../models/Verification');
+        const verification = await Verification.findOne({ identifier: normalizedEmail, otp });
+
+        if (!verification || verification.expiresAt < Date.now()) {
+            return res.status(400).json({ success: false, message: 'Invalid or expired OTP' });
+        }
+
+        const user = await User.findOne({ email: normalizedEmail });
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
+
+        user.password = password;
+        await user.save();
+
+        // Remove verification record
+        await Verification.deleteOne({ _id: verification._id });
+
+        res.json({ success: true, message: 'Password reset successful. You can now login with your new password.' });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
