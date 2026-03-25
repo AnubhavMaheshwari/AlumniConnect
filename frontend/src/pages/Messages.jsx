@@ -134,7 +134,11 @@ const Messages = () => {
     };
 
     /* ── helpers ── */
-    const getChatName = c => c.isGroupChat ? c.chatName : (c.users[0]._id === user._id ? c.users[1].name : c.users[0].name);
+    const getChatName = c => {
+        if (c.isGroupChat) return c.chatName;
+        const recipient = c.users.find(u => u._id !== user._id) || c.users[0];
+        return recipient._id === user._id ? "You" : recipient.name;
+    };
     const getChatImage = c => c.isGroupChat ? null : (c.users[0]._id === user._id ? c.users[1].profileImage : c.users[0].profileImage);
     const getChatUserId = c => c.users[0]._id === user._id ? c.users[1]._id : c.users[0]._id;
 
