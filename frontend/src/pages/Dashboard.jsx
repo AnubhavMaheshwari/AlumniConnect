@@ -252,11 +252,7 @@ const Dashboard = () => {
         fontFamily: "'DM Sans', sans-serif"
     };
 
-    const activities = [
-        { id: 1, text: 'Updated profile information', time: '2 hours ago' },
-        { id: 2, text: 'Changed contact email', time: '1 day ago' },
-        { id: 3, text: 'Verified phone number', time: '3 days ago' },
-    ];
+
 
     return (
         <div style={{
@@ -404,26 +400,7 @@ const Dashboard = () => {
                                         />
                                     </FieldRow>
                                 </div>
-                                <button
-                                    type="submit"
-                                    disabled={loading}
-                                    style={{
-                                        marginTop: 22, width: '100%',
-                                        background: `linear-gradient(135deg, var(--blue-light) 0%, var(--blue) 100%)`,
-                                        border: 'none', borderRadius: 9, padding: '11px 0',
-                                        color: '#fff', fontSize: 13, fontWeight: 700,
-                                        letterSpacing: '0.06em', cursor: 'pointer',
-                                        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-                                        fontFamily: "'DM Sans', sans-serif",
-                                        boxShadow: `0 4px 20px rgba(32,54,113,0.45)`,
-                                        transition: 'opacity 0.2s'
-                                    }}
-                                    onMouseEnter={e => e.currentTarget.style.opacity = '0.82'}
-                                    onMouseLeave={e => e.currentTarget.style.opacity = '1'}
-                                >
-                                    <FaSave style={{ fontSize: 13 }} />
-                                    {loading ? 'Saving…' : 'Save Changes'}
-                                </button>
+
                             </form>
                         </div>
 
@@ -460,13 +437,24 @@ const Dashboard = () => {
 
                                 <FieldRow label="Phone Number">
                                     <div style={{ display: 'flex', gap: 0, flex: 1 }}>
-                                        <div style={{ 
-                                            background: 'var(--input-bg)', border: '1px solid var(--border)', 
-                                            borderRight: 'none', borderRadius: '8px 0 0 8px', padding: '10px 8px', 
-                                            color: 'var(--text-muted)', fontSize: 13, minWidth: 45, textAlign: 'center'
-                                        }}>
-                                            {editData.countryCode || (countries.find(c => c.name === editData.country)?.code || '+91')}
-                                        </div>
+                                        <select
+                                            name="countryCode"
+                                            value={editData.countryCode}
+                                            onChange={handleChange}
+                                            style={{
+                                                background: 'var(--input-bg)', border: '1px solid var(--border)', 
+                                                borderRight: 'none', borderRadius: '8px 0 0 8px', padding: '10px 0', 
+                                                color: 'var(--text-muted)', fontSize: 12.5, width: 48, textAlign: 'center',
+                                                outline: 'none', cursor: 'pointer', appearance: 'none',
+                                                fontFamily: "'DM Sans', sans-serif", fontWeight: 600
+                                            }}
+                                        >
+                                            {countries.map(c => (
+                                                <option key={c.name + c.code} value={c.code} style={{ background: 'var(--bg-secondary)', color: 'var(--text-primary)' }}>
+                                                    {c.code} ({c.name})
+                                                </option>
+                                            ))}
+                                        </select>
                                         <InputField
                                             icon={FaPhone}
                                             name="phone"
@@ -506,34 +494,27 @@ const Dashboard = () => {
                             <div id="recaptcha-container-dash"></div>
                         </div>
 
-                        <div style={{ height: 1, background: 'var(--border)', margin: '32px 0' }} />
-
-                        {/* RECENT ACTIVITY */}
-                        <div>
-                            <SectionTitle icon={HiSparkles}>Recent Activity</SectionTitle>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                                {activities.map((act, i) => (
-                                    <div key={act.id} style={{
-                                        display: 'flex', alignItems: 'center', gap: 14,
-                                        padding: '14px 16px', borderRadius: 12,
-                                        background: 'var(--bg)', border: '1px solid var(--border)',
-                                        transition: 'transform 0.2s'
-                                    }}
-                                    onMouseEnter={e => e.currentTarget.style.transform = 'translateX(5px)'}
-                                    onMouseLeave={e => e.currentTarget.style.transform = 'translateX(0)'}
-                                    >
-                                        <div style={{
-                                            width: 8, height: 8, borderRadius: '50%',
-                                            background: i === 0 ? 'var(--blue-light)' : 'var(--border)'
-                                        }} />
-                                        <div style={{ flex: 1 }}>
-                                            <p style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-primary)', margin: '0 0 2px' }}>{act.text}</p>
-                                            <p style={{ fontSize: 11, color: 'var(--text-muted)', margin: 0 }}>{act.time}</p>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
+                        <button
+                            type="button"
+                            onClick={handleSaveGeneral}
+                            disabled={loading}
+                            style={{
+                                marginTop: 10, width: '100%',
+                                background: `linear-gradient(135deg, var(--blue-light) 0%, var(--blue) 100%)`,
+                                border: 'none', borderRadius: 9, padding: '12px 0',
+                                color: '#fff', fontSize: 13, fontWeight: 700,
+                                letterSpacing: '0.06em', cursor: 'pointer',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                                fontFamily: "'DM Sans', sans-serif",
+                                boxShadow: `0 4px 20px rgba(32,54,113,0.45)`,
+                                transition: 'opacity 0.2s'
+                            }}
+                            onMouseEnter={e => e.currentTarget.style.opacity = '0.82'}
+                            onMouseLeave={e => e.currentTarget.style.opacity = '1'}
+                        >
+                            <FaSave style={{ fontSize: 13 }} />
+                            {loading ? 'Saving…' : 'Save Changes'}
+                        </button>
 
                     </div>
                 </div>

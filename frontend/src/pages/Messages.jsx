@@ -762,7 +762,7 @@ const Messages = () => {
                                                 </div>
                                             )}
                                             <div style={{ display: 'flex', flexDirection: 'column', alignItems: isMine ? 'flex-end' : 'flex-start' }}>
-                                                {!isMine && !prevSame && <span style={{ fontSize: '12px', color: C.muted, marginBottom: '4px', marginLeft: '4px' }}>{m.sender?.name}</span>}
+                                                {!isMine && !prevSame && selectedChat.isGroupChat && <span style={{ fontSize: '12px', color: C.muted, marginBottom: '4px', marginLeft: '4px' }}>{m.sender?.name}</span>}
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexDirection: isMine ? 'row-reverse' : 'row' }}>
                                                     <div style={{ background: isMine ? C.blueLight : C.darkCard, color: m.isDeleted ? C.muted : (isMine ? C.trueWhite : C.white), fontStyle: m.isDeleted ? 'italic' : 'normal', padding: '10px 14px', borderRadius: isMine ? '16px 16px 4px 16px' : '16px 16px 16px 4px', fontSize: '14px', lineHeight: '1.4', wordBreak: 'break-word', border: `1px solid ${C.darkBorder}` }}>
                                                         {m.fileUrl && !m.isDeleted && (
