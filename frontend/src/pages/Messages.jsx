@@ -51,23 +51,27 @@ if (typeof document !== 'undefined' && !document.getElementById('msg-styles')) {
     document.head.appendChild(s);
 }
 
-const ENDPOINT = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const ENDPOINT = (import.meta.env.VITE_API_URL || 'http://localhost:5000').replace('/api', '');
 let socket, selectedChatCompare;
 
 /* ── avatar helper ───────────────────────────────────────────────────────── */
-const Avatar = ({ name = '', img, size = 40, gradient = false }) => (
-    <div style={{
-        width: size, height: size, borderRadius: '50%', flexShrink: 0,
-        background: gradient
-            ? `linear-gradient(135deg, ${C.blueLight}, ${C.blueDark})`
-            : C.blueFaint,
-        border: `1px solid ${C.blueBorder}`,
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        overflow: 'hidden', fontSize: size * 0.38, fontWeight: 800,
-        color: gradient ? C.trueWhite : C.blueLight, fontFamily: "'Sora', sans-serif",
-        backgroundImage: img ? `url(${img})` : undefined,
-        backgroundSize: 'cover', backgroundPosition: 'center',
-    }}>
+const Avatar = ({ name = '', img, size = 40, gradient = false, onClick }) => (
+    <div 
+        onClick={onClick}
+        style={{
+            width: size, height: size, borderRadius: '50%', flexShrink: 0,
+            background: gradient
+                ? `linear-gradient(135deg, ${C.blueLight}, ${C.blueDark})`
+                : C.blueFaint,
+            border: `1px solid ${C.blueBorder}`,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            overflow: 'hidden', fontSize: size * 0.38, fontWeight: 800,
+            color: gradient ? C.trueWhite : C.blueLight, fontFamily: "'Sora', sans-serif",
+            backgroundImage: img ? `url(${img})` : undefined,
+            backgroundSize: 'cover', backgroundPosition: 'center',
+            cursor: onClick ? 'zoom-in' : 'default'
+        }}
+    >
         {!img && name.charAt(0).toUpperCase()}
     </div>
 );
@@ -100,7 +104,10 @@ const Messages = () => {
     // group info
     const [showGroupInfo, setShowGroupInfo] = useState(location.state?.showGroupInfo || false);
     const [addMemberSearch, setAddMemberSearch] = useState('');
-    const [addMemberResults, setAddMemberResults] = useState([]);
+    // batch groups
+    const [batchGroups, setBatchGroups] = useState([]);
+    const [showBatchList, setShowBatchList] = useState(false);
+    const [loadingBatches, setLoadingBatches] = useState(false);
 
     // reporting
     const [showReportModal, setShowReportModal] = useState(false);
@@ -113,6 +120,7 @@ const Messages = () => {
     // attachments
     const [attachment, setAttachment] = useState(null);
     const [uploading, setUploading] = useState(false);
+    const [previewImage, setPreviewImage] = useState(null);
     const fileInputRef = useRef(null);
 
     const messagesContainerRef = useRef(null);
@@ -144,15 +152,19 @@ const Messages = () => {
 
     /* ── socket ── */
     useEffect(() => {
-        socket = io(ENDPOINT);
+        if (!user?._id) return;
+        
+        socket = io(ENDPOINT, { 
+            transports: ["websocket", "polling"],
+            reconnection: true,
+            reconnectionAttempts: 5
+        });
+
         socket.emit('setup', user);
         socket.on('connected', () => setSocketConnected(true));
         socket.on('typing', () => setIsTyping(true));
         socket.on('stop typing', () => setIsTyping(false));
-        return () => socket.disconnect();
-    }, [user]);
 
-    useEffect(() => {
         socket.on('message recieved', newMessageRecieved => {
             if (!selectedChatCompare || selectedChatCompare._id !== newMessageRecieved.chat._id) {
                 toast.info(`💬 ${newMessageRecieved.sender.name}: ${newMessageRecieved.content.slice(0, 40)}`);
@@ -171,7 +183,17 @@ const Messages = () => {
                 setMessages(prev => prev.map(m => m._id === deletedMsg._id ? deletedMsg : m));
             }
         });
-    });
+
+        return () => {
+            socket.off('connected');
+            socket.off('typing');
+            socket.off('stop typing');
+            socket.off('message recieved');
+            socket.off('message updated');
+            socket.off('message deleted');
+            socket.disconnect();
+        };
+    }, [user?._id]);
 
     useEffect(() => { 
         window.scrollTo(0, 0);
@@ -180,6 +202,30 @@ const Messages = () => {
     useEffect(() => { if (location.state?.userId) accessChat(location.state.userId); }, [location.state]);
     useEffect(() => { fetchMessages(); selectedChatCompare = selectedChat; }, [selectedChat]);
     useEffect(() => { if (messagesContainerRef.current) messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight; }, [messages]);
+
+    const fetchBatches = async () => {
+        setLoadingBatches(true);
+        try {
+            const { data } = await API.get('/chat/batches');
+            setBatchGroups(data);
+        } catch {
+            toast.error('Failed to load batch groups');
+        } finally {
+            setLoadingBatches(false);
+        }
+    };
+
+    const joinBatch = async (chatId) => {
+        try {
+            const { data } = await API.put('/chat/groupadd', { chatId, userId: user._id });
+            setChats(prev => prev.find(c => c._id === data._id) ? prev : [data, ...prev]);
+            setSelectedChat(data);
+            setShowBatchList(false);
+            toast.success('Joined batch group!');
+        } catch (err) {
+            toast.error(err.response?.data?.message || 'Failed to join batch');
+        }
+    };
 
     const fetchChats = async () => {
         try { const { data } = await API.get('/chat'); setChats(data); }
@@ -379,13 +425,33 @@ const Messages = () => {
         <div style={{ maxWidth: 1200, margin: '0 auto', padding: '32px 20px 48px', fontFamily: "'DM Sans', sans-serif", color: C.white }}>
 
             {/* page header */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 24 }}>
-                <div style={{ width: 38, height: 38, borderRadius: 10, background: C.blue, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: `0 4px 16px rgba(32,54,113,0.5)` }}>
-                    <FaCommentDots style={{ color: C.trueWhite, fontSize: 16 }} />
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24, gap: 15, flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <div style={{ width: 38, height: 38, borderRadius: 10, background: C.blue, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: `0 4px 16px rgba(32,54,113,0.5)` }}>
+                        <FaCommentDots style={{ color: C.trueWhite, fontSize: 16 }} />
+                    </div>
+                    <h1 style={{ fontFamily: "'Sora', sans-serif", fontSize: 22, fontWeight: 800, color: C.white, margin: 0, letterSpacing: '-0.3px' }}>
+                        Messages
+                    </h1>
                 </div>
-                <h1 style={{ fontFamily: "'Sora', sans-serif", fontSize: 22, fontWeight: 800, color: C.white, margin: 0, letterSpacing: '-0.3px' }}>
-                    Messages
-                </h1>
+
+                <button onClick={() => { setShowBatchList(!showBatchList); if (!showBatchList) fetchBatches(); }} style={{
+                    padding: '8px 16px',
+                    background: showBatchList ? C.blue : C.blueFaint,
+                    border: `1px solid ${showBatchList ? C.blue : C.blueBorder}`, 
+                    borderRadius: 9,
+                    color: showBatchList ? C.trueWhite : C.blueLight,
+                    fontSize: 12, fontWeight: 700, cursor: 'pointer',
+                    display: 'flex', alignItems: 'center', gap: 8,
+                    transition: 'all 0.2s',
+                    fontFamily: "'DM Sans', sans-serif"
+                }}
+                    onMouseEnter={e => { if (!showBatchList) e.currentTarget.style.background = 'rgba(32,54,113,0.22)'; }}
+                    onMouseLeave={e => { if (!showBatchList) e.currentTarget.style.background = C.blueFaint; }}
+                >
+                     {showBatchList ? <FaArrowLeft style={{ fontSize: 10 }} /> : <FaUsers style={{ fontSize: 13 }} />}
+                     {showBatchList ? 'Back to Chats' : 'Browse Batch Groups'}
+                </button>
             </div>
 
             <div style={{ display: 'flex', gap: isMobile ? 0 : 16, height: isMobile ? 'calc(100vh - 180px)' : '78vh', minHeight: 480 }}>
@@ -430,7 +496,7 @@ const Messages = () => {
                                     <div key={u._id} onClick={() => { accessChat(u._id); setSearch(''); setSearchResults([]); }}
                                         className="search-item"
                                         style={{ display: 'flex', alignItems: 'center', gap: 9, padding: '9px 12px', cursor: 'pointer', transition: 'background 0.15s' }}>
-                                        <Avatar name={u.name} size={28} gradient />
+                                        <Avatar name={u.name} img={u.profileImage} size={28} gradient onClick={(e) => { e.stopPropagation(); if (u.profileImage) setPreviewImage(u.profileImage); }} />
                                         <div>
                                             <p style={{ fontSize: 12.5, fontWeight: 600, color: C.white, margin: 0 }}>{u.name}</p>
                                             <p style={{ fontSize: 10.5, color: C.muted, margin: 0 }}>{u.email}</p>
@@ -441,44 +507,72 @@ const Messages = () => {
                         )}
                     </div>
 
-                    {/* chat list */}
+                    {/* chat list / batch list */}
                     <div className="msg-scroll" style={{ flex: 1, overflowY: 'auto', padding: '10px 10px' }}>
-                        {loadingChats ? (
-                            <div style={{ display: 'flex', justifyContent: 'center', padding: '40px 0' }}>
-                                <div style={{ width: 24, height: 24, borderRadius: '50%', border: `3px solid ${C.blueFaint}`, borderTopColor: C.blueLight, animation: 'spin 0.7s linear infinite' }} />
-                            </div>
-                        ) : filteredChats.length === 0 ? (
-                            <div style={{ textAlign: 'center', padding: '40px 16px', color: C.muted, fontSize: 12.5 }}>
-                                No chats yet.<br />Search for a user to start.
-                            </div>
-                        ) : 
-                            filteredChats.map(c => {
-                                const active = selectedChat?._id === c._id;
-                                return (
-                                <div key={c._id} onClick={() => setSelectedChat(c)}
-                                    className="chat-item"
-                                    style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 10px', cursor: 'pointer', marginBottom: 3, background: active ? C.blueFaint : 'transparent', borderColor: active ? C.blueBorder : 'transparent' }}>
-                                    {c.isGroupChat
-                                        ? <div style={{ width: 40, height: 40, borderRadius: '50%', flexShrink: 0, background: `linear-gradient(135deg, ${C.blue}, ${C.blueDark})`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                            <FaUsers style={{ color: C.trueWhite, fontSize: 16 }} />
+                        {showBatchList ? (
+                            loadingBatches ? (
+                                <div style={{ display: 'flex', justifyContent: 'center', padding: '40px 0' }}>
+                                    <div style={{ width: 24, height: 24, borderRadius: '50%', border: `3px solid ${C.blueFaint}`, borderTopColor: C.blueLight, animation: 'spin 0.7s linear infinite' }} />
+                                </div>
+                            ) : batchGroups.length === 0 ? (
+                                <div style={{ textAlign: 'center', padding: '40px 16px', color: C.muted, fontSize: 12.5 }}>No batch groups found.</div>
+                            ) : (
+                                batchGroups.map(b => (
+                                    <div key={b._id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, padding: '12px 10px', borderBottom: `1px solid ${C.darkBorder}` }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
+                                            <div style={{ width: 34, height: 34, borderRadius: '50%', flexShrink: 0, background: `linear-gradient(135deg, ${C.blue}, ${C.blueDark})`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                <FaUsers style={{ color: C.trueWhite, fontSize: 13 }} />
+                                            </div>
+                                            <div style={{ minWidth: 0 }}>
+                                                <p style={{ fontSize: 13, fontWeight: 700, color: C.white, margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{b.chatName}</p>
+                                                <p style={{ fontSize: 10.5, color: C.muted, margin: 0 }}>{b.users.length} members</p>
+                                            </div>
                                         </div>
-                                        : <Avatar name={getChatName(c)} img={getChatImage(c)} size={40} gradient />
-                                    }
-                                    <div style={{ minWidth: 0 }}>
-                                        <p style={{ fontSize: 13.5, fontWeight: active ? 700 : 600, color: active ? C.white : '#C5CCE0', margin: '0 0 2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                                            {getChatName(c)}
-                                        </p>
-                                        {c.latestMessage && (
-                                            <p style={{ fontSize: 11.5, color: C.muted, margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                                                <span style={{ fontWeight: 600 }}>{c.latestMessage.sender.name === user.name ? 'You' : c.latestMessage.sender.name}:</span>{' '}
-                                                {c.latestMessage.content.slice(0, 40)}{c.latestMessage.content.length > 40 ? '…' : ''}
-                                            </p>
+                                        {b.users.some(u => u._id === user._id) ? (
+                                            <button onClick={() => { setSelectedChat(b); setShowBatchList(false); }} style={{ background: C.blueFaint, border: `1px solid ${C.blueBorder}`, borderRadius: 6, padding: '4px 8px', color: C.blueLight, fontSize: 10, fontWeight: 700, cursor: 'pointer' }}>Open</button>
+                                        ) : (
+                                            <button onClick={() => joinBatch(b._id)} style={{ background: C.blue, border: 'none', borderRadius: 6, padding: '4px 10px', color: C.trueWhite, fontSize: 10, fontWeight: 700, cursor: 'pointer' }}>Join</button>
                                         )}
                                     </div>
+                                ))
+                            )
+                        ) : (
+                            loadingChats ? (
+                                <div style={{ display: 'flex', justifyContent: 'center', padding: '40px 0' }}>
+                                    <div style={{ width: 24, height: 24, borderRadius: '50%', border: `3px solid ${C.blueFaint}`, borderTopColor: C.blueLight, animation: 'spin 0.7s linear infinite' }} />
                                 </div>
-                            );
-                        })
-                    }
+                            ) : filteredChats.length === 0 ? (
+                                <div style={{ textAlign: 'center', padding: '40px 16px', color: C.muted, fontSize: 12.5 }}>
+                                    No chats yet.<br />Search for a user to start.
+                                </div>
+                            ) : 
+                                filteredChats.map(c => {
+                                    const active = selectedChat?._id === c._id;
+                                    return (
+                                    <div key={c._id} onClick={() => setSelectedChat(c)}
+                                        className="chat-item"
+                                        style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 10px', cursor: 'pointer', marginBottom: 3, background: active ? C.blueFaint : 'transparent', borderColor: active ? C.blueBorder : 'transparent' }}>
+                                        {c.isGroupChat
+                                            ? <div style={{ width: 40, height: 40, borderRadius: '50%', flexShrink: 0, background: `linear-gradient(135deg, ${C.blue}, ${C.blueDark})`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                <FaUsers style={{ color: C.trueWhite, fontSize: 16 }} />
+                                            </div>
+                                            : <Avatar name={getChatName(c)} img={getChatImage(c)} size={40} gradient onClick={(e) => { e.stopPropagation(); if (getChatImage(c)) setPreviewImage(getChatImage(c)); }} />
+                                        }
+                                        <div style={{ minWidth: 0 }}>
+                                            <p style={{ fontSize: 13.5, fontWeight: active ? 700 : 600, color: active ? C.white : '#C5CCE0', margin: '0 0 2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                                {getChatName(c)}
+                                            </p>
+                                            {c.latestMessage && (
+                                                <p style={{ fontSize: 11.5, color: C.muted, margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                                    <span style={{ fontWeight: 600 }}>{c.latestMessage.sender.name === user.name ? 'You' : c.latestMessage.sender.name}:</span>{' '}
+                                                    {c.latestMessage.content.slice(0, 40)}{c.latestMessage.content.length > 40 ? '…' : ''}
+                                                </p>
+                                            )}
+                                        </div>
+                                    </div>
+                                );
+                            })
+                        )}
                     </div>
                 </div>
                 )}
@@ -500,7 +594,7 @@ const Messages = () => {
                                     ? <div onClick={() => setShowGroupInfo(true)} style={{ width: 38, height: 38, borderRadius: '50%', flexShrink: 0, background: `linear-gradient(135deg, ${C.blue}, ${C.blueDark})`, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
                                         <FaUsers style={{ color: C.trueWhite, fontSize: 15 }} />
                                     </div>
-                                    : <Avatar name={getChatName(selectedChat)} img={getChatImage(selectedChat)} size={38} gradient />
+                                    : <Avatar name={getChatName(selectedChat)} img={getChatImage(selectedChat)} size={38} gradient onClick={() => { if (getChatImage(selectedChat)) setPreviewImage(getChatImage(selectedChat)); }} />
                                 }
                                 <div style={{ flex: 1, minWidth: 0 }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -540,7 +634,12 @@ const Messages = () => {
                                             {!isMine && (
                                                 <div style={{ width: '32px', flexShrink: 0, display: 'flex', alignItems: 'flex-end' }}>
                                                     {!nextSame && (
-                                                        <img src={m.sender?.profileImage || `https://ui-avatars.com/api/?name=${m.sender?.name}`} alt="avatar" style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover' }} />
+                                                        <Avatar 
+                                                            name={m.sender?.name} 
+                                                            img={m.sender?.profileImage} 
+                                                            size={32} 
+                                                            onClick={() => { if (m.sender?.profileImage) setPreviewImage(m.sender?.profileImage); }} 
+                                                        />
                                                     )}
                                                 </div>
                                             )}
@@ -551,7 +650,7 @@ const Messages = () => {
                                                         {m.fileUrl && !m.isDeleted && (
                                                             <div style={{ marginBottom: m.content ? '8px' : '0' }}>
                                                                 {m.fileType?.startsWith('image/') || m.fileUrl.match(/\.(jpeg|jpg|gif|png)$/i) ? (
-                                                                    <img src={m.fileUrl} alt="attachment" style={{ maxWidth: '100%', maxHeight: '200px', borderRadius: '8px', cursor: 'pointer' }} onClick={() => window.open(m.fileUrl, '_blank')} />
+                                                                    <img src={m.fileUrl} alt="attachment" style={{ maxWidth: '100%', maxHeight: '200px', borderRadius: '8px', cursor: 'zoom-in' }} onClick={() => setPreviewImage(m.fileUrl)} />
                                                                 ) : (
                                                                     <a href={m.fileUrl} target="_blank" rel="noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '8px', color: isMine ? C.trueWhite : C.blueLight, textDecoration: 'none', background: 'rgba(0,0,0,0.1)', padding: '8px 12px', borderRadius: '8px' }}>
                                                                         <FaFileAlt />
@@ -748,7 +847,7 @@ const Messages = () => {
                                     <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: C.darkCard, border: `1px solid ${C.darkBorder}`, borderRadius: 8, marginTop: 4, maxHeight: 150, overflowY: 'auto', zIndex: 10 }}>
                                         {addMemberResults.slice(0, 5).map(u => (
                                             <div key={u._id} onClick={() => handleAddToGroup(u)} className="search-item" style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', cursor: 'pointer', borderBottom: `1px solid ${C.darkBorder}` }}>
-                                                <Avatar name={u.name} img={u.profileImage} size={24} />
+                                                <Avatar name={u.name} img={u.profileImage} size={24} onClick={() => { if (u.profileImage) setPreviewImage(u.profileImage); }} />
                                                 <span style={{ fontSize: 13, color: C.white }}>{u.name}</span>
                                             </div>
                                         ))}
@@ -821,6 +920,13 @@ const Messages = () => {
                             <span style={{ fontSize: '12px' }}>⚠️</span> Report Message
                         </div>
                     ) : null}
+                </div>
+            )}
+            {/* ════════════════ IMAGE PREVIEW ════════════════ */}
+            {previewImage && (
+                <div onClick={() => setPreviewImage(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.92)', backdropFilter: 'blur(10px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: 40, cursor: 'zoom-out' }}>
+                    <img src={previewImage} alt="preview" style={{ maxWidth: '100%', maxHeight: '100%', borderRadius: 12, boxShadow: '0 40px 100px rgba(0,0,0,0.8)', animation: 'fadeUp 0.3s ease' }} />
+                    <FaTimes style={{ position: 'absolute', top: 30, right: 30, color: '#fff', fontSize: 28, cursor: 'pointer', opacity: 0.7 }} onClick={() => setPreviewImage(null)} />
                 </div>
             )}
         </div>

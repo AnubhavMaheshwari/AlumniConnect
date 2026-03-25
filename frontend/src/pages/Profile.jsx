@@ -38,6 +38,7 @@ const Profile = () => {
     const [profile, setProfile] = useState(null);
     const [loading, setLoading] = useState(true);
     const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+    const [previewImage, setPreviewImage] = useState(null);
     const isMobile = useIsMobile();
     const location = useLocation();
     const navigate = useNavigate();
@@ -120,23 +121,27 @@ const Profile = () => {
 
                         {/* avatar */}
                         <div 
-                            onClick={() => isOwnProfile && setIsUploadModalOpen(true)}
+                            onClick={() => { if (profile.profileImage) setPreviewImage(profile.profileImage); }}
                             className="profile-avatar-container"
                             style={{ 
                                 width: isMobile ? 64 : 80, height: isMobile ? 64 : 80, borderRadius: '50%', flexShrink: 0, 
                                 background: 'rgba(255,255,255,0.15)', border: '3px solid rgba(255,255,255,0.3)', 
                                 display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Sora', sans-serif", 
                                 fontSize: isMobile ? 22 : 28, fontWeight: 800, color: '#fff', boxShadow: '0 4px 20px rgba(0,0,0,0.3)', 
-                                zIndex: 1, position: 'relative', overflow: 'hidden', cursor: isOwnProfile ? 'pointer' : 'default',
+                                zIndex: 1, position: 'relative', overflow: 'hidden', cursor: profile.profileImage ? 'zoom-in' : 'default',
                                 backgroundImage: profile.profileImage ? `url(${profile.profileImage})` : 'none',
                                 backgroundSize: 'cover', backgroundPosition: 'center'
                             }}
                         >
                             {!profile.profileImage && initials}
                             {isOwnProfile && (
-                                <div className="profile-camera-overlay" style={{
-                                    position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0, transition: 'opacity 0.2s'
-                                }}>
+                                <div 
+                                    className="profile-camera-overlay" 
+                                    onClick={(e) => { e.stopPropagation(); setIsUploadModalOpen(true); }}
+                                    style={{
+                                        position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0, transition: 'opacity 0.2s', cursor: 'pointer'
+                                    }}
+                                >
                                     <FaCamera style={{ fontSize: 20, color: '#fff' }} />
                                 </div>
                             )}
@@ -237,6 +242,14 @@ const Profile = () => {
                     </div>
                 </div>
             </div>
+
+            {/* ════════════════ IMAGE PREVIEW ════════════════ */}
+            {previewImage && (
+                <div onClick={() => setPreviewImage(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.92)', backdropFilter: 'blur(10px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: 40, cursor: 'zoom-out' }}>
+                    <img src={previewImage} alt="preview" style={{ maxWidth: '100%', maxHeight: '100%', borderRadius: 12, boxShadow: '0 40px 100px rgba(0,0,0,0.8)', animation: 'fadeUp 0.3s ease' }} />
+                    <FaTimes style={{ position: 'absolute', top: 30, right: 30, color: '#fff', fontSize: 28, cursor: 'pointer', opacity: 0.7 }} onClick={() => setPreviewImage(null)} />
+                </div>
+            )}
         </div>
     );
 };

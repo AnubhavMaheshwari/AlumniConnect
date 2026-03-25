@@ -12,23 +12,27 @@ import { RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
 import PhotoUploadModal from '../components/PhotoUploadModal';
 
 /* ── helpers ─────────────────────────────────────────────────────────────── */
-const Avatar = ({ name, imageUrl, onClick }) => (
+const Avatar = ({ name, imageUrl, onCameraClick, onImageClick }) => (
     <div style={{ position: 'relative', width: 60, height: 60, flexShrink: 0 }}>
-        <div style={{
-            width: '100%', height: '100%', borderRadius: '50%',
-            background: imageUrl ? `url(${imageUrl}) center/cover no-repeat` : `linear-gradient(140deg, var(--blue-light) 0%, var(--blue) 60%, var(--blue-dark) 100%)`,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 24, fontWeight: 800, color: '#fff',
-            letterSpacing: '-0.5px',
-            boxShadow: `0 0 0 3px var(--blue-border), 0 4px 20px rgba(32,54,113,0.4)`,
-            overflow: 'hidden'
-        }}>
+        <div 
+            onClick={onImageClick}
+            style={{
+                width: '100%', height: '100%', borderRadius: '50%',
+                background: imageUrl ? `url(${imageUrl}) center/cover no-repeat` : `linear-gradient(140deg, var(--blue-light) 0%, var(--blue) 60%, var(--blue-dark) 100%)`,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: 24, fontWeight: 800, color: '#fff',
+                letterSpacing: '-0.5px',
+                boxShadow: `0 0 0 3px var(--blue-border), 0 4px 20px rgba(32,54,113,0.4)`,
+                overflow: 'hidden',
+                cursor: imageUrl ? 'zoom-in' : 'default'
+            }}
+        >
             {!imageUrl && name?.charAt(0)?.toUpperCase()}
         </div>
-        {onClick && (
+        {onCameraClick && (
             <button 
                 type="button"
-                onClick={onClick}
+                onClick={onCameraClick}
                 style={{
                     position: 'absolute', right: -4, bottom: -4,
                     width: 24, height: 24, borderRadius: '50%',
@@ -36,11 +40,11 @@ const Avatar = ({ name, imageUrl, onClick }) => (
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     cursor: 'pointer', color: '#fff', padding: 0,
                     boxShadow: '0 2px 5px rgba(0,0,0,0.2)',
-                    zIndex: 2, transition: 'transform 0.2s',
+                    zIndex: 2, transition: 'all 0.2s',
                     outline: 'none'
                 }}
-                onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.1)'}
-                onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+                onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.1)'; e.currentTarget.style.background = 'var(--blue-light)'; }}
+                onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.background = 'var(--blue)'; }}
                 title="Update Profile Picture"
             >
                 <FaCamera style={{ fontSize: 10 }} />
@@ -126,6 +130,7 @@ const Dashboard = () => {
     const [loading, setLoading] = useState(false);
     const [otpModal, setOtpModal] = useState({ show: false, type: '', value: '', otp: '' });
     const [isPhotoModalOpen, setIsPhotoModalOpen] = useState(false);
+    const [previewImage, setPreviewImage] = useState(null);
 
     const handleUploadSuccess = (imageUrl) => {
         const updatedUser = { ...user, profileImage: imageUrl };
@@ -289,7 +294,8 @@ const Dashboard = () => {
                         <Avatar 
                             name={user?.name} 
                             imageUrl={user?.profileImage} 
-                            onClick={() => setIsPhotoModalOpen(true)}
+                            onCameraClick={() => setIsPhotoModalOpen(true)}
+                            onImageClick={() => { if (user?.profileImage) setPreviewImage(user?.profileImage); }}
                         />
                         <div style={{ zIndex: 1 }}>
                             <p style={{
@@ -563,6 +569,14 @@ const Dashboard = () => {
                 userId={user?._id}
                 onUploadSuccess={handleUploadSuccess}
             />
+
+            {/* ════════════════ IMAGE PREVIEW ════════════════ */}
+            {previewImage && (
+                <div onClick={() => setPreviewImage(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.92)', backdropFilter: 'blur(10px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: 40, cursor: 'zoom-out' }}>
+                    <img src={previewImage} alt="preview" style={{ maxWidth: '100%', maxHeight: '100%', borderRadius: 12, boxShadow: '0 40px 100px rgba(0,0,0,0.8)', animation: 'fadeUp 0.3s ease' }} />
+                    <FaTimes style={{ position: 'absolute', top: 30, right: 30, color: '#fff', fontSize: 28, cursor: 'pointer', opacity: 0.7 }} onClick={() => setPreviewImage(null)} />
+                </div>
+            )}
         </div>
     );
 };

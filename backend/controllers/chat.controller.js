@@ -14,10 +14,22 @@ const accessChat = async (req, res) => {
     try {
         let isChat = await Conversation.find({
             isGroupChat: false,
-            users: { $all: [req.user._id, userId] },
+            $and: [
+                { users: { $all: [req.user._id, userId] } },
+                { users: { $size: 2 } }
+            ]
         })
             .populate("users", "-password -emailOTP -emailOTPExpires")
             .populate("latestMessage");
+
+        // If it's a self-chat, we need to be even more specific because $all:[A,A] is just $all:[A]
+        if (req.user._id.toString() === userId.toString()) {
+            isChat = isChat.filter(c => 
+                c.users.length === 2 &&
+                c.users[0]._id.toString() === req.user._id.toString() && 
+                c.users[1]._id.toString() === req.user._id.toString()
+            );
+        }
 
         isChat = await User.populate(isChat, {
             path: "latestMessage.sender",
@@ -191,8 +203,11 @@ const addToGroup = async (req, res) => {
     const chat = await Conversation.findById(chatId);
     if (!chat) return res.status(404).json({ message: "Chat not found" });
     
-    if (chat.groupAdmin && chat.groupAdmin.toString() !== req.user._id.toString()) {
-        return res.status(403).json({ message: "Only group admin can add new members" });
+    const isSelfAddition = userId === req.user._id.toString();
+    const isRequesterAdmin = chat.groupAdmin && chat.groupAdmin.toString() === req.user._id.toString();
+
+    if (!isRequesterAdmin && !isSelfAddition) {
+        return res.status(403).json({ message: "Only group admin can add other members" });
     }
 
     // Add user
@@ -211,6 +226,24 @@ const addToGroup = async (req, res) => {
     }
 };
 
+// @description     Fetch all Batch Groups (Class of XXXX)
+// @route           GET /api/chat/batches
+// @access          Protected
+const getBatchGroups = async (req, res) => {
+    try {
+        const batches = await Conversation.find({ 
+            isGroupChat: true, 
+            chatName: { $regex: /^Class of / } 
+        })
+        .populate("users", "name profileImage")
+        .sort({ chatName: -1 });
+        
+        res.status(200).json(batches);
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
+};
+
 module.exports = {
     accessChat,
     fetchChats,
@@ -218,4 +251,5 @@ module.exports = {
     renameGroup,
     addToGroup,
     removeFromGroup,
+    getBatchGroups,
 };

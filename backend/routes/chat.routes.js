@@ -7,12 +7,14 @@ const {
   removeFromGroup,
   addToGroup,
   renameGroup,
+  getBatchGroups,
 } = require("../controllers/chat.controller");
 
 const router = express.Router();
 
 router.post("/", protect, accessChat);
 router.get("/", protect, fetchChats);
+router.get("/batches", protect, getBatchGroups);
 router.post("/group", protect, createGroupChat);
 router.put("/rename", protect, renameGroup);
 router.put("/groupremove", protect, removeFromGroup);

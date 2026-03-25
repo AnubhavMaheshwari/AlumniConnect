@@ -131,19 +131,23 @@ const io = require("socket.io")(server, {
     pingTimeout: 60000,
     cors: {
         origin: (origin, callback) => {
+            if (!origin) return callback(null, true);
+            const normalize = (val) => val.trim().replace(/\/$/, '');
+            const normalizedOrigin = normalize(origin);
             const allowedOrigins = new Set(['http://localhost:5173', 'http://localhost:5174']);
             if (process.env.CLIENT_URL) {
-                process.env.CLIENT_URL.split(',').forEach(o => allowedOrigins.add(o.trim().replace(/\/$/, '')));
+                process.env.CLIENT_URL.split(',').forEach(o => allowedOrigins.add(normalize(o)));
             }
-            // allow undefined origin, or matched
-            if (!origin) return callback(null, true);
-            const normalize = (value) => value.trim().replace(/\/$/, '');
-            const normalizedOrigin = normalize(origin);
-            if (allowedOrigins.has(normalizedOrigin) || new URL(normalizedOrigin).hostname === 'localhost' || new URL(normalizedOrigin).hostname === '127.0.0.1' || new URL(normalizedOrigin).hostname.endsWith('.vercel.app')) {
-                return callback(null, true);
-            }
+            if (allowedOrigins.has(normalizedOrigin)) return callback(null, true);
+            try {
+                const hostname = new URL(normalizedOrigin).hostname;
+                if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname.endsWith('.vercel.app')) {
+                    return callback(null, true);
+                }
+            } catch (err) {}
             callback(new Error('Not allowed by CORS'));
         },
+        methods: ["GET", "POST"],
         credentials: true,
     },
 });
