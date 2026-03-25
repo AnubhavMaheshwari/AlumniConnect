@@ -6,9 +6,10 @@ import { toast } from 'react-toastify';
 import { useLocation, Link, useNavigate } from 'react-router-dom';
 import {
     FaFlag, FaSearch, FaUsers, FaTimes, FaPaperPlane,
-    FaPlus, FaCommentDots, FaPaperclip, FaFileAlt
+    FaPlus, FaCommentDots, FaPaperclip, FaFileAlt, FaArrowLeft
 } from 'react-icons/fa';
 import { HiSparkles } from 'react-icons/hi';
+import useIsMobile from '../hooks/useIsMobile';
 
 /* ── tokens ──────────────────────────────────────────────────────────────── */
 const C = {
@@ -76,6 +77,7 @@ const Messages = () => {
     const { user } = useAuth();
     const location = useLocation();
     const navigate = useNavigate();
+    const isMobile = useIsMobile();
 
     const [chats, setChats] = useState([]);
     const [loadingChats, setLoadingChats] = useState(true);
@@ -382,10 +384,11 @@ const Messages = () => {
                 </h1>
             </div>
 
-            <div style={{ display: 'flex', gap: 16, height: '78vh', minHeight: 480 }}>
+            <div style={{ display: 'flex', gap: isMobile ? 0 : 16, height: isMobile ? 'calc(100vh - 180px)' : '78vh', minHeight: 480 }}>
 
                 {/* ════════════════ LEFT PANEL ════════════════ */}
-                <div style={{ width: 300, flexShrink: 0, background: C.darkCard, border: `1px solid ${C.darkBorder}`, borderRadius: 16, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+                {(!isMobile || !selectedChat) && (
+                <div style={{ width: isMobile ? '100%' : 300, flexShrink: 0, background: C.darkCard, border: `1px solid ${C.darkBorder}`, borderRadius: 16, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
 
                     {/* panel header */}
                     <div style={{ padding: '16px 16px 12px', borderBottom: `1px solid ${C.darkBorder}` }}>
@@ -444,7 +447,7 @@ const Messages = () => {
                             <div style={{ textAlign: 'center', padding: '40px 16px', color: C.muted, fontSize: 12.5 }}>
                                 No chats yet.<br />Search for a user to start.
                             </div>
-                        ) : (
+                        ) : 
                             filteredChats.map(c => {
                                 const active = selectedChat?._id === c._id;
                                 return (
@@ -470,35 +473,48 @@ const Messages = () => {
                                     </div>
                                 </div>
                             );
-                        }))}
+                        })
+                    }
                     </div>
                 </div>
+                )}
 
                 {/* ════════════════ RIGHT PANEL ════════════════ */}
+                {(!isMobile || selectedChat) && (
                 <div style={{ flex: 1, background: C.darkCard, border: `1px solid ${C.darkBorder}`, borderRadius: 16, display: 'flex', flexDirection: 'column', overflow: 'hidden', minWidth: 0 }}>
 
                     {selectedChat ? (
                         <>
                             {/* chat header */}
                             <div style={{ padding: '14px 20px', borderBottom: `1px solid ${C.darkBorder}`, display: 'flex', alignItems: 'center', gap: 12, background: C.darkCard }}>
+                                {isMobile && (
+                                    <button onClick={() => setSelectedChat(null)} style={{ background: 'none', border: 'none', color: C.white, cursor: 'pointer', padding: '0 8px 0 0', display: 'flex', alignItems: 'center' }}>
+                                        <FaArrowLeft style={{ fontSize: 16 }} />
+                                    </button>
+                                )}
                                 {selectedChat.isGroupChat
                                     ? <div onClick={() => setShowGroupInfo(true)} style={{ width: 38, height: 38, borderRadius: '50%', flexShrink: 0, background: `linear-gradient(135deg, ${C.blue}, ${C.blueDark})`, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
                                         <FaUsers style={{ color: C.trueWhite, fontSize: 15 }} />
                                     </div>
                                     : <Avatar name={getChatName(selectedChat)} img={getChatImage(selectedChat)} size={38} gradient />
                                 }
-                                <div>
-                                    {selectedChat.isGroupChat ? (
-                                        <p onClick={() => setShowGroupInfo(true)} style={{ cursor: 'pointer', fontFamily: "'Sora', sans-serif", fontSize: 15, fontWeight: 700, color: C.white, margin: 0 }}>{getChatName(selectedChat)}</p>
-                                    ) : (
-                                        <Link to={`/profile/${getChatUserId(selectedChat)}`} state={{ from: '/messages' }}
-                                            style={{ fontFamily: "'Sora', sans-serif", fontSize: 15, fontWeight: 700, color: C.white, textDecoration: 'none', transition: 'color 0.2s' }}
-                                            onMouseEnter={e => e.currentTarget.style.color = C.blueLight}
-                                            onMouseLeave={e => e.currentTarget.style.color = C.white}
-                                        >
-                                            {getChatName(selectedChat)}
-                                        </Link>
-                                    )}
+                                <div style={{ flex: 1, minWidth: 0 }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                        {selectedChat.isGroupChat ? (
+                                            <h3 onClick={() => setShowGroupInfo(true)} style={{ cursor: 'pointer', fontFamily: "'Sora', sans-serif", fontSize: 15, fontWeight: 700, color: C.white, margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                                {getChatName(selectedChat)}
+                                            </h3>
+                                        ) : (
+                                            <Link to={`/profile/${getChatUserId(selectedChat)}`} state={{ from: '/messages' }}
+                                                style={{ fontFamily: "'Sora', sans-serif", fontSize: 15, fontWeight: 700, color: C.white, textDecoration: 'none', transition: 'color 0.2s' }}
+                                                onMouseEnter={e => e.currentTarget.style.color = C.blueLight}
+                                                onMouseLeave={e => e.currentTarget.style.color = C.white}
+                                            >
+                                                {getChatName(selectedChat)}
+                                            </Link>
+                                        )}
+                                        {selectedChat.isGroupChat && <span style={{ background: C.blueFaint, color: C.blueLight, fontSize: 9, fontWeight: 800, padding: '2px 6px', borderRadius: 4, textTransform: 'uppercase' }}>Group</span>}
+                                    </div>
                                     <p style={{ fontSize: 11, color: C.muted, margin: 0, marginTop: 1 }}>
                                         {selectedChat.isGroupChat ? `${selectedChat.users.length} members` : 'Alumni Member'}
                                     </p>
@@ -616,6 +632,7 @@ const Messages = () => {
                         </div>
                     )}
                 </div>
+                )}
             </div>
 
             {/* ════════════════ GROUP MODAL ════════════════ */}
