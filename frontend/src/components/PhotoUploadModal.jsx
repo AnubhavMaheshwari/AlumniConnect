@@ -10,19 +10,30 @@ const PhotoUploadModal = ({ isOpen, onClose, userId, onUploadSuccess }) => {
     const webcamRef = useRef(null);
     const fileInputRef = useRef(null);
 
-    if (!isOpen) return null;
-
     const handleClose = () => {
         setMode('select');
         setError('');
         onClose();
     };    
 
-    const uploadBase64Image = async (base64String) => {
+    const uploadImage = async (imageSource) => {
         setLoading(true);
         setError('');
         try {
-            const { data } = await API.put(`/users/${userId}/profile-photo`, { image: base64String });
+            let response;
+            if (imageSource instanceof File) {
+                // File upload via FormData
+                const formData = new FormData();
+                formData.append('image', imageSource);
+                response = await API.put(`/users/${userId}/profile-photo`, formData, {
+                    headers: { 'Content-Type': 'multipart/form-data' }
+                });
+            } else {
+                // Base64 upload (from camera)
+                response = await API.put(`/users/${userId}/profile-photo`, { image: imageSource });
+            }
+
+            const { data } = response;
             if (data.success) {
                 onUploadSuccess(data.profileImage);
                 handleClose();
@@ -37,9 +48,11 @@ const PhotoUploadModal = ({ isOpen, onClose, userId, onUploadSuccess }) => {
     const handleCapture = useCallback(() => {
         const imageSrc = webcamRef.current.getScreenshot();
         if (imageSrc) {
-            uploadBase64Image(imageSrc);
+            uploadImage(imageSrc);
         }
     }, [webcamRef]);
+
+    if (!isOpen) return null;
 
     const handleFileChange = (e) => {
         const file = e.target.files[0];
@@ -48,14 +61,7 @@ const PhotoUploadModal = ({ isOpen, onClose, userId, onUploadSuccess }) => {
                 setError('File size must be less than 5MB');
                 return;
             }
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = () => {
-                uploadBase64Image(reader.result);
-            };
-            reader.onerror = () => {
-                setError('Failed to read file');
-            };
+            uploadImage(file);
         }
     };
 
