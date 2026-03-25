@@ -16,11 +16,18 @@ const generateToken = (id) => {
 exports.register = async (req, res) => {
     try {
         const { name, email, password, graduationYear, department, phone, company, yearsOfExperience, country, zipCode } = req.body;
+        const registrationNumber = phone; // Registration number is phone number
 
-        // Check if user exists
-        const userExists = await User.findOne({ email });
-        if (userExists) {
-            return res.status(400).json({ success: false, message: 'User already exists' });
+        // Check if user exists (email)
+        const userWithEmail = await User.findOne({ email });
+        if (userWithEmail) {
+            return res.status(400).json({ success: false, message: 'User with this email already exists' });
+        }
+
+        // Check if user exists (phone/registrationNumber)
+        const userWithPhone = await User.findOne({ phone });
+        if (userWithPhone) {
+            return res.status(400).json({ success: false, message: 'User with this phone number already exists' });
         }
 
         // Create user
@@ -34,7 +41,8 @@ exports.register = async (req, res) => {
             company,
             yearsOfExperience,
             country,
-            zipCode
+            zipCode,
+            registrationNumber
         });
 
         const token = generateToken(user._id);

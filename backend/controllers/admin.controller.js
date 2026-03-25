@@ -20,11 +20,18 @@ exports.getAllUsers = async (req, res) => {
 exports.addUser = async (req, res) => {
     try {
         const { name, email, password, department, graduationYear, phone, role } = req.body;
+        const registrationNumber = phone; // Registration number is phone number
 
-        // Check if user exists
-        const userExists = await User.findOne({ email });
-        if (userExists) {
-            return res.status(400).json({ success: false, message: 'User already exists' });
+        // Check if user exists (email)
+        const userWithEmail = await User.findOne({ email });
+        if (userWithEmail) {
+            return res.status(400).json({ success: false, message: 'User with this email already exists' });
+        }
+
+        // Check if user exists (phone/registrationNumber)
+        const userWithPhone = await User.findOne({ phone });
+        if (userWithPhone) {
+            return res.status(400).json({ success: false, message: 'User with this phone number already exists' });
         }
 
         const user = await User.create({
@@ -34,6 +41,7 @@ exports.addUser = async (req, res) => {
             department,
             graduationYear,
             phone,
+            registrationNumber,
             role: role || 'alumni'
         });
 
@@ -45,6 +53,7 @@ exports.addUser = async (req, res) => {
                 name: user.name,
                 email: user.email,
                 department: user.department,
+                registrationNumber: user.registrationNumber,
                 role: user.role
             }
         });

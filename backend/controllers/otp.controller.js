@@ -20,6 +20,12 @@ exports.sendEmailOTP = async (req, res) => {
             return res.status(400).json({ success: false, message: 'Please provide a valid email address' });
         }
 
+        // Check if user already exists
+        const userExists = await User.findOne({ email: normalizedEmail });
+        if (userExists) {
+            return res.status(400).json({ success: false, message: 'User with this email already exists' });
+        }
+
         const otp = generateOTP();
         const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
@@ -109,6 +115,26 @@ exports.verifyPhoneOTP = async (req, res) => {
         await user.save({ validateBeforeSave: false });
 
         res.json({ success: true, message: 'Phone verified successfully', user });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+// @desc    Check if Phone is available
+// @route   POST /api/auth/check-phone
+exports.checkPhoneAvailable = async (req, res) => {
+    try {
+        const { phone } = req.body;
+        if (!phone) {
+            return res.status(400).json({ success: false, message: 'Phone number is required' });
+        }
+
+        const userExists = await User.findOne({ phone });
+        if (userExists) {
+            return res.status(400).json({ success: false, message: 'User with this phone number already exists' });
+        }
+
+        res.json({ success: true, message: 'Phone number is available' });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }

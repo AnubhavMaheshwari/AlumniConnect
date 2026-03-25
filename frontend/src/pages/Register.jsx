@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'react-toastify';
-import { FaGraduationCap, FaUser, FaEnvelope, FaLock, FaBuilding, FaCalendarAlt, FaArrowRight, FaPhone, FaBriefcase, FaEye, FaEyeSlash, FaCheckCircle, FaMapMarkerAlt } from 'react-icons/fa';
+import { FaGraduationCap, FaUser, FaEnvelope, FaLock, FaBuilding, FaCalendarAlt, FaArrowRight, FaPhone, FaBriefcase, FaEye, FaEyeSlash, FaCheckCircle, FaMapMarkerAlt, FaIdCard } from 'react-icons/fa';
 import useIsMobile from '../hooks/useIsMobile';
 import { auth } from '../config/firebase';
 import { RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
@@ -47,7 +47,7 @@ const Field = ({ label, icon: Icon, children, right }) => (
             {label}
         </label>
         <div style={{ position: 'relative' }}>
-            <Icon style={{ position: 'absolute', left: 13, top: '50%', transform: 'translateY(-50%)', color: C.muted, fontSize: 12, pointerEvents: 'none', zIndex: 1 }} />
+            {Icon && <Icon style={{ position: 'absolute', left: 13, top: '50%', transform: 'translateY(-50%)', color: C.muted, fontSize: 12, pointerEvents: 'none', zIndex: 1 }} />}
             {children}
             {right && <div style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)' }}>{right}</div>}
         </div>
@@ -204,11 +204,16 @@ const Register = () => {
         if (formData.phone.length < 10) return toast.error('Enter a valid 10-digit number');
         const fullPhone = `${formData.countryCode}${formData.phone}`;
         try {
+            // Check if phone already exists
+            await API.post('/auth/check-phone', { phone: fullPhone });
+            
             setupRecaptcha();
             const confirmation = await signInWithPhoneNumber(auth, fullPhone, window.recaptchaVerifier);
             setConfirmationResult(confirmation);
             toast.success('SMS OTP sent');
-        } catch (err) { toast.error(err.message || 'Failed to send SMS OTP'); }
+        } catch (err) { 
+            toast.error(err.response?.data?.message || err.message || 'Failed to send SMS OTP'); 
+        }
     };
 
     const verifyPhoneOTP = async () => {
@@ -357,7 +362,7 @@ const Register = () => {
                                             {countries.map(c => <option key={c.name} value={c.name} style={{ background: C.darkBg }}>{c.name} ({c.code})</option>)}
                                         </select>
                                     </Field>
-                                    <Field label="Phone" icon={FaPhone} right={
+                                    <Field label="Phone" right={
                                         isPhoneVerified
                                             ? <FaCheckCircle style={{ color: '#10B981', fontSize: 14 }} />
                                             : <VerifyBtn onClick={sendPhoneOTP} sent={!!confirmationResult} />
@@ -365,9 +370,10 @@ const Register = () => {
                                         <div style={{ display: 'flex', gap: 0 }}>
                                             <div style={{ 
                                                 background: 'var(--bg-secondary)', border: `1px solid ${C.darkBorder}`, 
-                                                borderRight: 'none', borderRadius: '9px 0 0 9px', padding: '10px 8px', 
-                                                color: C.muted, fontSize: 13.5, minWidth: 45, textAlign: 'center'
+                                                borderRight: 'none', borderRadius: '9px 0 0 9px', padding: '10px 8px 10px 32px', 
+                                                color: C.muted, fontSize: 13.5, minWidth: 45, textAlign: 'center', position: 'relative'
                                             }}>
+                                                <FaPhone style={{ position: 'absolute', left: 13, top: '50%', transform: 'translateY(-50%)', color: C.muted, fontSize: 12 }} />
                                                 {formData.countryCode}
                                             </div>
                                             <input type="tel" name="phone" value={formData.phone} onChange={handleChange}

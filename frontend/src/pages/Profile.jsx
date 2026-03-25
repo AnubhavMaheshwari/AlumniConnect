@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import PhotoUploadModal from '../components/PhotoUploadModal';
 import {
     FaEnvelope, FaPhone, FaLinkedin, FaMapMarkerAlt,
-    FaBuilding, FaGraduationCap, FaArrowLeft, FaBriefcase, FaCamera,
+    FaBuilding, FaGraduationCap, FaArrowLeft, FaBriefcase, FaCamera, FaIdCard
 } from 'react-icons/fa';
 import { HiSparkles } from 'react-icons/hi';
 import useIsMobile from '../hooks/useIsMobile';
@@ -220,6 +220,11 @@ const Profile = () => {
                                         {profile.department && (
                                             <DetailRow icon={FaGraduationCap}>
                                                 {profile.department}{profile.graduationYear ? ` — Class of ${profile.graduationYear}` : ''}
+                                            </DetailRow>
+                                        )}
+                                        {profile.phone && (
+                                            <DetailRow icon={FaIdCard}>
+                                                Registration No (Phone): {profile.phone}
                                             </DetailRow>
                                         )}
                                         {/* <button onClick={() => navigate('/dashboard')} style={{
