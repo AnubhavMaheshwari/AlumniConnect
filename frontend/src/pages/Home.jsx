@@ -90,7 +90,7 @@ const Hero = ({ user }) => (
                 letterSpacing: '-1.2px',
                 animation: 'fadeUp 0.7s ease 0.1s both',
             }}>
-                Where NIT Jamshedpur<br />
+                A Place Where NIT Jamshedpur<br />
                 <span style={{
                     background: `linear-gradient(135deg, var(--text-primary) 0%, var(--blue-light) 40%, #6B8FE8 100%)`,
                     backgroundSize: '200% auto',

@@ -109,6 +109,8 @@ app.use('/api/events', require('./routes/event.routes'));
 app.use('/api/jobs', require('./routes/job.routes'));
 app.use('/api/news', require('./routes/news.routes'));
 app.use('/api/admin', require('./routes/admin.routes'));
+app.use('/api/chat', require('./routes/chat.routes'));
+app.use('/api/message', require('./routes/message.routes'));
 
 // Health check
 app.get('/api/health', (req, res) => {
@@ -121,6 +123,80 @@ app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
+});
+
+const io = require("socket.io")(server, {
+    pingTimeout: 60000,
+    cors: {
+        origin: (origin, callback) => {
+            const allowedOrigins = new Set(['http://localhost:5173', 'http://localhost:5174']);
+            if (process.env.CLIENT_URL) {
+                process.env.CLIENT_URL.split(',').forEach(o => allowedOrigins.add(o.trim().replace(/\/$/, '')));
+            }
+            // allow undefined origin, or matched
+            if (!origin) return callback(null, true);
+            const normalize = (value) => value.trim().replace(/\/$/, '');
+            const normalizedOrigin = normalize(origin);
+            if (allowedOrigins.has(normalizedOrigin) || new URL(normalizedOrigin).hostname === 'localhost' || new URL(normalizedOrigin).hostname === '127.0.0.1' || new URL(normalizedOrigin).hostname.endsWith('.vercel.app')) {
+                return callback(null, true);
+            }
+            callback(new Error('Not allowed by CORS'));
+        },
+        credentials: true,
+    },
+});
+
+io.on("connection", (socket) => {
+    console.log("Connected to socket.io");
+
+    socket.on("setup", (userData) => {
+        socket.join(userData._id);
+        socket.emit("connected");
+    });
+
+    socket.on("join chat", (room) => {
+        socket.join(room);
+        console.log("User Joined Room: " + room);
+    });
+
+    socket.on("typing", (room) => socket.in(room).emit("typing"));
+    socket.on("stop typing", (room) => socket.in(room).emit("stop typing"));
+
+    socket.on("new message", (newMessageRecieved) => {
+        var chat = newMessageRecieved.chat;
+
+        if (!chat || !chat.users) return console.log("chat.users not defined");
+
+        chat.users.forEach((user) => {
+            if (user._id === newMessageRecieved.sender._id) return;
+            socket.in(user._id).emit("message recieved", newMessageRecieved);
+        });
+    });
+
+    socket.on("message updated", (updatedMessage) => {
+        var chat = updatedMessage.chat;
+        if (!chat || !chat.users) return;
+        chat.users.forEach((user) => {
+            if (user._id === updatedMessage.sender._id) return;
+            socket.in(user._id).emit("message updated", updatedMessage);
+        });
+    });
+
+    socket.on("message deleted", (deletedMessage) => {
+        var chat = deletedMessage.chat;
+        if (!chat || !chat.users) return;
+        chat.users.forEach((user) => {
+            if (user._id === deletedMessage.sender._id) return;
+            socket.in(user._id).emit("message deleted", deletedMessage);
+        });
+    });
+
+    socket.off("setup", (userData) => {
+        console.log("USER DISCONNECTED");
+        if (userData && userData._id) {
+            socket.leave(userData._id);
+        }
+    });
 });

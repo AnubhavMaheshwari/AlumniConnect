@@ -122,6 +122,7 @@ const Navbar = () => {
     const authLinks = [
         { name: 'Home',      path: '/' },
         { name: 'Directory', path: '/directory' },
+        { name: 'Messages',  path: '/messages' },
         { name: 'Events',    path: '/events' },
         { name: 'Jobs',      path: '/jobs' },
         { name: 'News',      path: '/news' },
@@ -246,8 +247,14 @@ const Navbar = () => {
                                 onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--blue-border)'; e.currentTarget.style.background = 'var(--blue-faint)'; }}
                                 onMouseLeave={e => { if (!showUser) { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.background = 'transparent'; } }}
                             >
-                                <div style={{ width: 28, height: 28, borderRadius: '50%', background: `linear-gradient(135deg, var(--blue-light), var(--blue-dark))`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Sora', sans-serif", fontSize: 11, fontWeight: 800, color: '#fff', flexShrink: 0 }}>
-                                    {initials}
+                                <div style={{ 
+                                    width: 28, height: 28, borderRadius: '50%', background: `linear-gradient(135deg, var(--blue-light), var(--blue-dark))`, 
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Sora', sans-serif", fontSize: 11, 
+                                    fontWeight: 800, color: '#fff', flexShrink: 0,
+                                    backgroundImage: user.profileImage ? `url('${user.profileImage}')` : 'none',
+                                    backgroundSize: 'cover', backgroundPosition: 'center'
+                                }}>
+                                    {!user.profileImage && initials}
                                 </div>
                                 <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', maxWidth: 90, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                                     {firstName}
@@ -353,8 +360,13 @@ const Navbar = () => {
                     {/* user identity strip */}
                     {user && (
                         <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 14px', background: 'var(--blue-faint)', border: '1px solid var(--blue-border)', borderRadius: 10, marginBottom: 12 }}>
-                            <div style={{ width: 36, height: 36, borderRadius: '50%', background: `linear-gradient(135deg, var(--blue-light), var(--blue-dark))`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 800, color: '#fff', flexShrink: 0 }}>
-                                {initials}
+                            <div style={{ 
+                                width: 36, height: 36, borderRadius: '50%', background: `linear-gradient(135deg, var(--blue-light), var(--blue-dark))`, 
+                                display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 800, color: '#fff', flexShrink: 0,
+                                backgroundImage: user.profileImage ? `url('${user.profileImage}')` : 'none',
+                                backgroundSize: 'cover', backgroundPosition: 'center'
+                            }}>
+                                {!user.profileImage && initials}
                             </div>
                             <div style={{ minWidth: 0 }}>
                                 <p style={{ fontSize: 13.5, fontWeight: 700, color: 'var(--text-primary)', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user.name}</p>

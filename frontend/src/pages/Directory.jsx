@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import API from '../services/api';
-import { FaSearch, FaLinkedin, FaEnvelope, FaPhone, FaBriefcase, FaGraduationCap, FaUsers } from 'react-icons/fa';
+import { FaSearch, FaLinkedin, FaEnvelope, FaPhone, FaBriefcase, FaGraduationCap, FaUsers, FaCommentDots } from 'react-icons/fa';
 import { HiSparkles } from 'react-icons/hi';
 
 const inputSx = {
@@ -15,6 +15,7 @@ const blurSx  = e => { e.target.style.borderColor = 'var(--border)'; e.target.st
 
 /* ── alumni card ─────────────────────────────────────────────────────────── */
 const AlumniCard = ({ user }) => {
+    const navigate = useNavigate();
     const initials = user.name?.slice(0, 2).toUpperCase() || '??';
 
     return (
@@ -124,7 +125,7 @@ const AlumniCard = ({ user }) => {
                     </button>
 
                     <button
-                        onClick={e => { e.preventDefault(); e.stopPropagation(); }}
+                        onClick={e => { e.preventDefault(); e.stopPropagation(); navigate('/messages', { state: { userId: user._id } }); }}
                         style={{
                             flex: 2, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
                             background: 'transparent', border: '1px solid var(--blue-border)',
@@ -135,7 +136,7 @@ const AlumniCard = ({ user }) => {
                         onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--blue-light)'; e.currentTarget.style.color = 'var(--blue-light)'; }}
                         onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--blue-border)'; e.currentTarget.style.color = 'var(--text-secondary)'; }}
                     >
-                        <FaPhone style={{ fontSize: 10 }} /> Request Contact
+                        <FaCommentDots style={{ fontSize: 10 }} /> Message
                     </button>
                 </div>
             </div>

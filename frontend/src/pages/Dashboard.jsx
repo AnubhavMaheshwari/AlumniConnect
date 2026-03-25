@@ -4,23 +4,48 @@ import { toast } from 'react-toastify';
 import API from '../services/api';
 import {
     FaEnvelope, FaBuilding, FaSave, FaCheckCircle, FaTimes,
-    FaPhone, FaBriefcase, FaIdCard
+    FaPhone, FaBriefcase, FaIdCard, FaCamera
 } from 'react-icons/fa';
 import { HiSparkles } from 'react-icons/hi';
 import { auth } from '../config/firebase';
 import { RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
+import PhotoUploadModal from '../components/PhotoUploadModal';
 
 /* ── helpers ─────────────────────────────────────────────────────────────── */
-const Avatar = ({ name }) => (
-    <div style={{
-        width: 60, height: 60, borderRadius: '50%',
-        background: `linear-gradient(140deg, var(--blue-light) 0%, var(--blue) 60%, var(--blue-dark) 100%)`,
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        fontSize: 24, fontWeight: 800, color: '#fff',
-        flexShrink: 0, letterSpacing: '-0.5px',
-        boxShadow: `0 0 0 3px var(--blue-border), 0 4px 20px rgba(32,54,113,0.4)`
-    }}>
-        {name?.charAt(0)?.toUpperCase()}
+const Avatar = ({ name, imageUrl, onClick }) => (
+    <div style={{ position: 'relative', width: 60, height: 60, flexShrink: 0 }}>
+        <div style={{
+            width: '100%', height: '100%', borderRadius: '50%',
+            background: imageUrl ? `url(${imageUrl}) center/cover no-repeat` : `linear-gradient(140deg, var(--blue-light) 0%, var(--blue) 60%, var(--blue-dark) 100%)`,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: 24, fontWeight: 800, color: '#fff',
+            letterSpacing: '-0.5px',
+            boxShadow: `0 0 0 3px var(--blue-border), 0 4px 20px rgba(32,54,113,0.4)`,
+            overflow: 'hidden'
+        }}>
+            {!imageUrl && name?.charAt(0)?.toUpperCase()}
+        </div>
+        {onClick && (
+            <button 
+                type="button"
+                onClick={onClick}
+                style={{
+                    position: 'absolute', right: -4, bottom: -4,
+                    width: 24, height: 24, borderRadius: '50%',
+                    background: 'var(--blue)', border: '2px solid var(--bg-secondary)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    cursor: 'pointer', color: '#fff', padding: 0,
+                    boxShadow: '0 2px 5px rgba(0,0,0,0.2)',
+                    zIndex: 2, transition: 'transform 0.2s',
+                    outline: 'none'
+                }}
+                onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.1)'}
+                onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+                title="Update Profile Picture"
+            >
+                <FaCamera style={{ fontSize: 10 }} />
+            </button>
+        )}
     </div>
 );
 
@@ -100,6 +125,12 @@ const Dashboard = () => {
     });
     const [loading, setLoading] = useState(false);
     const [otpModal, setOtpModal] = useState({ show: false, type: '', value: '', otp: '' });
+    const [isPhotoModalOpen, setIsPhotoModalOpen] = useState(false);
+
+    const handleUploadSuccess = (imageUrl) => {
+        setUser(prev => ({ ...prev, profileImage: imageUrl }));
+        toast.success('Profile photo updated successfully');
+    };
 
     const handleChange = e => {
         const { name, value } = e.target;
@@ -253,7 +284,11 @@ const Dashboard = () => {
                             width: 110, height: 110, borderRadius: '50%',
                             background: 'rgba(255,255,255,0.04)'
                         }} />
-                        <Avatar name={user?.name} />
+                        <Avatar 
+                            name={user?.name} 
+                            imageUrl={user?.profileImage} 
+                            onClick={() => setIsPhotoModalOpen(true)}
+                        />
                         <div style={{ zIndex: 1 }}>
                             <p style={{
                                 fontFamily: "'Sora', sans-serif",
@@ -519,6 +554,13 @@ const Dashboard = () => {
                     </div>
                 </div>
             )}
+
+            <PhotoUploadModal
+                isOpen={isPhotoModalOpen}
+                onClose={() => setIsPhotoModalOpen(false)}
+                userId={user?._id}
+                onUploadSuccess={handleUploadSuccess}
+            />
         </div>
     );
 };

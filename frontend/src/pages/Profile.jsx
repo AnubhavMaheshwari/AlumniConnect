@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useLocation, useNavigate } from 'react-router-dom';
 import API from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import PhotoUploadModal from '../components/PhotoUploadModal';
@@ -39,6 +39,8 @@ const Profile = () => {
     const [loading, setLoading] = useState(true);
     const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
     const isMobile = useIsMobile();
+    const location = useLocation();
+    const navigate = useNavigate();
 
     useEffect(() => { fetchProfile(); }, [id]);
 
@@ -90,18 +92,18 @@ const Profile = () => {
 
 
                 {/* back link */}
-                <Link to="/directory" style={{
+                <button onClick={() => navigate(location.state?.from || '/directory', { state: location.state })} style={{
                     display: 'inline-flex', alignItems: 'center', gap: 8, marginBottom: 28,
                     color: 'var(--text-muted)', fontSize: 13, fontWeight: 600, textDecoration: 'none',
-                    padding: '7px 14px', borderRadius: 8,
+                    padding: '7px 14px', borderRadius: 8, cursor: 'pointer',
                     background: 'var(--bg-secondary)', border: '1px solid var(--border)',
                     transition: 'border-color 0.2s, color 0.2s',
                 }}
                     onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--blue-border)'; e.currentTarget.style.color = 'var(--text-primary)'; }}
                     onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.color = 'var(--text-muted)'; }}
                 >
-                    <FaArrowLeft style={{ fontSize: 11 }} /> Back to Directory
-                </Link>
+                    <FaArrowLeft style={{ fontSize: 11 }} /> {location.state?.from === '/messages' ? 'Back to Messages' : 'Back to Directory'}
+                </button>
 
                 {/* main card */}
                 <div style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border)', borderRadius: 18, overflow: 'hidden', boxShadow: '0 24px 64px var(--card-shadow)', animation: 'fadeUp 0.5s ease both', transition: 'background 0.3s, border-color 0.3s' }}>
