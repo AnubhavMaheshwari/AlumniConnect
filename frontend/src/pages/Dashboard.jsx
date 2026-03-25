@@ -128,7 +128,9 @@ const Dashboard = () => {
     const [isPhotoModalOpen, setIsPhotoModalOpen] = useState(false);
 
     const handleUploadSuccess = (imageUrl) => {
-        setUser(prev => ({ ...prev, profileImage: imageUrl }));
+        const updatedUser = { ...user, profileImage: imageUrl };
+        setUser(updatedUser);
+        localStorage.setItem('user', JSON.stringify(updatedUser));
         toast.success('Profile photo updated successfully');
     };
 

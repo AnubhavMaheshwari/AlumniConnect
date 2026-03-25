@@ -39,8 +39,10 @@ const AlumniCard = ({ user }) => {
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                         fontFamily: "'Sora', sans-serif", fontSize: 18, fontWeight: 800, color: '#fff',
                         boxShadow: `0 0 0 3px var(--blue-border)`,
+                        backgroundImage: user.profileImage ? `url('${user.profileImage}')` : 'none',
+                        backgroundSize: 'cover', backgroundPosition: 'center'
                     }}>
-                        {initials}
+                        {!user.profileImage && initials}
                     </div>
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'flex-end' }}>
