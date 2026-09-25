@@ -98,7 +98,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Root API route
 app.get('/api', (req, res) => {
-    res.json({ message: 'Welcome to Alumni Connect API' });
+    res.json({ message: 'Welcome to Campus Connect API' });
 });
 
 // Routes
@@ -112,10 +112,14 @@ app.use('/api/admin', require('./routes/admin.routes'));
 app.use('/api/chat', require('./routes/chat.routes'));
 app.use('/api/message', require('./routes/message.routes'));
 app.use('/api/activity', require('./routes/activity.routes'));
+app.use('/api/mentors', require('./routes/mentor.routes'));
+app.use('/api/membership', require('./routes/membership.routes'));
+
+
 
 // Health check
 app.get('/api/health', (req, res) => {
-    res.json({ status: 'OK', message: 'Alumni Connect API is running' });
+    res.json({ status: 'OK', message: 'Campus Connect API is running' });
 });
 
 // Error handler

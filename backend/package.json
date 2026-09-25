@@ -1,7 +1,7 @@
 {
   "name": "alumniconnect-backend",
   "version": "1.0.0",
-  "description": "Alumni Connect Backend API",
+  "description": "Campus Connect Backend API",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
@@ -23,6 +23,7 @@
     "mongoose": "^8.5.0",
     "multer": "^1.4.5-lts.1",
     "nodemailer": "^6.9.14",
+    "razorpay": "^2.9.6",
     "resend": "^6.9.4",
     "socket.io": "^4.8.3"
   },

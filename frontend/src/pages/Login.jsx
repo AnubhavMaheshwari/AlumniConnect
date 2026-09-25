@@ -93,7 +93,7 @@ const Login = () => {
                         <FaGraduationCap style={{ color: '#fff', fontSize: isMobile ? 24 : 30 }} />
                     </div>
                     <h1 style={{ fontFamily: "'Sora', sans-serif", fontSize: isMobile ? 24 : 28, fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 8px', letterSpacing: '-0.4px' }}>Welcome Back</h1>
-                    <p style={{ fontSize: isMobile ? 13 : 14, color: 'var(--text-muted)', margin: 0 }}>Sign in to NIT Jamshedpur Alumni Portal</p>
+                    <p style={{ fontSize: isMobile ? 13 : 14, color: 'var(--text-muted)', margin: 0 }}>Sign in to NIT Jamshedpur Campus Connect</p>
                 </div>
 
                 {/* card */}

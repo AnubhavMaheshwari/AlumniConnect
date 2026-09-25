@@ -154,8 +154,12 @@ const Directory = () => {
     const [loading, setLoading]       = useState(true);
     const [search, setSearch]         = useState('');
     const [department, setDepartment] = useState('');
+    const [batchYear, setBatchYear]   = useState('');
+    const [location, setLocation]     = useState('');
+    const [company, setCompany]       = useState('');
     const [page, setPage]             = useState(1);
     const [totalPages, setTotalPages] = useState(1);
+
 
     const departments = [
         'Computer Science & Engineering', 'Electrical Engineering', 'Mechanical Engineering',
@@ -164,7 +168,8 @@ const Directory = () => {
         'Physics', 'Chemistry', 'Humanities & Social Sciences',
     ];
 
-    useEffect(() => { fetchUsers(); }, [page, department]);
+    useEffect(() => { fetchUsers(); }, [page, department, batchYear]);
+
 
     const fetchUsers = async () => {
         setLoading(true);
@@ -172,7 +177,11 @@ const Directory = () => {
             const params = { page, limit: 12 };
             if (search) params.search = search;
             if (department) params.department = department;
+            if (batchYear) params.batchYear = batchYear;
+            if (location) params.location = location;
+            if (company) params.company = company;
             const { data } = await API.get('/users', { params });
+
             setUsers(data.users);
             setTotalPages(data.totalPages);
         } catch (err) { console.error(err); }
@@ -189,14 +198,14 @@ const Directory = () => {
                 <div style={{ textAlign: 'center', marginBottom: 48 }}>
                     <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'var(--blue-faint)', border: '1px solid var(--blue-border)', borderRadius: 20, padding: '5px 14px', marginBottom: 18 }}>
                         <HiSparkles style={{ color: 'var(--blue-light)', fontSize: 13 }} />
-                        <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--blue-light)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Alumni Network</span>
+                        <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--blue-light)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Campus Network</span>
                     </div>
                     <h1 style={{ fontFamily: "'Sora', sans-serif", fontSize: 'clamp(28px, 5vw, 44px)', fontWeight: 800, margin: '0 0 14px', color: 'var(--text-primary)', letterSpacing: '-0.7px', lineHeight: 1.15 }}>
-                        Alumni{' '}
+                        Campus{' '}
                         <span style={{ background: `linear-gradient(135deg, var(--blue-light), #6B8FE8)`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Directory</span>
                     </h1>
                     <p style={{ fontSize: 15, color: 'var(--text-secondary)', margin: 0, maxWidth: 500, marginLeft: 'auto', marginRight: 'auto', lineHeight: 1.65 }}>
-                        Find and connect with fellow NIT Jamshedpur alumni from across the world.
+                        Find and connect with fellow NIT Jamshedpur students from across the world.
                     </p>
                 </div>
 
@@ -226,6 +235,37 @@ const Directory = () => {
                             </select>
                         </div>
 
+                        <div style={{ flex: '1 1 120px' }}>
+                            <input
+                                type="number" value={batchYear}
+                                onChange={e => { setBatchYear(e.target.value); setPage(1); }}
+                                placeholder="Year (2024)"
+                                style={inputSx}
+                                onFocus={focusSx} onBlur={blurSx}
+                            />
+                        </div>
+
+                        <div style={{ flex: '1 1 180px' }}>
+                            <input
+                                type="text" value={location}
+                                onChange={e => { setLocation(e.target.value); setPage(1); }}
+                                placeholder="Location..."
+                                style={inputSx}
+                                onFocus={focusSx} onBlur={blurSx}
+                            />
+                        </div>
+
+                        <div style={{ flex: '1 1 180px' }}>
+                            <input
+                                type="text" value={company}
+                                onChange={e => { setCompany(e.target.value); setPage(1); }}
+                                placeholder="Company..."
+                                style={inputSx}
+                                onFocus={focusSx} onBlur={blurSx}
+                            />
+                        </div>
+
+
                         <button type="submit" style={{
                             background: `linear-gradient(135deg, var(--blue-light), var(--blue))`,
                             border: 'none', borderRadius: 9, padding: '10px 26px',
@@ -253,7 +293,7 @@ const Directory = () => {
                         <div style={{ width: 64, height: 64, borderRadius: 18, background: 'var(--blue-faint)', border: '1px solid var(--blue-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
                             <FaUsers style={{ fontSize: 26, color: 'var(--blue-light)' }} />
                         </div>
-                        <h3 style={{ fontFamily: "'Sora', sans-serif", fontSize: 18, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 8px' }}>No Alumni Found</h3>
+                        <h3 style={{ fontFamily: "'Sora', sans-serif", fontSize: 18, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 8px' }}>No Students Found</h3>
                         <p style={{ fontSize: 13.5, color: 'var(--text-secondary)', margin: 0 }}>Try adjusting your search criteria.</p>
                     </div>
                 ) : (

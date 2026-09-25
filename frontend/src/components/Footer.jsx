@@ -120,12 +120,12 @@ const Footer = () => {
                             <FaGraduationCap style={{ color: '#FFFFFF', fontSize: 16 }} />
                         </div>
                         <span style={{ fontFamily: "'Sora', sans-serif", fontSize: 15, fontWeight: 800, color: C.white, letterSpacing: '-0.2px' }}>
-                            NIT JSR Alumni
+                            Campus Connect
                         </span>
                     </div>
 
                     <p style={{ fontSize: 13, color: C.muted, lineHeight: 1.75, margin: '0 0 20px', maxWidth: 300 }}>
-                        The official alumni network of National Institute of Technology, Jamshedpur. Connecting graduates worldwide since 2024.
+                        The campus network of National Institute of Technology, Jamshedpur. Connecting students worldwide.
                     </p>
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 9 }}>
@@ -133,16 +133,16 @@ const Footer = () => {
                             <FaMapMarkerAlt style={{ color: C.blueLight, fontSize: 11, flexShrink: 0 }} />
                             Adityapur, Jamshedpur, Jharkhand
                         </div>
-                        <a href="mailto:alumni@nitjsr.ac.in" style={{ display: 'flex', alignItems: 'center', gap: 9, fontSize: 12.5, color: C.muted, textDecoration: 'none', transition: 'color 0.2s' }}
+                        <a href="mailto:campus@nitjsr.ac.in" style={{ display: 'flex', alignItems: 'center', gap: 9, fontSize: 12.5, color: C.muted, textDecoration: 'none', transition: 'color 0.2s' }}
                             onMouseEnter={e => e.currentTarget.style.color = C.white}
                             onMouseLeave={e => e.currentTarget.style.color = C.muted}
                         >
                             <FaEnvelope style={{ color: C.blueLight, fontSize: 11, flexShrink: 0 }} />
-                            alumni@nitjsr.ac.in
+                            campus@nitjsr.ac.in
                         </a>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 9, fontSize: 12.5, color: C.muted }}>
                             <FaPhone style={{ color: C.blueLight, fontSize: 11, flexShrink: 0 }} />
-                            +91 657 237 4000
+                            +91 8303607708
                         </div>
                     </div>
                 </div>
@@ -186,7 +186,7 @@ const Footer = () => {
             {/* ── BOTTOM ROW ── */}
             <div className="ft-bottom">
                 <p style={{ fontSize: 12, color: C.muted, margin: 0 }}>
-                    © {new Date().getFullYear()} NIT Jamshedpur Alumni Portal. All rights reserved.
+                    © {new Date().getFullYear()} Campus Connect Portal. All rights reserved.
                 </p>
 
                 {/* social icons */}

@@ -193,7 +193,7 @@ const Navbar = () => {
                         <FaGraduationCap style={{ color: '#fff', fontSize: 16 }} />
                     </div>
                     <span className="logo-text" style={{ fontFamily: "'Sora', sans-serif", fontSize: 15, fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.2px', whiteSpace: 'nowrap' }}>
-                        NIT JSR Alumni
+                        Campus Connect
                     </span>
                 </Link>
 
@@ -229,7 +229,7 @@ const Navbar = () => {
                     {user && (
                         <div style={{ position: 'relative' }} ref={bellRef}>
                             <button
-                                onClick={() => { setShowBell(v => !v); setShowUser(false); }}
+                                onClick={() => navigate('/notifications')}
                                 style={iconBtnSx(showBell)}
                                 onMouseEnter={e => { e.currentTarget.style.background = 'var(--blue-faint)'; e.currentTarget.style.borderColor = 'var(--blue-border)'; e.currentTarget.style.color = 'var(--text-primary)'; }}
                                 onMouseLeave={e => { if (!showBell) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = 'transparent'; e.currentTarget.style.color = 'var(--text-secondary)'; } }}

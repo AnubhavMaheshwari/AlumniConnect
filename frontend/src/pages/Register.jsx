@@ -156,15 +156,16 @@ const Register = () => {
         e.preventDefault();
         if (formData.password !== formData.confirmPassword) { toast.error('Passwords do not match'); return; }
         if (formData.password.length < 6) { toast.error('Password must be at least 6 characters'); return; }
+        if (!formData.email.endsWith('@nitjsr.ac.in')) { toast.error('Only @nitjsr.ac.in email addresses are allowed'); return; }
         if (!isEmailVerified) { toast.error('Please verify your email first'); return; }
-        if (!isPhoneVerified) { toast.error('Please verify your phone number first'); return; }
+        // if (!isPhoneVerified) { toast.error('Please verify your phone number first'); return; }
         setLoading(true);
         try {
             const fullPhone = `${formData.countryCode}${formData.phone}`;
             await register({
                 name: formData.name, email: formData.email, password: formData.password,
                 graduationYear: formData.graduationYear ? parseInt(formData.graduationYear) : undefined,
-                department: formData.department, phone: fullPhone,
+                department: formData.department, phone: formData.phone ? fullPhone : undefined,
                 company: formData.company, location: formData.location,
                 country: formData.country, zipCode: formData.zipCode,
                 yearsOfExperience: formData.yearsOfExperience ? parseInt(formData.yearsOfExperience) : 0,
@@ -178,6 +179,7 @@ const Register = () => {
 
     const sendEmailOTP = async () => {
         if (!formData.email) return toast.error('Enter email first');
+        if (!formData.email.endsWith('@nitjsr.ac.in')) return toast.error('OTPs can only be sent to @nitjsr.ac.in addresses');
         try {
             await API.post('/auth/send-email-otp', { email: formData.email });
             setIsEmailSent(true);
@@ -255,9 +257,9 @@ const Register = () => {
                         <FaGraduationCap style={{ color: '#FFFFFF', fontSize: isMobile ? 24 : 30 }} />
                     </div>
                     <h1 style={{ fontFamily: "'Sora', sans-serif", fontSize: isMobile ? 24 : 28, fontWeight: 800, color: C.text, margin: '0 0 8px', letterSpacing: '-0.4px' }}>
-                        Join NIT JSR Alumni
+                        Join Campus Connect
                     </h1>
-                    <p style={{ fontSize: isMobile ? 13 : 14, color: C.muted, margin: 0 }}>Create your alumni profile — it's free</p>
+                    <p style={{ fontSize: isMobile ? 13 : 14, color: C.muted, margin: 0 }}>Create your student profile — it's free</p>
                 </div>
 
                 {/* card */}
@@ -330,7 +332,7 @@ const Register = () => {
 
                                 {/* Grad year + Department */}
                                 <div style={{ display: 'grid', gridTemplateColumns: col2, gap: 14 }}>
-                                    <Field label="Graduation Year" icon={FaCalendarAlt}>
+                                    <Field label="Expected Graduation Year" icon={FaCalendarAlt}>
                                         <input type="number" name="graduationYear" value={formData.graduationYear}
                                             onChange={handleChange} placeholder="e.g. 2022" min="1960" max="2030"
                                             style={inputSx()} onFocus={focusSx} onBlur={blurSx} />
@@ -377,7 +379,7 @@ const Register = () => {
                                                 {formData.countryCode}
                                             </div>
                                             <input type="tel" name="phone" value={formData.phone} onChange={handleChange}
-                                                placeholder="9876543210" disabled={isPhoneVerified}
+                                                placeholder="9876543210 (Optional)" disabled={isPhoneVerified}
                                                 style={{ ...inputSx(true), borderRadius: '0 9px 9px 0', paddingLeft: 10 }} 
                                                 onFocus={focusSx} onBlur={blurSx} maxLength="10" />
                                         </div>

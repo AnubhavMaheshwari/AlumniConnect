@@ -16,6 +16,12 @@ const generateToken = (id) => {
 exports.register = async (req, res) => {
     try {
         const { name, email, password, graduationYear, department, phone, company, yearsOfExperience, country, zipCode } = req.body;
+        
+        // Validate email domain
+        if (!email.endsWith('@nitjsr.ac.in')) {
+            return res.status(400).json({ success: false, message: 'Only @nitjsr.ac.in email addresses are allowed' });
+        }
+
         const registrationNumber = phone; // Registration number is phone number
 
         // Check if user exists (email)
@@ -24,10 +30,12 @@ exports.register = async (req, res) => {
             return res.status(400).json({ success: false, message: 'User with this email already exists' });
         }
 
-        // Check if user exists (phone/registrationNumber)
-        const userWithPhone = await User.findOne({ phone });
-        if (userWithPhone) {
-            return res.status(400).json({ success: false, message: 'User with this phone number already exists' });
+        // Check if user exists (phone/registrationNumber) if phone is provided
+        if (phone) {
+            const userWithPhone = await User.findOne({ phone });
+            if (userWithPhone) {
+                return res.status(400).json({ success: false, message: 'User with this phone number already exists' });
+            }
         }
 
         // Create user
@@ -37,12 +45,12 @@ exports.register = async (req, res) => {
             password,
             graduationYear,
             department,
-            phone,
+            phone: phone || undefined,
             company,
             yearsOfExperience,
             country,
             zipCode,
-            registrationNumber
+            registrationNumber: phone || undefined
         });
 
         const token = generateToken(user._id);
@@ -154,7 +162,7 @@ exports.forgotPassword = async (req, res) => {
 
         const html = `
       <h1>Password Reset Request</h1>
-      <p>You have requested a password reset for your Alumni Connect account.</p>
+      <p>You have requested a password reset for your Campus Connect account.</p>
       <p>Click the link below to reset your password:</p>
       <a href="${resetUrl}" style="display:inline-block;padding:12px 24px;background:#4F46E5;color:white;text-decoration:none;border-radius:8px;">Reset Password</a>
       <p>This link will expire in 10 minutes.</p>
@@ -163,7 +171,7 @@ exports.forgotPassword = async (req, res) => {
 
         await sendEmail({
             email: user.email,
-            subject: 'Alumni Connect - Password Reset',
+            subject: 'Campus Connect - Password Reset',
             html
         });
 

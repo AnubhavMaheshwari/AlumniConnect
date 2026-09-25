@@ -4,7 +4,7 @@ const User = require('../models/User');
 // @route   GET /api/users
 exports.getUsers = async (req, res) => {
     try {
-        const { search, department, graduationYear, page = 1, limit = 12 } = req.query;
+        const { search, department, graduationYear, batchYear, company, location, page = 1, limit = 12 } = req.query;
 
         let query = {};
 
@@ -14,7 +14,8 @@ exports.getUsers = async (req, res) => {
                 { company: { $regex: search, $options: 'i' } },
                 { currentPosition: { $regex: search, $options: 'i' } },
                 { skills: { $regex: search, $options: 'i' } },
-                { registrationNumber: { $regex: search, $options: 'i' } }
+                { registrationNumber: { $regex: search, $options: 'i' } },
+                { location: { $regex: search, $options: 'i' } }
             ];
         }
 
@@ -22,8 +23,17 @@ exports.getUsers = async (req, res) => {
             query.department = department;
         }
 
-        if (graduationYear) {
-            query.graduationYear = parseInt(graduationYear);
+        const year = graduationYear || batchYear;
+        if (year) {
+            query.graduationYear = parseInt(year);
+        }
+
+        if (company) {
+            query.company = { $regex: company, $options: 'i' };
+        }
+
+        if (location) {
+            query.location = { $regex: location, $options: 'i' };
         }
 
         const total = await User.countDocuments(query);
@@ -32,6 +42,7 @@ exports.getUsers = async (req, res) => {
             .skip((page - 1) * limit)
             .limit(parseInt(limit))
             .sort({ createdAt: -1 });
+
 
         res.json({
             success: true,

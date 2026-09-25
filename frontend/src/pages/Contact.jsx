@@ -139,7 +139,7 @@ const Contact = () => {
                     }}>
                         <HiSparkles style={{ color: C.blueLight, fontSize: 13 }} />
                         <span style={{ fontSize: 11, fontWeight: 700, color: C.blueLight, letterSpacing: '0.12em', textTransform: 'uppercase' }}>
-                            Alumni Cell · NIT Jamshedpur
+                            Campus Cell · NIT Jamshedpur
                         </span>
                     </div>
 
@@ -155,7 +155,7 @@ const Contact = () => {
                         }}>Touch</span>
                     </h1>
                     <p style={{ fontSize: 15, color: C.muted, margin: 0, lineHeight: 1.6 }}>
-                        Have a question or suggestion?<br />Reach out to the NIT Jamshedpur Alumni Cell.
+                        Have a question or suggestion?<br />Reach out to the NIT Jamshedpur Campus Cell.
                     </p>
                 </div>
 
@@ -314,7 +314,7 @@ const Contact = () => {
                             background: C.blueLight
                         }} />
                         <span style={{ fontSize: 11, color: C.muted }}>
-                            Your message is sent directly to the Alumni Cell team
+                            Your message is sent directly to the Campus Cell team
                         </span>
                     </div>
                 </div>

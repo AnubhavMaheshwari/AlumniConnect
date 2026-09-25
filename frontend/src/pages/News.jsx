@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
 import API from '../services/api';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+
 import { toast } from 'react-toastify';
 import { FaNewspaper, FaUser, FaClock, FaPlus, FaTimes, FaFilter, FaTag } from 'react-icons/fa';
 import { HiSparkles } from 'react-icons/hi';
@@ -75,16 +76,17 @@ const NewsCard = ({ item }) => {
                     </span>
                 </div>
 
-                {/* title */}
-                <h3 style={{
-                    fontFamily: "'Sora', sans-serif",
-                    fontSize: 16, fontWeight: 700, color: 'var(--text-primary)',
-                    lineHeight: 1.4, margin: 0,
-                    display: '-webkit-box', WebkitLineClamp: 2,
-                    WebkitBoxOrient: 'vertical', overflow: 'hidden',
-                }}>
-                    {item.title}
-                </h3>
+                <Link to={`/news/${item._id}`} style={{ textDecoration: 'none' }}>
+                    <h3 style={{
+                        fontFamily: "'Sora', sans-serif",
+                        fontSize: 16, fontWeight: 700, color: 'var(--text-primary)',
+                        lineHeight: 1.4, margin: 0,
+                        display: '-webkit-box', WebkitLineClamp: 2,
+                        WebkitBoxOrient: 'vertical', overflow: 'hidden',
+                    }}>
+                        {item.title}
+                    </h3>
+                </Link>
 
                 {/* summary */}
                 <p style={{
@@ -95,6 +97,7 @@ const NewsCard = ({ item }) => {
                 }}>
                     {item.summary || item.content}
                 </p>
+
 
                 {/* tags */}
                 {item.tags?.length > 0 && (
@@ -126,7 +129,7 @@ const NewsCard = ({ item }) => {
                         }}>
                             <FaUser style={{ fontSize: 9, color: '#fff' }} />
                         </div>
-                        {item.author?.name || 'Alumni'}
+                        {item.author?.name || 'Student'}
                     </span>
                     <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
                         <FaClock style={{ fontSize: 10 }} />
@@ -194,7 +197,7 @@ const News = () => {
                         }}>
                             <HiSparkles style={{ color: 'var(--blue-light)', fontSize: 13 }} />
                             <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--blue-light)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>
-                                Alumni Stories
+                                Campus Stories
                             </span>
                         </div>
 
@@ -210,7 +213,7 @@ const News = () => {
                             }}>Stories</span>
                         </h1>
                         <p style={{ fontSize: 14.5, color: 'var(--text-secondary)', margin: 0 }}>
-                            Celebrating NIT Jamshedpur alumni achievements and updates.
+                            Celebrating NIT Jamshedpur campus achievements and updates.
                         </p>
                     </div>
 
@@ -302,7 +305,7 @@ const News = () => {
                             </div>
                             <div>
                                 <p style={{ fontFamily: "'Sora', sans-serif", fontSize: 15, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>Share Your Story</p>
-                                <p style={{ fontSize: 11.5, color: 'var(--text-secondary)', margin: '2px 0 0' }}>Inspire fellow alumni with your journey</p>
+                                <p style={{ fontSize: 11.5, color: 'var(--text-secondary)', margin: '2px 0 0' }}>Inspire fellow students with your journey</p>
                             </div>
                         </div>
 

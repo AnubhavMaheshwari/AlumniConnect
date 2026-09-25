@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
 import API from '../services/api';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+
 import { toast } from 'react-toastify';
 import { FaCalendarAlt, FaMapMarkerAlt, FaUsers, FaClock, FaPlus, FaTimes, FaVideo, FaFilter } from 'react-icons/fa';
 import { HiSparkles } from 'react-icons/hi';
@@ -73,12 +74,15 @@ const EventCard = ({ event, user, onRSVP }) => {
             </div>
 
             <div style={{ padding: '14px 22px 20px', flex: 1, display: 'flex', flexDirection: 'column', gap: 12 }}>
-                <h3 style={{ fontFamily: "'Sora', sans-serif", fontSize: 16, fontWeight: 700, color: 'var(--text-primary)', margin: 0, lineHeight: 1.4, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                    {event.title}
-                </h3>
+                <Link to={`/events/${event._id}`} style={{ textDecoration: 'none' }}>
+                    <h3 style={{ fontFamily: "'Sora', sans-serif", fontSize: 16, fontWeight: 700, color: 'var(--text-primary)', margin: 0, lineHeight: 1.4, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                        {event.title}
+                    </h3>
+                </Link>
                 <p style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.65, margin: 0, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                    {event.description}
+                    {event.shortDescription || event.description}
                 </p>
+
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 7, fontSize: 12.5, color: 'var(--text-secondary)' }}>
                     <span style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
@@ -125,7 +129,12 @@ const Events = () => {
     const [loading, setLoading]     = useState(true);
     const [showForm, setShowForm]   = useState(false);
     const [filter, setFilter]       = useState('');
-    const [formData, setFormData]   = useState({ title: '', description: '', date: '', location: '', type: 'other', isOnline: false, meetingLink: '', maxAttendees: 0 });
+    const [formData, setFormData]   = useState({ 
+        title: '', description: '', shortDescription: '', date: '', location: '', 
+        type: 'other', isOnline: false, meetingLink: '', maxAttendees: 0,
+        registrationType: 'free', price: 0, registrationDeadline: ''
+    });
+
 
     const eventTypes = ['reunion', 'workshop', 'seminar', 'networking', 'cultural', 'other'];
 
@@ -147,8 +156,13 @@ const Events = () => {
             await API.post('/events', formData);
             toast.success('Event created!');
             setShowForm(false);
-            setFormData({ title: '', description: '', date: '', location: '', type: 'other', isOnline: false, meetingLink: '', maxAttendees: 0 });
+            setFormData({ 
+                title: '', description: '', shortDescription: '', date: '', location: '', 
+                type: 'other', isOnline: false, meetingLink: '', maxAttendees: 0,
+                registrationType: 'free', price: 0, registrationDeadline: ''
+            });
             fetchEvents();
+
         } catch (err) { toast.error(err.response?.data?.message || 'Failed to create event'); }
     };
 
@@ -166,13 +180,13 @@ const Events = () => {
                     <div>
                         <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'var(--blue-faint)', border: '1px solid var(--blue-border)', borderRadius: 20, padding: '5px 14px', marginBottom: 16 }}>
                             <HiSparkles style={{ color: 'var(--blue-light)', fontSize: 13 }} />
-                            <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--blue-light)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Alumni Gatherings</span>
+                            <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--blue-light)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Campus Gatherings</span>
                         </div>
                         <h1 style={{ fontFamily: "'Sora', sans-serif", fontSize: 38, fontWeight: 800, margin: '0 0 10px', color: 'var(--text-primary)', letterSpacing: '-0.6px', lineHeight: 1.15 }}>
                             Events &{' '}
-                            <span style={{ background: `linear-gradient(135deg, var(--blue-light), #6B8FE8)`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Reunions</span>
+                            <span style={{ background: `linear-gradient(135deg, var(--blue-light), #6B8FE8)`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Meetups</span>
                         </h1>
-                        <p style={{ fontSize: 14.5, color: 'var(--text-secondary)', margin: 0 }}>Stay connected with upcoming NIT JSR alumni gatherings.</p>
+                        <p style={{ fontSize: 14.5, color: 'var(--text-secondary)', margin: 0 }}>Stay connected with upcoming NIT JSR campus meetups.</p>
                     </div>
                     {user && (
                         <button onClick={() => setShowForm(!showForm)} style={{
@@ -220,7 +234,7 @@ const Events = () => {
                             </div>
                             <div>
                                 <p style={{ fontFamily: "'Sora', sans-serif", fontSize: 15, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>Create New Event</p>
-                                <p style={{ fontSize: 11.5, color: 'var(--text-secondary)', margin: '2px 0 0' }}>Bring alumni together for something memorable</p>
+                                <p style={{ fontSize: 11.5, color: 'var(--text-secondary)', margin: '2px 0 0' }}>Bring students together for something memorable</p>
                             </div>
                         </div>
                         <form onSubmit={handleSubmit}>
@@ -232,8 +246,21 @@ const Events = () => {
                                     {eventTypes.map(t => <option key={t} value={t} style={{ background: 'var(--bg-secondary)' }}>{t.charAt(0).toUpperCase() + t.slice(1)}</option>)}
                                 </select>
                             </div>
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 14, marginBottom: 14 }}>
+                                <select value={formData.registrationType} onChange={e => setFormData({ ...formData, registrationType: e.target.value })} style={{ ...inputSx, appearance: 'none', cursor: 'pointer' }} onFocus={focusSx} onBlur={blurSx}>
+                                    <option value="free" style={{ background: 'var(--bg-secondary)' }}>Free Event</option>
+                                    <option value="paid" style={{ background: 'var(--bg-secondary)' }}>Paid Event</option>
+                                </select>
+                                {formData.registrationType === 'paid' && (
+                                    <input type="number" placeholder="Price (₹) *" value={formData.price} onChange={e => setFormData({ ...formData, price: e.target.value })} style={inputSx} onFocus={focusSx} onBlur={blurSx} required />
+                                )}
+                                <input type="datetime-local" placeholder="Reg. Deadline" value={formData.registrationDeadline} onChange={e => setFormData({ ...formData, registrationDeadline: e.target.value })} style={{ ...inputSx, colorScheme: 'dark' }} onFocus={focusSx} onBlur={blurSx} />
+                                <input placeholder="Max Attendees" type="number" value={formData.maxAttendees} onChange={e => setFormData({ ...formData, maxAttendees: e.target.value })} style={inputSx} onFocus={focusSx} onBlur={blurSx} />
+                            </div>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-                                <textarea placeholder="Description *" value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })} rows={3} required style={{ ...inputSx, resize: 'vertical', lineHeight: 1.65 }} onFocus={focusSx} onBlur={blurSx} />
+                                <input placeholder="Short Preview (max 200 chars)" value={formData.shortDescription} onChange={e => setFormData({ ...formData, shortDescription: e.target.value })} style={inputSx} onFocus={focusSx} onBlur={blurSx} maxLength={200} />
+                                <textarea placeholder="Full Description *" value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })} rows={3} required style={{ ...inputSx, resize: 'vertical', lineHeight: 1.65 }} onFocus={focusSx} onBlur={blurSx} />
+
                                 <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
                                     <button type="submit" style={{ background: `linear-gradient(135deg, var(--blue-light), var(--blue))`, border: 'none', borderRadius: 9, padding: '11px 28px', color: '#fff', fontSize: 13, fontWeight: 700, letterSpacing: '0.05em', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", boxShadow: `0 4px 20px rgba(32,54,113,0.35)`, transition: 'opacity 0.2s' }} onMouseEnter={e => e.currentTarget.style.opacity = '0.85'} onMouseLeave={e => e.currentTarget.style.opacity = '1'}>
                                         Create Event →

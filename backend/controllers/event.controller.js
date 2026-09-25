@@ -35,28 +35,41 @@ exports.getEvent = async (req, res) => {
     try {
         const event = await Event.findById(req.params.id)
             .populate('organizer', 'name email profileImage')
-            .populate('attendees', 'name email profileImage');
+            .populate('attendees', 'name profileImage graduationYear department company');
 
         if (!event) {
             return res.status(404).json({ success: false, message: 'Event not found' });
         }
+
         res.json({ success: true, event });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
 };
 
-// @desc    Create event
+// @desc    Create new event
 // @route   POST /api/events
 exports.createEvent = async (req, res) => {
     try {
-        req.body.organizer = req.user.id;
-        const event = await Event.create(req.body);
+        const {
+            title, description, shortDescription, date, endDate, location,
+            type, isOnline, meetingLink, maxAttendees, registrationType,
+            price, registrationDeadline, organizerContact
+        } = req.body;
+
+        const event = await Event.create({
+            title, description, shortDescription, date, endDate, location,
+            type, isOnline, meetingLink, maxAttendees, registrationType,
+            price, registrationDeadline, organizerContact,
+            organizer: req.user.id
+        });
+
         res.status(201).json({ success: true, event });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
 };
+
 
 // @desc    Update event
 // @route   PUT /api/events/:id

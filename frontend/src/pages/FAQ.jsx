@@ -26,18 +26,18 @@ if (typeof document !== 'undefined' && !document.getElementById('faq-fonts')) {
 }
 
 const flatFaqData = [
-    { q: 'What is the NIT Jamshedpur Alumni Portal?', a: 'The NIT Jamshedpur Alumni Portal is the official platform for alumni of National Institute of Technology, Jamshedpur. It helps graduates stay connected, discover opportunities, attend events, and give back to the institute.' },
-    { q: 'Who can register on the portal?', a: 'Any graduate, postgraduate, or doctoral alumnus of NIT Jamshedpur (formerly RIT Jamshedpur) can register. Current students and faculty with admin approval can also access certain features.' },
-    { q: 'Is there a fee to use the portal?', a: 'No, the alumni portal is completely free to use. Simply register with your email and start connecting with fellow alumni.' },
-    { q: 'How do I create an account?', a: 'Click the "Sign Up" button on the homepage, fill in your details including name, email, graduation year, and department, then set a password. Your account will be created instantly.' },
-    { q: 'How do I update my profile information?', a: 'After logging in, go to your Dashboard and click "View Full Profile". From there you can edit your bio, current position, company, location, skills, and contact details.' },
-    { q: 'I forgot my password. What should I do?', a: "Click \"Forgot password?\" on the login page. Enter your registered email and we'll send you a password reset link. The link is valid for 10 minutes." },
-    { q: 'How does the Alumni Directory work?', a: 'The Alumni Directory lets you search for fellow NIT Jamshedpur graduates by name, department, batch, company, or skills. Click on any profile card to view their full profile and connect.' },
-    { q: 'Can I post a job on the Job Board?', a: 'Yes! Once logged in, visit the Jobs page and click "Post Job". Fill in the job details including title, company, location, type, and description. Your posting will be visible to all alumni.' },
+    { q: 'What is the NIT Jamshedpur Campus Portal?', a: 'The NIT Jamshedpur Campus Portal is the platform for students of National Institute of Technology, Jamshedpur. It helps students stay connected, discover opportunities, attend events, and collaborate.' },
+    { q: 'Who can register on the portal?', a: 'Any current student of NIT Jamshedpur can register. Use your institute email address (@nitjsr.ac.in) to create an account.' },
+    { q: 'Is there a fee to use the portal?', a: 'No, the campus portal is completely free to use. Simply register with your email and start connecting with fellow students.' },
+    { q: 'How do I create an account?', a: 'Click the "Sign Up" button on the homepage, fill in your details including name, email, expected graduation year, and department, then set a password. Your account will be created instantly.' },
+    { q: 'How do I update my profile information?', a: 'After logging in, go to your Dashboard and click "My Profile". From there you can edit your bio, current projects, internships, location, skills, and contact details.' },
+    { q: 'I forgot my password. What should I do?', a: "Click \"Forgot password?\" on the login page. Enter your registered email and we'll send you a password reset code. The code is valid for 10 minutes." },
+    { q: 'How does the Campus Directory work?', a: 'The Campus Directory lets you search for fellow NIT Jamshedpur students by name, department, batch, or skills. Click on any profile card to view their full profile and connect.' },
+    { q: 'Can I post a job or internship on the Job Board?', a: 'Yes! Once logged in, visit the Jobs page and click "Post Job". Fill in the details of the opportunity. Your posting will be visible to all students.' },
     { q: 'How do I RSVP to an event?', a: "Navigate to the Events page, find the event you're interested in, and click the \"RSVP Now\" button. You'll be added to the attendees list and can view other attendees." },
-    { q: 'Can I share my success story?', a: 'Absolutely! Go to the News & Stories page and click "Share Story". Write your story with a title, summary, and full content. You can also add tags to categorize it.' },
-    { q: 'Is my personal information safe?', a: 'Yes. We use industry-standard encryption for passwords and secure communication. Your personal data is only visible to registered alumni members and is never shared with third parties.' },
-    { q: 'Can I control what information is visible on my profile?', a: 'Yes, you can choose what details to share on your profile. Only your name and department are required — all other fields like phone, location, and bio are optional.' },
+    { q: 'Can I share my journey or achievement?', a: 'Absolutely! Go to the Campus Stories page and click "Share Story". Write your story with a title, summary, and full content. You can also add tags to categorize it.' },
+    { q: 'Is my personal information safe?', a: 'Yes. We use industry-standard encryption for passwords and secure communication. Your personal data is only visible to registered campus members and is never shared with third parties.' },
+    { q: 'Can I control what information is visible on my profile?', a: 'Yes, you can choose what details to share on your profile. Only your name and department are required — all other fields are optional.' },
 ];
 
 /* ── accordion item ──────────────────────────────────────────────────────── */
@@ -172,7 +172,7 @@ const FAQ = () => {
                         }}>Questions</span>
                     </h1>
                     <p style={{ fontSize: 15, color: C.muted, margin: 0, lineHeight: 1.6 }}>
-                        Everything you need to know about the NIT Jamshedpur Alumni Portal.
+                        Everything you need to know about the NIT Jamshedpur Campus Portal.
                     </p>
 
                     {/* stat pills */}

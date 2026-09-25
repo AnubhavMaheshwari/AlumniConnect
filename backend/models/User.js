@@ -17,8 +17,7 @@ const userSchema = new mongoose.Schema({
     },
     registrationNumber: {
         type: String,
-        required: [true, 'Please add a registration number'],
-        unique: true,
+        required: false,
         trim: true
     },
     password: {
@@ -48,8 +47,7 @@ const userSchema = new mongoose.Schema({
     },
     phone: {
         type: String,
-        required: [true, 'Please add a phone number'],
-        unique: true,
+        required: false,
         trim: true
     },
     skills: [{
@@ -122,13 +120,26 @@ const userSchema = new mongoose.Schema({
     timestamps: true
 });
 
+// Indexes for fast querying
+userSchema.index({ graduationYear: 1 });
+userSchema.index({ department: 1 });
+userSchema.index({ company: 1 });
+userSchema.index({ location: 1 });
+userSchema.index({ name: 'text', skills: 'text', company: 'text' });
+
+
 // Hash password before saving
 userSchema.pre('save', async function (next) {
     if (!this.isModified('password')) {
-        next();
+        return next();
     }
-    const salt = await bcrypt.genSalt(10);
-    this.password = await bcrypt.hash(this.password, salt);
+    try {
+        const salt = await bcrypt.genSalt(10);
+        this.password = await bcrypt.hash(this.password, salt);
+        next();
+    } catch (error) {
+        next(error);
+    }
 });
 
 // Match password

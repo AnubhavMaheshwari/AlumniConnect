@@ -7,7 +7,7 @@ const getSmtpConfig = () => {
     const user = process.env.SMTP_USER || process.env.EMAIL_USER;
     const rawPass = process.env.SMTP_PASS || process.env.EMAIL_PASS || '';
     const pass = rawPass.replace(/\s+/g, '');
-    const from = process.env.SMTP_FROM || process.env.EMAIL_FROM || `"Alumni Connect" <${user}>`;
+    const from = process.env.SMTP_FROM || process.env.EMAIL_FROM || `"Campus Connect" <${user}>`;
     const secure = port === 465;
 
     return { host, port, user, pass, from, secure };

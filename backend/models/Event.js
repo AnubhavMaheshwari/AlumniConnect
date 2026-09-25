@@ -51,7 +51,33 @@ const eventSchema = new mongoose.Schema({
     maxAttendees: {
         type: Number,
         default: 0
+    },
+    shortDescription: {
+        type: String,
+        maxlength: 200,
+        default: ''
+    },
+    registrationType: {
+        type: String,
+        enum: ['free', 'paid'],
+        default: 'free'
+    },
+    price: {
+        type: Number,
+        default: 0
+    },
+    registrationDeadline: {
+        type: Date
+    },
+    attachments: [{
+        type: String // Cloudinary URLs
+    }],
+    organizerContact: {
+        name: String,
+        email: String,
+        phone: String
     }
+
 }, {
     timestamps: true
 });

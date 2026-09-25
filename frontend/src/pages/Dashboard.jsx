@@ -324,7 +324,7 @@ const Dashboard = () => {
                                 borderRadius: 20, padding: '3px 11px'
                             }}>
                                 <span style={{ fontSize: 11, fontWeight: 600, color: '#fff', letterSpacing: '0.07em' }}>
-                                    {user?.role === 'admin' ? '⚡ Administrator' : '🎓 Alumni Member'}
+                                    {user?.role === 'admin' ? '⚡ Administrator' : '🎓 Campus Member'}
                                 </span>
                             </div>
                         </div>

@@ -77,7 +77,7 @@ const Hero = ({ user }) => (
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'var(--blue-faint)', border: '1px solid var(--blue-border)', borderRadius: 20, padding: '6px 16px', marginBottom: 28, animation: 'fadeUp 0.6s ease both' }}>
                 <HiSparkles style={{ color: 'var(--blue-light)', fontSize: 13 }} />
                 <span style={{ fontSize: 11.5, fontWeight: 700, color: 'var(--blue-light)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>
-                    Official Alumni Portal · Est. 2026
+                    Campus Portal · Est. 2026
                 </span>
             </div>
 
@@ -96,7 +96,7 @@ const Hero = ({ user }) => (
                     backgroundSize: '200% auto',
                     WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
                     animation: 'shimmer 4s linear infinite',
-                }}>Alumni Connect</span>
+                }}>Campus Connect</span>
             </h1>
 
             {/* subtext */}
@@ -105,7 +105,7 @@ const Hero = ({ user }) => (
                 maxWidth: 560, margin: '0 auto 40px',
                 animation: 'fadeUp 0.7s ease 0.2s both',
             }}>
-                The official network for graduates of NIT Jamshedpur. Discover opportunities, share your story, attend events, and give back to your alma mater.
+                The network for students of NIT Jamshedpur. Discover opportunities, share your story, attend events, and collaborate with your peers.
             </p>
 
             {/* CTAs */}
@@ -138,7 +138,7 @@ const Hero = ({ user }) => (
                 {[['500+', 'Alumni'], ['50+', 'Jobs'], ['30+', 'Events'], ['1960', 'Est. Year']].map(([num, label]) => (
                     <div key={label} style={{ textAlign: 'center', minWidth: 80 }}>
                         <div style={{ fontFamily: "'Sora', sans-serif", fontSize: 24, fontWeight: 800, color: 'var(--text-primary)', lineHeight: 1 }}>{num}</div>
-                        <div style={{ fontSize: 10, color: 'var(--text-secondary)', marginTop: 4, letterSpacing: '0.06em', textTransform: 'uppercase' }}>{label}</div>
+                        <div style={{ fontSize: 10, color: 'var(--text-secondary)', marginTop: 4, letterSpacing: '0.06em', textTransform: 'uppercase' }}>{label === 'Alumni' ? 'Students' : label}</div>
                     </div>
                 ))}
             </div>
@@ -148,11 +148,11 @@ const Hero = ({ user }) => (
 
 /* ── features grid ───────────────────────────────────────────────────────── */
 const features = [
-    { icon: FaUsers,        title: 'Alumni Directory',   desc: 'Search and connect with NIT JSR graduates by department, batch, company, or skill set.', href: '/directory',  label: 'Browse Directory' },
-    { icon: FaBriefcase,    title: 'Job Board',          desc: 'Discover and post career opportunities exclusively within the NIT Jamshedpur alumni network.', href: '/jobs', label: 'View Jobs' },
-    { icon: FaCalendarAlt,  title: 'Events & Reunions',  desc: 'RSVP to upcoming gatherings, workshops, seminars, and batch reunions.', href: '/events',     label: 'See Events' },
-    { icon: FaNewspaper,    title: 'News & Stories',     desc: 'Share achievements, read inspiring alumni journeys, and stay updated with institute news.', href: '/news', label: 'Read Stories' },
-    { icon: FaHandshake,    title: 'Mentorship',         desc: 'Connect with experienced alumni for guidance on career growth and industry transitions.', href: '/directory', label: 'Find a Mentor' },
+    { icon: FaUsers,        title: 'Campus Directory',   desc: 'Search and connect with NIT JSR students by department, batch, or skill set.', href: '/directory',  label: 'Browse Directory' },
+    { icon: FaBriefcase,    title: 'Job Board',          desc: 'Discover and post career opportunities exclusively within the NIT Jamshedpur campus network.', href: '/jobs', label: 'View Jobs' },
+    { icon: FaCalendarAlt,  title: 'Events & Reunions',  desc: 'RSVP to upcoming gatherings, workshops, seminars, and meetups.', href: '/events',     label: 'See Events' },
+    { icon: FaNewspaper,    title: 'News & Stories',     desc: 'Share achievements, read inspiring student journeys, and stay updated with institute news.', href: '/news', label: 'Read Stories' },
+    { icon: FaHandshake,    title: 'Mentorship',         desc: 'Connect with experienced students and seniors for guidance on career growth and industry transitions.', href: '/directory', label: 'Find a Mentor' },
     { icon: FaQuestionCircle, title: 'Help & FAQ',       desc: 'Everything you need to get started — registration, profile setup, and portal features.', href: '/faq',       label: 'Read FAQ' },
 ];
 
@@ -165,10 +165,10 @@ const Features = () => (
                     <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--blue-light)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Everything in One Place</span>
                 </div>
                 <h2 style={{ fontFamily: "'Sora', sans-serif", fontSize: 'clamp(26px, 4vw, 40px)', fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 14px', letterSpacing: '-0.6px' }}>
-                    Built for the Alumni Community
+                    Built for the Campus Community
                 </h2>
                 <p style={{ fontSize: 15, color: 'var(--text-secondary)', maxWidth: 500, margin: '0 auto' }}>
-                    Every feature designed to strengthen the bond between NIT Jamshedpur graduates worldwide.
+                    Every feature designed to strengthen the bond between NIT Jamshedpur students worldwide.
                 </p>
             </div>
 
@@ -202,7 +202,7 @@ const Stats = () => (
             {[
                 { num: '1960', label: 'Founded', sub: 'Formerly RIT Jamshedpur' },
                 { num: '60+',  label: 'Years Legacy', sub: 'Of engineering excellence' },
-                { num: '500+', label: 'Alumni', sub: 'And growing daily' },
+                { num: '500+', label: 'Students', sub: 'And growing daily' },
                 { num: '20+',  label: 'Departments', sub: 'Across all disciplines' },
                 { num: '100%', label: 'Free to Join', sub: 'No membership fees' },
             ].map(s => (
@@ -243,8 +243,8 @@ const CTAStrip = ({ user }) => (
                     </h2>
                     <p style={{ fontSize: 15, color: 'rgba(255,255,255,0.75)', margin: '0 0 32px', lineHeight: 1.65 }}>
                         {user
-                            ? 'Your alumni network is waiting. Explore jobs, events, and connect with fellow graduates.'
-                            : 'Join thousands of NIT Jamshedpur alumni already on the platform. Registration is free and takes under a minute.'
+                            ? 'Your campus network is waiting. Explore jobs, events, and connect with fellow students.'
+                            : 'Join thousands of NIT Jamshedpur students already on the platform. Registration is free and takes under a minute.'
                         }
                     </p>
                     <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>

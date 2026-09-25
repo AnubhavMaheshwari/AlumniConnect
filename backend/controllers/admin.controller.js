@@ -179,6 +179,11 @@ exports.searchUsers = async (req, res) => {
     }
 };
 
+const Event = require('../models/Event');
+const Job = require('../models/Job');
+const News = require('../models/News');
+const Mentor = require('../models/Mentor');
+
 // @desc    Get user statistics
 // @route   GET /api/admin/stats
 exports.getStats = async (req, res) => {
@@ -188,16 +193,40 @@ exports.getStats = async (req, res) => {
         const totalAlumni = await User.countDocuments({ role: 'alumni' });
         const totalBanned = await User.countDocuments({ isBanned: true });
 
+        const totalEvents = await Event.countDocuments();
+        const totalJobs = await Job.countDocuments();
+        const totalNews = await News.countDocuments();
+        const totalMentors = await Mentor.countDocuments({ isActive: true });
+
+        // Get some monthly data for charts (last 6 months)
+        const sixMonthsAgo = new Date();
+        sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+        
+        const userGrowth = await User.aggregate([
+            { $match: { createdAt: { $gte: sixMonthsAgo } } },
+            { $group: { 
+                _id: { month: { $month: "$createdAt" }, year: { $year: "$createdAt" } },
+                count: { $sum: 1 }
+            }},
+            { $sort: { "_id.year": 1, "_id.month": 1 } }
+        ]);
+
         res.status(200).json({
             success: true,
             stats: {
                 totalUsers,
                 totalAdmins,
                 totalAlumni,
-                totalBanned
+                totalBanned,
+                totalEvents,
+                totalJobs,
+                totalNews,
+                totalMentors,
+                userGrowth
             }
         });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
 };
+

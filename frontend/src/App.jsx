@@ -18,9 +18,15 @@ import Dashboard from './pages/Dashboard';
 import Directory from './pages/Directory';
 import Profile from './pages/Profile';
 import Events from './pages/Events';
+import EventDetail from './pages/EventDetail';
 import Jobs from './pages/Jobs';
 import News from './pages/News';
+import NewsDetail from './pages/NewsDetail';
+import Mentorship from './pages/Mentorship';
+import Membership from './pages/Membership';
 import Admin from './pages/Admin';
+
+
 import Messages from './pages/Messages';
 import Notifications from './pages/Notifications';
 
@@ -45,9 +51,14 @@ function App() {
               <Route path="directory" element={<ProtectedRoute><Directory /></ProtectedRoute>} />
               <Route path="profile/:id" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
               <Route path="events" element={<ProtectedRoute><Events /></ProtectedRoute>} />
+              <Route path="events/:id" element={<ProtectedRoute><EventDetail /></ProtectedRoute>} />
               <Route path="jobs" element={<ProtectedRoute><Jobs /></ProtectedRoute>} />
               <Route path="news" element={<ProtectedRoute><News /></ProtectedRoute>} />
+              <Route path="news/:id" element={<ProtectedRoute><NewsDetail /></ProtectedRoute>} />
+              <Route path="mentorship" element={<ProtectedRoute><Mentorship /></ProtectedRoute>} />
+              <Route path="membership" element={<ProtectedRoute><Membership /></ProtectedRoute>} />
               <Route path="messages" element={<ProtectedRoute><Messages /></ProtectedRoute>} />
+
               <Route path="notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
 
               {/* Admin routes - require admin role */}

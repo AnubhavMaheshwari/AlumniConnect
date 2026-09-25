@@ -20,6 +20,11 @@ exports.sendEmailOTP = async (req, res) => {
             return res.status(400).json({ success: false, message: 'Please provide a valid email address' });
         }
 
+        // Validate email domain
+        if (!normalizedEmail.endsWith('@nitjsr.ac.in')) {
+            return res.status(400).json({ success: false, message: 'OTPs can only be sent to @nitjsr.ac.in email addresses' });
+        }
+
         // Check if user already exists
         const userExists = await User.findOne({ email: normalizedEmail });
         if (userExists) {
@@ -40,20 +45,20 @@ exports.sendEmailOTP = async (req, res) => {
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 10px;">
                 <h2 style="color: #4F46E5; text-align: center;">Verify Your Email</h2>
                 <p>Hello,</p>
-                <p>Your verification code for Alumni Connect is:</p>
+                <p>Your verification code for Campus Connect is:</p>
                 <div style="background: #f3f4f6; padding: 20px; text-align: center; font-size: 32px; font-weight: bold; letter-spacing: 5px; color: #111827; border-radius: 8px; margin: 20px 0;">
                     ${otp}
                 </div>
                 <p>This code will expire in 10 minutes.</p>
                 <p>If you did not request this, please ignore this email.</p>
                 <hr style="border: 0; border-top: 1px solid #e0e0e0; margin: 20px 0;">
-                <p style="font-size: 12px; color: #6b7280; text-align: center;">Alumni Connect - Connecting NIT JSR Alumni</p>
+                <p style="font-size: 12px; color: #6b7280; text-align: center;">Campus Connect - Connecting NIT JSR Alumni</p>
             </div>
         `;
 
         await sendEmail({
             email: normalizedEmail,
-            subject: 'Email Verification - Alumni Connect',
+            subject: 'Email Verification - Campus Connect',
             html
         });
 
@@ -177,13 +182,13 @@ exports.sendForgotPasswordOTP = async (req, res) => {
                 <p>This code will expire in 10 minutes.</p>
                 <p>If you did not request a password reset, please ignore this email or contact support.</p>
                 <hr style="border: 0; border-top: 1px solid #e0e0e0; margin: 20px 0;">
-                <p style="font-size: 12px; color: #6b7280; text-align: center;">Alumni Connect - NIT Jamshedpur</p>
+                <p style="font-size: 12px; color: #6b7280; text-align: center;">Campus Connect - NIT Jamshedpur</p>
             </div>
         `;
 
         await sendEmail({
             email: normalizedEmail,
-            subject: 'Password Reset OTP - Alumni Connect',
+            subject: 'Password Reset OTP - Campus Connect',
             html
         });
 

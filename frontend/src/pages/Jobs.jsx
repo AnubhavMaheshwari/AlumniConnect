@@ -171,7 +171,7 @@ const Jobs = () => {
                             Job{' '}
                             <span style={{ background: `linear-gradient(135deg, var(--blue-light), #6B8FE8)`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Board</span>
                         </h1>
-                        <p style={{ fontSize: 14.5, color: 'var(--text-secondary)', margin: 0 }}>Discover career opportunities shared by NIT JSR alumni.</p>
+                        <p style={{ fontSize: 14.5, color: 'var(--text-secondary)', margin: 0 }}>Discover career opportunities shared by NIT JSR students.</p>
                     </div>
                     {user && (
                         <button onClick={() => setShowForm(!showForm)} style={{
@@ -245,7 +245,7 @@ const Jobs = () => {
                             </div>
                             <div>
                                 <p style={{ fontFamily: "'Sora', sans-serif", fontSize: 15, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>Post a Job</p>
-                                <p style={{ fontSize: 11.5, color: 'var(--text-secondary)', margin: '2px 0 0' }}>Share an opportunity with the alumni network</p>
+                                <p style={{ fontSize: 11.5, color: 'var(--text-secondary)', margin: '2px 0 0' }}>Share an opportunity with the campus network</p>
                             </div>
                         </div>
                         <form onSubmit={handleSubmit}>

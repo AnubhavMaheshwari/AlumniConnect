@@ -6,7 +6,9 @@ import API from '../services/api';
 import {
     FaTrash, FaLock, FaSearch, FaUserPlus, FaUsers,
     FaUserShield, FaUnlock, FaChartBar, FaTimes, FaPlus,
+    FaChalkboardTeacher, FaBriefcase, FaCalendarAlt, FaNewspaper
 } from 'react-icons/fa';
+
 import { HiSparkles } from 'react-icons/hi';
 import useIsMobile from '../hooks/useIsMobile';
 
@@ -163,10 +165,11 @@ const Admin = () => {
 
     const statCards = [
         { label: 'Total Users',  value: stats?.totalUsers,  accent: blueLight,  icon: FaUsers },
-        { label: 'Alumni',       value: stats?.totalAlumni, accent: SUCCESS,    icon: FaUserPlus },
-        { label: 'Admins',       value: stats?.totalAdmins, accent: WARNING,    icon: FaUserShield },
-        { label: 'Banned',       value: stats?.totalBanned, accent: DANGER,     icon: FaLock },
+        { label: 'Mentors',      value: stats?.totalMentors, accent: SUCCESS,    icon: FaChalkboardTeacher },
+        { label: 'Total Jobs',   value: stats?.totalJobs,    accent: WARNING,    icon: FaBriefcase },
+        { label: 'Active Events', value: stats?.totalEvents,  accent: DANGER,     icon: FaCalendarAlt },
     ];
+
 
     return (
         <div style={{ minHeight: '100vh', background: 'var(--bg)', padding: isMobile ? '32px 12px 56px' : '48px 20px 72px', fontFamily: "'DM Sans', sans-serif", color: 'var(--text-primary)', transition: 'background 0.3s, color 0.3s' }}>
@@ -264,7 +267,7 @@ const Admin = () => {
                                                 </div>
                                             ))}
                                             <select value={newUser.role} onChange={e => setNewUser({ ...newUser, role: e.target.value })} style={{ ...inputSx, appearance: 'none', cursor: 'pointer' }} onFocus={focusSx} onBlur={blurSx}>
-                                                <option value="alumni" style={{ background: 'var(--bg-secondary)' }}>Alumni</option>
+                                                <option value="alumni" style={{ background: 'var(--bg-secondary)' }}>Student</option>
                                                 <option value="admin"  style={{ background: 'var(--bg-secondary)' }}>Admin</option>
                                             </select>
                                         </div>
@@ -314,7 +317,7 @@ const Admin = () => {
                                                     <select value={u.role} onChange={e => handleUpdateRole(u._id, e.target.value)}
                                                         style={{ background: u.role === 'admin' ? WARNING_FAINT : 'var(--blue-faint)', border: `1px solid ${u.role === 'admin' ? 'rgba(245,158,11,0.3)' : 'var(--blue-border)'}`, borderRadius: 7, padding: '5px 10px', color: u.role === 'admin' ? WARNING : 'var(--blue-light)', fontSize: 11, fontWeight: 700, cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", outline: 'none', appearance: 'none' }}
                                                     >
-                                                        <option value="alumni" style={{ background: 'var(--bg-secondary)' }}>Alumni</option>
+                                                        <option value="alumni" style={{ background: 'var(--bg-secondary)' }}>Student</option>
                                                         <option value="admin"  style={{ background: 'var(--bg-secondary)' }}>Admin</option>
                                                     </select>
                                                 </TD>
