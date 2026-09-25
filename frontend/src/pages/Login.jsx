@@ -38,15 +38,15 @@ const inputSx = (hasRight) => ({
     transition: 'border-color 0.2s, box-shadow 0.2s', boxSizing: 'border-box',
 });
 const focusSx = e => { e.target.style.borderColor = 'var(--blue-light)'; e.target.style.boxShadow = `0 0 0 3px var(--blue-faint)`; };
-const blurSx  = e => { e.target.style.borderColor = 'var(--border)'; e.target.style.boxShadow = 'none'; };
+const blurSx = e => { e.target.style.borderColor = 'var(--border)'; e.target.style.boxShadow = 'none'; };
 
 const Login = () => {
     const [formData, setFormData] = useState({ email: '', password: '' });
     const [rememberMe, setRememberMe] = useState(false);
-    const [loading, setLoading]   = useState(false);
-    const [showPw, setShowPw]     = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [showPw, setShowPw] = useState(false);
     const { login } = useAuth();
-    const navigate  = useNavigate();
+    const navigate = useNavigate();
     const isMobile = useIsMobile();
 
     const handleChange = e => setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -93,7 +93,7 @@ const Login = () => {
                         <FaGraduationCap style={{ color: '#fff', fontSize: isMobile ? 24 : 30 }} />
                     </div>
                     <h1 style={{ fontFamily: "'Sora', sans-serif", fontSize: isMobile ? 24 : 28, fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 8px', letterSpacing: '-0.4px' }}>Welcome Back</h1>
-                    <p style={{ fontSize: isMobile ? 13 : 14, color: 'var(--text-muted)', margin: 0 }}>Sign in to NIT Jamshedpur Campus Connect</p>
+                    <p style={{ fontSize: isMobile ? 13 : 14, color: 'var(--text-muted)', margin: 0 }}>Sign in to NIT Jamshedpur Campus Connect Email : anubhavmaheshwari2005@gmail.com and Password: 111111</p>
                 </div>
 
                 {/* card */}
@@ -119,11 +119,11 @@ const Login = () => {
                         {/* remember + forgot */}
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                             <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12.5, color: 'var(--text-muted)', cursor: 'pointer' }}>
-                                <input 
-                                    type="checkbox" 
+                                <input
+                                    type="checkbox"
                                     checked={rememberMe}
                                     onChange={e => setRememberMe(e.target.checked)}
-                                    style={{ accentColor: 'var(--blue-light)', width: 14, height: 14 }} 
+                                    style={{ accentColor: 'var(--blue-light)', width: 14, height: 14 }}
                                 />
                                 Remember me
                             </label>
