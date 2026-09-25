@@ -1,43 +1,36 @@
-const nodemailer = require('nodemailer');
-
-const getSmtpConfig = () => {
-    const host = process.env.SMTP_HOST || process.env.EMAIL_HOST || 'smtp.gmail.com';
-    const envPort = process.env.SMTP_PORT || process.env.EMAIL_PORT;
-    const port = Number(envPort || 465);
-    const user = process.env.SMTP_USER || process.env.EMAIL_USER;
-    const rawPass = process.env.SMTP_PASS || process.env.EMAIL_PASS || '';
-    const pass = rawPass.replace(/\s+/g, '');
-    const from = process.env.SMTP_FROM || process.env.EMAIL_FROM || `"Campus Connect" <${user}>`;
-    const secure = port === 465;
-
-    return { host, port, user, pass, from, secure };
-};
-
+// ── Brevo (SendinBlue) HTTP API — primary email transport ─────────────
 const sendEmail = async (options) => {
-    const config = getSmtpConfig();
-    if (!config.user || !config.pass) {
-        throw new Error('SMTP credentials missing. Set EMAIL_USER/EMAIL_PASS or SMTP_USER/SMTP_PASS.');
+    const apiKey = process.env.BREVO_API_KEY;
+    if (!apiKey) {
+        throw new Error('BREVO_API_KEY is not set in .env');
     }
 
-    const transporter = nodemailer.createTransport({
-        host: config.host,
-        port: config.port,
-        secure: config.secure,
-        auth: {
-            user: config.user,
-            pass: config.pass
+    const senderEmail = process.env.BREVO_SENDER_EMAIL || process.env.EMAIL_USER;
+    const senderName = process.env.BREVO_SENDER_NAME || 'Campus Connect';
+
+    const res = await fetch('https://api.brevo.com/v3/smtp/email', {
+        method: 'POST',
+        headers: {
+            'accept': 'application/json',
+            'api-key': apiKey,
+            'content-type': 'application/json',
         },
-        connectionTimeout: 30000,
-        greetingTimeout: 30000,
-        socketTimeout: 30000
+        body: JSON.stringify({
+            sender: { name: senderName, email: senderEmail },
+            to: [{ email: options.email }],
+            subject: options.subject,
+            htmlContent: options.html,
+        }),
     });
 
-    return transporter.sendMail({
-        from: config.from,
-        to: options.email,
-        subject: options.subject,
-        html: options.html
-    });
+    if (!res.ok) {
+        const body = await res.text();
+        throw new Error(`Brevo API error (${res.status}): ${body}`);
+    }
+
+    const data = await res.json();
+    console.log(`✅ Email sent via Brevo to ${options.email}`);
+    return data;
 };
 
 module.exports = sendEmail;
