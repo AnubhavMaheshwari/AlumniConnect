@@ -47,48 +47,49 @@ connectDB();
 const app = express();
 
 // Middleware
-app.use(cors({
-    origin: (origin, callback) => {
-        // Non-browser requests (like health checks/postman) may not send origin.
-        if (!origin) {
-            return callback(null, true);
-        }
+// Allowed Origins Setup
+const defaultAllowed = ['http://localhost:5173', 'http://localhost:5174'];
+const extraAllowed = (process.env.CLIENT_URL || '')
+  .split(',')
+  .map(url => url.trim().replace(/\/$/, ''))
+  .filter(Boolean);
 
-        const normalize = (value) => value.trim().replace(/\/$/, '');
-        const allowedOrigins = new Set(['http://localhost:5173', 'http://localhost:5174']);
+const allowedSet = new Set([...defaultAllowed, ...extraAllowed]);
 
-        if (process.env.CLIENT_URL) {
-            const extraOrigins = process.env.CLIENT_URL
-                .split(',')
-                .map(normalize)
-                .filter(Boolean);
-            extraOrigins.forEach((o) => allowedOrigins.add(o));
-        }
+const corsOptions = {
+  origin: (origin, callback) => {
+    // Allow non-browser requests (Postman, curl, health checks)
+    if (!origin) return callback(null, true);
 
-        const normalizedOrigin = normalize(origin);
-        let hostname = '';
-        try {
-            hostname = new URL(normalizedOrigin).hostname;
-        } catch (e) {
-            console.warn(`Invalid origin format blocked by CORS: ${origin}`);
-            return callback(new Error('Not allowed by CORS'));
-        }
+    const cleanOrigin = origin.trim().replace(/\/$/, '');
+    
+    let hostname = '';
+    try {
+      hostname = new URL(cleanOrigin).hostname;
+    } catch (e) {
+      return callback(null, false);
+    }
 
-        const isAllowed =
-            allowedOrigins.has(normalizedOrigin) ||
-            hostname === 'localhost' ||
-            hostname === '127.0.0.1' ||
-            hostname.endsWith('.vercel.app');
+    const isAllowed =
+      allowedSet.has(cleanOrigin) ||
+      hostname === 'localhost' ||
+      hostname === '127.0.0.1' ||
+      hostname.endsWith('.vercel.app');
 
-        if (isAllowed) {
-            return callback(null, true);
-        }
+    if (isAllowed) {
+      return callback(null, true);
+    } else {
+      console.warn(`Denied origin by CORS: ${origin}`);
+      // Pass null, false instead of new Error() to avoid crashing preflight
+      return callback(null, false);
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+};
 
-        console.warn(`Denied origin by CORS: ${origin}`);
-        return callback(new Error('Not allowed by CORS'));
-    },
-    credentials: true
-}));
+app.use(cors(corsOptions));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
 app.use(cookieParser());
