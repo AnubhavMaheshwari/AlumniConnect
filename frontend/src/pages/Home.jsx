@@ -86,11 +86,11 @@ const Home = () => {
           }}
         >
           <img
-            src="https://images.unsplash.com/photo-1562774053-701939374585?w=1600&q=80&auto=format&fit=crop"
-            alt="University Campus Hall"
-            width="1600"
-            height="900"
-            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+            src="https://lh3.googleusercontent.com/gps-cs-s/ANWiy9RmYtiLDxuRADoBN0cYS5F_CvmOzwmIzlLBAty20q-1Bo0augLNfZloAlf-Rz665Hqha0NFC0Rf-qa7nktPXK4SEGcJOGLdOKLdZIOUXNb5oLKNRjBjUpeK06Q9qJiFl4WyEfNp=s0"
+            alt="Full College Building"
+            className="w-full h-auto object-contain"
+            loading="lazy"
+            referrerPolicy="no-referrer"
           />
         </div>
 
@@ -122,12 +122,12 @@ const Home = () => {
               fontSize: 'clamp(32px, 5.5vw, 56px)',
               fontWeight: 800,
               lineHeight: 1.15,
-              color: '#FFFFFF',
+              color: '#ffffffff',
               letterSpacing: '-0.03em',
               marginBottom: 20,
             }}
           >
-            Connect with 5,000+ NIT Jamshedpur alumni worldwide
+            Connect with 30,000+ NIT Jamshedpur alumni worldwide
           </h1>
 
           <p
@@ -156,7 +156,8 @@ const Home = () => {
               boxShadow: 'var(--shadow-lg)',
             }}
           >
-            <div
+
+             <div
               style={{
                 position: 'relative',
                 flex: 1,
@@ -526,7 +527,7 @@ const Home = () => {
             {
               title: 'Central Computing & Technical Labs',
               desc: 'Advanced research computing centres supporting machine learning, VLSI, and student robotics.',
-              img: 'https://images.unsplash.com/photo-1523050854058-8df90110c8f1?w=600&q=80&auto=format&fit=crop',
+              img: 'https://images.unsplash.com/photo-1581090464777-f3220bbe1b8b?w=600&q=80&auto=format&fit=crop',
             },
             {
               title: 'Annual Technical Fest — OJASS',
@@ -546,6 +547,10 @@ const Home = () => {
                   width="600"
                   height="360"
                   loading="lazy"
+                  onError={(e) => {
+                    e.currentTarget.onerror = null;
+                    e.currentTarget.src = 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=600&q=80&auto=format&fit=crop';
+                  }}
                   style={{
                     width: '100%',
                     height: '100%',

@@ -57,11 +57,15 @@ const Login = () => {
       {/* Left photograph with navy overlay */}
       <div className="auth-image">
         <img
-          src="https://images.unsplash.com/photo-1523050854058-8df90110c8f1?w=1000&q=80&auto=format&fit=crop"
+          src="https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=1000&q=80&auto=format&fit=crop"
           alt="NIT Jamshedpur Campus"
           width="1000"
           height="1200"
           loading="lazy"
+          onError={(e) => {
+            e.currentTarget.onerror = null;
+            e.currentTarget.src = 'https://images.unsplash.com/photo-1562774053-701939374585?w=1000&q=80&auto=format&fit=crop';
+          }}
         />
         <div className="auth-image-overlay">
           <div
