@@ -104,7 +104,7 @@ const Home = () => {
             textAlign: 'center',
           }}
         >
-          <div
+          {/* <div
             className="badge badge-accent"
             style={{
               marginBottom: 20,
@@ -114,7 +114,7 @@ const Home = () => {
             }}
           >
             Official NIT Jamshedpur Network
-          </div>
+          </div> */}
 
           <h1
             style={{
@@ -200,20 +200,20 @@ const Home = () => {
 
           {/* Trust Metric Stats */}
           <div
-            style={{
-              display: 'flex',
-              justifyContent: 'center',
-              gap: 'clamp(20px, 4vw, 48px)',
-              flexWrap: 'wrap',
-              borderTop: '1px solid rgba(255, 255, 255, 0.15)',
-              paddingTop: 28,
-            }}
+            // style={{
+            //   display: 'flex',
+            //   justifyContent: 'center',
+            //   gap: 'clamp(20px, 4vw, 48px)',
+            //   flexWrap: 'wrap',
+            //   borderTop: '1px solid rgba(255, 255, 255, 0.15)',
+            //   paddingTop: 28,
+            // }}
           >
             {[
-              { num: '5,400+', label: 'Verified Alumni' },
-              { num: '42', label: 'Countries Represented' },
-              { num: '650+', label: 'Mentorship Sessions' },
-              { num: '1960', label: 'Institute Founded' },
+              //{ num: '5,400+', label: 'Verified Alumni' },
+              //{ num: '42', label: 'Countries Represented' },
+              //{ num: '650+', label: 'Mentorship Sessions' },
+              //{ num: '1960', label: 'Institute Founded' },
             ].map((stat) => (
               <div key={stat.label} style={{ textAlign: 'center' }}>
                 <div
@@ -245,9 +245,7 @@ const Home = () => {
       {/* ── HOW IT WORKS (3 VARIED LAYOUTS, NOT IDENTICAL REPEATED CARDS) ── */}
       <section style={{ padding: '80px 24px', maxWidth: 1200, margin: '0 auto' }}>
         <div style={{ textAlign: 'center', marginBottom: 56 }}>
-          <div className="badge badge-accent" style={{ marginBottom: 12 }}>
-            Network Structure
-          </div>
+          
           <h2
             style={{
               fontFamily: 'var(--font-heading)',
